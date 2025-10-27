@@ -54,7 +54,23 @@ public class Inicio extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.carpeta){
-            Navigation.findNavController(v).navigate(R.id.archivosCifrados);
+            Navigation.findNavController(v).navigate(R.id.cifradosEscaneo);
+        } else if (v.getId() == R.id.house) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        } else if (v.getId() == R.id.candadoclose) {
+            Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
+        } else if (v.getId() == R.id.candadopen) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        } else if (v.getId() == R.id.btnseleccarpeta) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        } else if (v.getId() == R.id.btnenvcorreo) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        }else if (v.getId() == R.id.mail) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        }else if (v.getId() == R.id.archivo) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        } else if (v.getId() == R.id.btnperfil) {
+
         }
     }
 }

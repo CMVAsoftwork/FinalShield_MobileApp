@@ -24,10 +24,16 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener {
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
         Button regre;
+        Button regis;
+        Button inic;
         ImageView huella;
 
         regre = v.findViewById(R.id.regresar3);
         regre.setOnClickListener(this);
+        regis = v.findViewById(R.id.btnregis);
+        regis.setOnClickListener(this);
+        inic = v.findViewById(R.id.btninses2);
+        inic.setOnClickListener(this);
         huella = v.findViewById(R.id.huella);
         huella.setOnClickListener(this);;
     }
@@ -37,6 +43,10 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener {
         if(v.getId() == R.id.regresar3){
             Navigation.findNavController(v).navigate(R.id.inicioSesion);
         } else if (v.getId() == R.id.huella) {
+            Navigation.findNavController(v).navigate(R.id.inicio);
+        } else if (v.getId() == R.id.btnregis) {
+            Navigation.findNavController(v).navigate(R.id.registroSesion);
+        }else if (v.getId() == R.id.btninses2) {
             Navigation.findNavController(v).navigate(R.id.inicio);
         }
     }
