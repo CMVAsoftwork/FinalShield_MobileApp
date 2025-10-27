@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/naviegador"
+    app:startDestination="@id/cargaApp">
+    <fragment
+        android:id="@+id/cargaApp"
+        android:name="com.example.finalshield.CargaApp"
+        android:label="fragment_carga_app"
+        tools:layout="@layout/fragment_carga_app" >
+        <action
+            android:id="@+id/action_cargaApp_to_bienvenida"
+            app:destination="@id/bienvenida" />
+    </fragment>
+    <fragment
+        android:id="@+id/bienvenida"
+        android:name="com.example.finalshield.Bienvenida"
+        android:label="fragment_bienvenida"
+        tools:layout="@layout/fragment_bienvenida" >
+        <action
+            android:id="@+id/action_bienvenida_to_inicioSesion"
+            app:destination="@id/inicioSesion" />
+    </fragment>
+    <fragment
+        android:id="@+id/registroSesion"
+        android:name="com.example.finalshield.RegistroSesion"
+        android:label="fragment_registro_sesion"
+        tools:layout="@layout/fragment_registro_sesion" >
+        <action
+            android:id="@+id/action_registroSesion_to_inicioSesion"
+            app:destination="@id/inicioSesion" />
+        <action
+            android:id="@+id/action_registroSesion_to_datosBiometricos"
+            app:destination="@id/datosBiometricos" />
+        <action
+            android:id="@+id/action_registroSesion_to_inicioSesion2"
+            app:destination="@id/inicioSesion" />
+    </fragment>
+    <fragment
+        android:id="@+id/inicioSesion"
+        android:name="com.example.finalshield.InicioSesion"
+        android:label="fragment_inicio_sesion"
+        tools:layout="@layout/fragment_inicio_sesion" >
+        <action
+            android:id="@+id/action_inicioSesion_to_datosBiometricos"
+            app:destination="@id/datosBiometricos" />
+        <action
+            android:id="@+id/action_inicioSesion_to_registroSesion"
+            app:destination="@id/registroSesion" />
+    </fragment>
+    <fragment
+        android:id="@+id/inicio"
+        android:name="com.example.finalshield.Inicio"
+        android:label="fragment_inicio"
+        tools:layout="@layout/fragment_inicio" >
+        <action
+            android:id="@+id/action_inicio_to_continuacionInicio"
+            app:destination="@id/continuacionInicio" />
+        <action
+            android:id="@+id/action_inicio_to_archivosCifrados"
+            app:destination="@id/archivosCifrados" />
+    </fragment>
+    <fragment
+        android:id="@+id/continuacionInicio"
+        android:name="com.example.finalshield.ContinuacionInicio"
+        android:label="fragment_continuacion_inicio"
+        tools:layout="@layout/fragment_continuacion_inicio" >
+        <action
+            android:id="@+id/action_continuacionInicio_to_inicio"
+            app:destination="@id/inicio" />
+    </fragment>
+    <fragment
+        android:id="@+id/archivosCifrados"
+        android:name="com.example.finalshield.ArchivosCifrados"
+        android:label="fragment_archivos_cifrados"
+        tools:layout="@layout/fragment_archivos_cifrados" >
+        <action
+            android:id="@+id/action_archivosCifrados_to_inicio"
+            app:destination="@id/inicio" />
+    </fragment>
+    <fragment
+        android:id="@+id/datosBiometricos"
+        android:name="com.example.finalshield.DatosBiometricos"
+        android:label="fragment_datos_biometricos"
+        tools:layout="@layout/fragment_datos_biometricos" >
+        <action
+            android:id="@+id/action_datosBiometricos_to_inicio"
+            app:destination="@id/inicio" />
+    </fragment>
+</navigation>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/degradado_negro_azul">
+    <Button
+        android:id="@+id/regresar2"
+        android:layout_width="69dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="37dp"
+        android:backgroundTint="#10FFFFFF"
+        android:text="←"
+        android:textAlignment="center"
+        android:textSize="40dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Registrate ahora"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="32dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Y dile hola a la tranquilidad digital"
+        android:textColor="@color/white"
+        android:textSize="17dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="17dp"/>
+    <EditText
+        android:id="@+id/nombre"
+        android:layout_width="347dp"
+        android:layout_height="40dp"
+        android:drawableStart="@drawable/person"
+        android:layout_gravity="center"
+        android:layout_marginTop="40dp"
+        android:gravity="center_vertical"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        android:hint="Nombre"
+        android:textSize="20dp"
+        android:paddingStart="49dp"
+        android:background="@drawable/edittextshape"/>
+    <EditText
+        android:id="@+id/paterno"
+        android:layout_width="347dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/edittextshape"
+        android:gravity="center_vertical"
+        android:paddingStart="80dp"
+        android:hint="Apellido Paterno"
+        android:textColorHint="@color/white"
+        android:textColor="@color/white"
+        android:textSize="20dp" />
+    <EditText
+        android:id="@+id/materno"
+        android:layout_width="347dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/edittextshape"
+        android:gravity="center_vertical"
+        android:paddingStart="80dp"
+        android:hint="Apellido Materno"
+        android:textColorHint="@color/white"
+        android:textColor="@color/white"
+        android:textSize="20dp" />
+    <EditText
+        android:id="@+id/correo"
+        android:layout_width="347dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/edittextshape"
+        android:gravity="center_vertical"
+        android:paddingStart="80dp"
+        android:hint="Correo"
+        android:textColorHint="@color/white"
+        android:textColor="@color/white"
+        android:textSize="20dp" />
+    <EditText
+        android:id="@+id/contraseña"
+        android:layout_width="347dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/edittextshape"
+        android:gravity="center_vertical"
+        android:paddingStart="80dp"
+        android:hint="Contraseña"
+        android:textColorHint="@color/white"
+        android:textColor="@color/white"
+        android:textSize="20dp" />
+    <EditText
+        android:id="@+id/confcontra"
+        android:layout_width="347dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/edittextshape"
+        android:gravity="center_vertical"
+        android:paddingStart="80dp"
+        android:hint="Confirmar contraseña"
+        android:textColorHint="@color/white"
+        android:textColor="@color/white"
+        android:textSize="20dp" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="¿Ya tienes cuenta?"
+            android:textColor="#FFFFFF"
+            android:textSize="14dp"
+            android:paddingStart="49dp"/>
+        <Button
+            android:id="@+id/inisesi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Iniciar sesión"
+            android:backgroundTint="@android:color/transparent"
+            android:textColor="#1E90FF" />
+    </LinearLayout>
+    <Button
+        android:id="@+id/regis"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:text="Registrarse"
+        android:backgroundTint="#1E90FF"
+        android:textSize="15dp"
+        android:textStyle="bold"/>
+</LinearLayout>

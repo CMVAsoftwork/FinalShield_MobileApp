@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="degradado_azul_claro">#004DFF</color>
+    <color name="degradado_azul_medio">#19006D</color>
+    <color name="degradado_azul_oscuro_1">#180A59</color>
+    <color name="degradado_azul_oscuro_2">#171446</color>
+    <color name="degradado_negro_azul">#000328</color>
+</resources>

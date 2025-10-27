@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/degradado_negro_azul"
+    tools:context=".DatosBiometricos">
+    <Button
+
+        android:layout_width="69dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="37dp"
+        android:backgroundTint="#10FFFFFF"
+        android:id="@+id/regresar3"
+        android:text="←"
+        android:textAlignment="center"
+        android:textSize="40dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Bienvenido de vuelta"
+        android:textColor="@color/white"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="32dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Inicia sesión en tu cuenta para volver\ a tu espacio seguro"
+        android:textColor="@color/white"
+        android:textSize="17dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="17dp"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="¿No tienes cuenta?"
+            android:textColor="#FFFFFF"
+            android:textSize="14dp"
+            android:paddingStart="30dp"/>
+        <Button
+            android:id="@+id/btnregis"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Registrarse"
+            android:backgroundTint="@android:color/transparent"
+            android:textColor="#1E90FF" />
+    </LinearLayout>
+    <ImageView
+        android:id="@+id/huella"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/huella"
+        android:layout_marginTop="190dp"
+        android:layout_gravity="center"/>
+    <Button
+        android:id="@+id/btninses2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp"
+        android:text="Iniciar sesión"
+        android:backgroundTint="#1E90FF"
+        android:textSize="15dp"
+        android:textStyle="bold"/>
+
+</LinearLayout>
