@@ -2,63 +2,65 @@ package com.example.finalshield;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ContinuacionInicio#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class ContinuacionInicio extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public ContinuacionInicio() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ContinuacionInicio.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ContinuacionInicio newInstance(String param1, String param2) {
-        ContinuacionInicio fragment = new ContinuacionInicio();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
+public class ContinuacionInicio extends Fragment implements  View.OnClickListener{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_continuacion_inicio, container, false);
+    }
+    @Override
+    public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(v, savedInstanceState);
+        ImageButton perfil,house, archivo,candadclose, carpeta, mail, candadopen;
+        Button selecarpeta, correo;
+        perfil = v.findViewById(R.id.btnperfil);
+        house = v.findViewById(R.id.house);
+        archivo = v.findViewById(R.id.archivo);
+        candadclose = v.findViewById(R.id.candadoclose);
+        carpeta = v.findViewById(R.id.carpeta);
+        mail = v.findViewById(R.id.mail);
+        candadopen = v.findViewById(R.id.candadopen);
+        perfil.setOnClickListener(this);
+        house.setOnClickListener(this);
+        archivo.setOnClickListener(this);
+        candadclose.setOnClickListener(this);
+        carpeta.setOnClickListener(this);
+        mail.setOnClickListener(this);
+        candadopen.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.carpeta){
+            Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
+        } else if (v.getId() == R.id.house) {
+            Navigation.findNavController(v).navigate(R.id.inicio);
+        } else if (v.getId() == R.id.candadoclose) {
+            Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
+        } else if (v.getId() == R.id.candadopen) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        } else if (v.getId() == R.id.btnseleccarpeta) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        } else if (v.getId() == R.id.btnenvcorreo) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        }else if (v.getId() == R.id.mail) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        }else if (v.getId() == R.id.archivo) {
+            Navigation.findNavController(v).navigate(R.id.archivosCifrados);
+        } else if (v.getId() == R.id.btnperfil) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        }
     }
 }

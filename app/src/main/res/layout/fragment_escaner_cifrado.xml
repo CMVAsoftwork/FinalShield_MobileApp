@@ -1,14 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/degradado_negro_azul"
     tools:context=".EscanerCifrado">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/regresar1"
+            android:layout_width="69dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="37dp"
+            android:backgroundTint="#10FFFFFF"
+            android:text="←"
+            android:textAlignment="center"
+            android:textSize="40dp" />
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        <Button
+            android:id="@+id/guardar"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginStart="150dp"
+            android:layout_marginTop="20dp"
+            android:text="Guardar pdf"
+            android:backgroundTint="@color/degradado_negro_azul"
+            android:textAlignment="center" />
+    </LinearLayout>
 
-</FrameLayout>
+    <ImageView
+        android:layout_width="287dp"
+        android:layout_height="310dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="50dp" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="30dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="center"
+            android:layout_marginStart="140dp"
+            app:cornerRadius="40dp"/>
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="60dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="50dp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="70dp">
+        <ImageButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="20dp"
+
+            android:scaleType="fitCenter"
+            android:background="@android:color/transparent"/>
+        <ImageButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+
+            android:scaleType="fitCenter"
+            android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"/>
+
+        <ImageButton
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter" />
+        <ImageButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+
+            android:scaleType="fitCenter"
+            android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"/>
+        <ImageButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+
+            android:scaleType="fitCenter"
+            android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"/>
+        <ImageButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+
+            android:scaleType="fitCenter"
+            android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"/>
+    </LinearLayout>
+
+</LinearLayout>
