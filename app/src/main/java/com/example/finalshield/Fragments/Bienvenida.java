@@ -1,4 +1,4 @@
-package com.example.finalshield;
+package com.example.finalshield.Fragments;
 
 import android.os.Bundle;
 
@@ -14,6 +14,9 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.example.finalshield.R;
 
 public class Bienvenida extends Fragment implements View.OnClickListener {
     ImageView ivescala;

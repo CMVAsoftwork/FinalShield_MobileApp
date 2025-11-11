@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/degradado_negro_azul"
-    tools:context=".RegistroSesion">
+    tools:context=".Fragments.RegistroSesion">
     <Button
         android:id="@+id/regresar2"
         android:layout_width="69dp"

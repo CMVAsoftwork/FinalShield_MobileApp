@@ -1,4 +1,4 @@
-package com.example.finalshield;
+package com.example.finalshield.Fragments;
 
 import android.os.Bundle;
 
@@ -13,15 +13,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 
+import com.example.finalshield.R;
 
-public class Inicio extends Fragment implements View.OnClickListener {
+public class ContinuacionInicio extends Fragment implements  View.OnClickListener{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_inicio, container, false);
+        return inflater.inflate(R.layout.fragment_continuacion_inicio, container, false);
     }
-
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
@@ -34,9 +34,6 @@ public class Inicio extends Fragment implements View.OnClickListener {
         carpeta = v.findViewById(R.id.carpeta);
         mail = v.findViewById(R.id.mail);
         candadopen = v.findViewById(R.id.candadopen);
-
-        selecarpeta = v.findViewById(R.id.btnseleccarpeta);
-        correo = v.findViewById(R.id.btnenvcorreo);
         perfil.setOnClickListener(this);
         house.setOnClickListener(this);
         archivo.setOnClickListener(this);
@@ -44,8 +41,6 @@ public class Inicio extends Fragment implements View.OnClickListener {
         carpeta.setOnClickListener(this);
         mail.setOnClickListener(this);
         candadopen.setOnClickListener(this);
-        selecarpeta.setOnClickListener(this);
-        correo.setOnClickListener(this);
     }
 
     @Override
@@ -53,7 +48,7 @@ public class Inicio extends Fragment implements View.OnClickListener {
         if(v.getId() == R.id.carpeta){
             Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
         } else if (v.getId() == R.id.house) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+            Navigation.findNavController(v).navigate(R.id.inicio);
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
@@ -67,8 +62,7 @@ public class Inicio extends Fragment implements View.OnClickListener {
         }else if (v.getId() == R.id.archivo) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados);
         } else if (v.getId() == R.id.btnperfil) {
-
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
         }
     }
 }
-       
