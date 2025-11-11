@@ -33,15 +33,25 @@
             android:layout_marginTop="20dp"
             android:src="@drawable/flower" />
     </LinearLayout>
-    <TextView
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Monitoreo de carpetas"
-        android:textColor="@color/white"
-        android:textSize="20dp"
-        android:textStyle="bold"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="30dp"/>
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="41dp"
+            android:layout_height="35dp"
+            android:layout_marginTop="30dp"
+            android:layout_marginStart="40dp"
+            android:src="@drawable/monitoreo" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Monitoreo de carpetas"
+            android:textColor="@color/white"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="30dp"/>
+    </LinearLayout>
 
     <ListView
         android:layout_width="349dp"
@@ -59,14 +69,14 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="20dp"
-            android:src="@drawable/house"
+            android:src="@drawable/housecolor"
             android:scaleType="fitCenter"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/archivo"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/archivo"
+            android:src="@drawable/carpetablanc"
             android:scaleType="fitCenter"
             android:layout_marginStart="20dp"
             android:background="@android:color/transparent"/>
