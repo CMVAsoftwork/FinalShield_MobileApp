@@ -1,5 +1,7 @@
 package com.example.finalshield;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,8 +19,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 public class CargaApp extends Fragment {
-    private static  final int tiempoEsp = 2000;
-    //ImageView ivscalee;
+    private static  final int tiempoEsp = 2500;
+    ImageView ivalphaa;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -27,14 +29,19 @@ public class CargaApp extends Fragment {
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-        /*ivscalee = v.findViewById(R.id.icono);
-        Animation animationscale = AnimationUtils.loadAnimation(requireContext(), R.anim.escaladito);
-        ivscalee.startAnimation(animationscale);*/
+        ivalphaa = v.findViewById(R.id.icono);
+        ObjectAnimator animatoralpha = ObjectAnimator.ofFloat(ivalphaa, View.ALPHA, 1.0f, 0.0f);
+        animatoralpha.setDuration(tiempoEsp);
+        AnimatorSet animatorsetalpha = new AnimatorSet();
+        animatorsetalpha.play(animatoralpha);
+        animatorsetalpha.start();
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Navigation.findNavController(v).navigate(R.id.bienvenida);
+                if (isAdded()) {
+                    Navigation.findNavController(v).navigate(R.id.bienvenida);
+                }
             }
-        },tiempoEsp);
+        }, tiempoEsp);
     }
 }

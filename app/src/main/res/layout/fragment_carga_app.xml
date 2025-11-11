@@ -8,8 +8,11 @@
     tools:context=".CargaApp">
 
     <ImageView
+        android:id="@+id/icono"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/logo"/>
+        android:alpha="1"
+        android:visibility="visible"
+        android:src="@drawable/logo" />
 </LinearLayout>

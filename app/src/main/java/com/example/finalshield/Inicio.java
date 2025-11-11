@@ -71,3 +71,4 @@ public class Inicio extends Fragment implements View.OnClickListener {
         }
     }
 }
+       
