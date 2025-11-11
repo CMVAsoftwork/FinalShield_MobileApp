@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 
 public class ArchivosCifrados2 extends Fragment implements View.OnClickListener{
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -40,7 +39,6 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener{
         mail.setOnClickListener(this);
         candadopen.setOnClickListener(this);
     }
-
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.carpeta){
