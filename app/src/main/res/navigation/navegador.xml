@@ -138,6 +138,9 @@
         <action
             android:id="@+id/action_escanerCifrado_to_cifradoEscaneo2"
             app:destination="@id/cifradoEscaneo2" />
+        <action
+            android:id="@+id/action_escanerCifrado_to_seleccion_imagenes"
+            app:destination="@id/seleccion_imagenes" />
     </fragment>
     <fragment
         android:id="@+id/cifradoEscaneo2"
@@ -161,6 +164,15 @@
             app:destination="@id/archivosCifrados2" />
         <action
             android:id="@+id/action_cifradoEscaneo2_to_escanerCifrado"
+            app:destination="@id/escanerCifrado" />
+    </fragment>
+    <fragment
+        android:id="@+id/seleccion_imagenes"
+        android:name="com.example.finalshield.Seleccion_imagenes"
+        android:label="fragment_seleccion_imagenes"
+        tools:layout="@layout/fragment_seleccion_imagenes" >
+        <action
+            android:id="@+id/action_seleccion_imagenes_to_escanerCifrado"
             app:destination="@id/escanerCifrado" />
     </fragment>
 </navigation>
