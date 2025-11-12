@@ -5,10 +5,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/fondo1"
-    tools:context=".Bienvenida">
+    tools:context=".Fragments.Bienvenida">
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="500dp"
+        android:id="@+id/textbv"
         android:src="@drawable/frame" />
     <TextView
         android:layout_width="wrap_content"
@@ -17,7 +18,7 @@
         android:textColor="#FFFFFF"
         android:textSize="32sp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="300dp"
+        android:layout_marginTop="320dp"
         android:textStyle="bold" />
     <ImageView
         android:layout_width="144dp"
@@ -25,6 +26,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerInParent="true"
         android:layout_marginTop="80dp"
+        android:id="@+id/robot"
         android:src="@drawable/robot" />
     <TextView
         android:layout_width="wrap_content"

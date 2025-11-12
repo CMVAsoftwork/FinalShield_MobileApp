@@ -1,4 +1,4 @@
-package com.example.finalshield;
+package com.example.finalshield.Fragments;
 
 import android.os.Bundle;
 
@@ -13,12 +13,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 
-public class ContinuacionInicio extends Fragment implements  View.OnClickListener{
+import com.example.finalshield.R;
 
+public class ArchivosCifrados2 extends Fragment implements View.OnClickListener{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_continuacion_inicio, container, false);
+        return inflater.inflate(R.layout.fragment_archivos_cifrados2, container, false);
     }
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
@@ -40,7 +41,6 @@ public class ContinuacionInicio extends Fragment implements  View.OnClickListene
         mail.setOnClickListener(this);
         candadopen.setOnClickListener(this);
     }
-
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.carpeta){
@@ -58,7 +58,7 @@ public class ContinuacionInicio extends Fragment implements  View.OnClickListene
         }else if (v.getId() == R.id.mail) {
             Navigation.findNavController(v).navigate(R.id.continuacionInicio);
         }else if (v.getId() == R.id.archivo) {
-            Navigation.findNavController(v).navigate(R.id.archivosCifrados);
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
         } else if (v.getId() == R.id.btnperfil) {
             Navigation.findNavController(v).navigate(R.id.continuacionInicio);
         }

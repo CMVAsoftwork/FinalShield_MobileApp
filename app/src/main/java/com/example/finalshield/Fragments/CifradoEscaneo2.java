@@ -1,4 +1,4 @@
-package com.example.finalshield;
+package com.example.finalshield.Fragments;
 
 import android.os.Bundle;
 
@@ -12,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+
+import com.example.finalshield.R;
 
 public class CifradoEscaneo2 extends Fragment implements View.OnClickListener{
 

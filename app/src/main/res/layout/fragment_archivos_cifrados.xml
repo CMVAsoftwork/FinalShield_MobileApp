@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/degradado_azul_medio"
-    tools:context=".ArchivosCifrados">
+    tools:context=".Fragments.ArchivosCifrados">
     <ImageButton
         android:id="@+id/btnperfil"
         android:layout_width="wrap_content"
@@ -58,7 +58,8 @@
         android:layout_height="390dp"
         android:layout_marginTop="30dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginStart="40dp"/>
+        android:layout_marginStart="40dp"
+        android:id="@+id/listacarp"/>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

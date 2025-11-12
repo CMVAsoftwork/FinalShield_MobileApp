@@ -6,7 +6,7 @@
     app:startDestination="@id/cargaApp">
     <fragment
         android:id="@+id/cargaApp"
-        android:name="com.example.finalshield.CargaApp"
+        android:name="com.example.finalshield.Fragments.CargaApp"
         android:label="fragment_carga_app"
         tools:layout="@layout/fragment_carga_app" >
         <action
@@ -15,7 +15,7 @@
     </fragment>
     <fragment
         android:id="@+id/bienvenida"
-        android:name="com.example.finalshield.Bienvenida"
+        android:name="com.example.finalshield.Fragments.Bienvenida"
         android:label="fragment_bienvenida"
         tools:layout="@layout/fragment_bienvenida" >
         <action
@@ -24,7 +24,7 @@
     </fragment>
     <fragment
         android:id="@+id/registroSesion"
-        android:name="com.example.finalshield.RegistroSesion"
+        android:name="com.example.finalshield.Fragments.RegistroSesion"
         android:label="fragment_registro_sesion"
         tools:layout="@layout/fragment_registro_sesion" >
         <action
@@ -39,7 +39,7 @@
     </fragment>
     <fragment
         android:id="@+id/inicioSesion"
-        android:name="com.example.finalshield.InicioSesion"
+        android:name="com.example.finalshield.Fragments.InicioSesion"
         android:label="fragment_inicio_sesion"
         tools:layout="@layout/fragment_inicio_sesion" >
         <action
@@ -51,7 +51,7 @@
     </fragment>
     <fragment
         android:id="@+id/inicio"
-        android:name="com.example.finalshield.Inicio"
+        android:name="com.example.finalshield.Fragments.Inicio"
         android:label="fragment_inicio"
         tools:layout="@layout/fragment_inicio" >
         <action
@@ -72,7 +72,7 @@
     </fragment>
     <fragment
         android:id="@+id/continuacionInicio"
-        android:name="com.example.finalshield.ContinuacionInicio"
+        android:name="com.example.finalshield.Fragments.ContinuacionInicio"
         android:label="fragment_continuacion_inicio"
         tools:layout="@layout/fragment_continuacion_inicio" >
         <action
@@ -87,7 +87,7 @@
     </fragment>
     <fragment
         android:id="@+id/archivosCifrados"
-        android:name="com.example.finalshield.ArchivosCifrados"
+        android:name="com.example.finalshield.Fragments.ArchivosCifrados"
         android:label="fragment_archivos_cifrados"
         tools:layout="@layout/fragment_archivos_cifrados" >
         <action
@@ -102,7 +102,7 @@
     </fragment>
     <fragment
         android:id="@+id/datosBiometricos"
-        android:name="com.example.finalshield.DatosBiometricos"
+        android:name="com.example.finalshield.Fragments.DatosBiometricos"
         android:label="fragment_datos_biometricos"
         tools:layout="@layout/fragment_datos_biometricos" >
         <action
@@ -111,7 +111,7 @@
     </fragment>
     <fragment
         android:id="@+id/archivosCifrados2"
-        android:name="com.example.finalshield.ArchivosCifrados2"
+        android:name="com.example.finalshield.Fragments.ArchivosCifrados2"
         android:label="fragment_archivos_cifrados2"
         tools:layout="@layout/fragment_archivos_cifrados2" >
         <action
@@ -132,16 +132,19 @@
     </fragment>
     <fragment
         android:id="@+id/escanerCifrado"
-        android:name="com.example.finalshield.EscanerCifrado"
+        android:name="com.example.finalshield.Fragments.EscanerCifrado"
         android:label="fragment_escaner_cifrado"
         tools:layout="@layout/fragment_escaner_cifrado" >
         <action
             android:id="@+id/action_escanerCifrado_to_cifradoEscaneo2"
             app:destination="@id/cifradoEscaneo2" />
+        <action
+            android:id="@+id/action_escanerCifrado_to_seleccion_imagenes"
+            app:destination="@id/seleccion_imagenes" />
     </fragment>
     <fragment
         android:id="@+id/cifradoEscaneo2"
-        android:name="com.example.finalshield.CifradoEscaneo2"
+        android:name="com.example.finalshield.Fragments.CifradoEscaneo2"
         android:label="fragment_cifrado_escaneo2"
         tools:layout="@layout/fragment_cifrado_escaneo2" >
         <action
@@ -161,6 +164,15 @@
             app:destination="@id/archivosCifrados2" />
         <action
             android:id="@+id/action_cifradoEscaneo2_to_escanerCifrado"
+            app:destination="@id/escanerCifrado" />
+    </fragment>
+    <fragment
+        android:id="@+id/seleccion_imagenes"
+        android:name="com.example.finalshield.Fragments.Seleccion_imagenes"
+        android:label="fragment_seleccion_imagenes"
+        tools:layout="@layout/fragment_seleccion_imagenes" >
+        <action
+            android:id="@+id/action_seleccion_imagenes_to_escanerCifrado"
             app:destination="@id/escanerCifrado" />
     </fragment>
 </navigation>

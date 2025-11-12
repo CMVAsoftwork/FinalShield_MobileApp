@@ -5,11 +5,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/fondo1"
-    tools:context=".CargaApp">
+    tools:context=".Fragments.CargaApp"
+    android:id="@+id/laybienv">
 
     <ImageView
+        android:id="@+id/icono"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/logo"/>
+        android:alpha="1"
+        android:visibility="visible"
+        android:src="@drawable/logo" />
 </LinearLayout>

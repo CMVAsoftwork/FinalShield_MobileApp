@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/degradado_negro_azul"
-    tools:context=".DatosBiometricos">
+    tools:context=".Fragments.DatosBiometricos">
     <Button
         android:layout_width="69dp"
         android:layout_height="wrap_content"
@@ -55,8 +55,8 @@
     </LinearLayout>
     <ImageView
         android:id="@+id/huella"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="170dp"
+        android:layout_height="90dp"
         android:src="@drawable/huella"
         android:layout_marginTop="190dp"
         android:layout_gravity="center"/>

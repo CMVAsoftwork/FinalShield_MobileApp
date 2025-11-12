@@ -1,4 +1,4 @@
-package com.example.finalshield;
+package com.example.finalshield.Fragments;
 
 import android.os.Bundle;
 
@@ -10,10 +10,16 @@ import androidx.navigation.Navigation;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.example.finalshield.R;
 
 public class Bienvenida extends Fragment implements View.OnClickListener {
-
+    ImageView ivescala;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -23,6 +29,9 @@ public class Bienvenida extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
+        ivescala = v.findViewById(R.id.robot);
+        Animation animationscale = AnimationUtils.loadAnimation(getContext(), R.anim.escaladito);
+        ivescala.startAnimation(animationscale);
         Button comenzar;
         comenzar = v.findViewById(R.id.btncomenzar);
         comenzar.setOnClickListener(this);
