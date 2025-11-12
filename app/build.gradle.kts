@@ -32,6 +32,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.navigation:navigation-fragment:2.9.5")
     implementation("androidx.navigation:navigation-ui:2.9.5")
     implementation(libs.appcompat)

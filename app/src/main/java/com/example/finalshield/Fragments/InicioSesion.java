@@ -39,7 +39,7 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
         if(v.getId() == R.id.regresar1){
             Navigation.findNavController(v).navigate(R.id.bienvenida);
         } else if (v.getId() == R.id.btninises1) {
-            Navigation.findNavController(v).navigate(R.id.datosBiometricos);
+            Navigation.findNavController(v).navigate(R.id.inicio);
         } else if (v.getId() == R.id.btnregis) {
             Navigation.findNavController(v).navigate(R.id.registroSesion);
         }

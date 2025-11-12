@@ -35,7 +35,6 @@ public class ArchivosCifrados extends Fragment implements View.OnClickListener{
         carpeta = v.findViewById(R.id.carpeta);
         mail = v.findViewById(R.id.mail);
         candadopen = v.findViewById(R.id.candadopen);
-
         perfil.setOnClickListener(this);
         house.setOnClickListener(this);
         archivo.setOnClickListener(this);
