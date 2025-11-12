@@ -14,39 +14,64 @@
             android:id="@+id/regresar1"
             android:layout_width="69dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="37dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="10dp"
             android:backgroundTint="#10FFFFFF"
             android:text="←"
             android:textAlignment="center"
             android:textSize="40dp" />
-
         <Button
             android:id="@+id/guardar"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:layout_marginStart="150dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="5dp"
             android:text="Guardar pdf"
             android:backgroundTint="@color/degradado_negro_azul"
             android:textAlignment="center" />
     </LinearLayout>
+    <androidx.camera.view.PreviewView
+        android:id="@+id/vistaprevia"
+        android:layout_width="280dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginStart="65dp"
+        android:layout_height="350dp" />
     <ImageView
-        android:layout_width="287dp"
-        android:layout_height="310dp"
-        android:layout_gravity="center"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="140dp" />
+        android:id="@+id/overlay"
+        android:layout_width="280dp"
+        android:layout_height="350dp"
+        android:layout_marginTop="100dp"
+        android:layout_marginStart="65dp"
+        android:src="@drawable/cam"
+        android:scaleType="fitXY"
+        android:alpha="0.3"/>
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp">
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginStart="163dp"
+            android:backgroundTint="#9BB9FF"
+            android:layout_marginTop="490dp"/>
         <ImageView
-            android:layout_width="50dp"
-            android:layout_height="60dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginStart="50dp"/>
+            android:id="@+id/imagencita"
+            android:layout_width="70dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="490dp"
+            android:background="@android:color/darker_gray"
+            android:contentDescription="Última foto" />
+        <TextView
+            android:id="@+id/Contadorfot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="445dp"
+            android:text="#"
+
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
     </LinearLayout>
     <ImageView
         android:layout_width="wrap_content"
@@ -64,22 +89,21 @@
             android:layout_height="50dp"
             android:src="@drawable/circle"
             android:scaleType="fitCenter"
-            android:layout_marginStart="27dp"
+            android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/archivo"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginTop="10dp"
             android:src="@drawable/picture"
             android:scaleType="fitCenter"
-            android:layout_marginStart="27dp"
+            android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/candadoclose"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginStart="27dp"
+            android:layout_marginStart="30dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
             android:src="@drawable/hojitamas" />
@@ -87,7 +111,7 @@
             android:id="@+id/carpeta"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginStart="27dp"
+            android:layout_marginStart="30dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
             android:src="@drawable/recortar" />
@@ -97,7 +121,7 @@
             android:layout_height="30dp"
             android:src="@drawable/hojitas"
             android:scaleType="fitCenter"
-            android:layout_marginStart="27dp"
+            android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/candadopen"
@@ -105,15 +129,9 @@
             android:layout_height="30dp"
             android:src="@drawable/basurita"
             android:scaleType="fitCenter"
-            android:layout_marginStart="27dp"
+            android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
-    <com.google.android.material.button.MaterialButton
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_gravity="center"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="470dp"
-        android:backgroundTint="#9BB9FF"
-        app:cornerRadius="40dp" />
+
+
 </RelativeLayout>

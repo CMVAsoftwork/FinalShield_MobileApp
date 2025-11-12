@@ -13,8 +13,8 @@
             android:id="@+id/regresar1"
             android:layout_width="69dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="37dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="10dp"
             android:backgroundTint="#10FFFFFF"
             android:text="←"
             android:textAlignment="center"
@@ -24,8 +24,8 @@
             android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:layout_marginStart="150dp"
-            android:layout_marginTop="20dp"
-            android:text="Guardar pdf"
+            android:layout_marginTop="5dp"
+            android:text="Hecho"
             android:backgroundTint="@color/degradado_negro_azul"
             android:textAlignment="center" />
     </LinearLayout>
@@ -41,26 +41,25 @@
         android:layout_marginTop="630dp">
         <ImageButton
             android:id="@+id/house"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/circle"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/scann"
             android:scaleType="fitCenter"
-            android:layout_marginStart="27dp"
+            android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/archivo"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginTop="10dp"
-            android:src="@drawable/picture"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/circlepicture"
             android:scaleType="fitCenter"
-            android:layout_marginStart="27dp"
+            android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/candadoclose"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginStart="27dp"
+            android:layout_marginStart="30dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
             android:src="@drawable/hojitamas" />
@@ -68,7 +67,7 @@
             android:id="@+id/carpeta"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginStart="27dp"
+            android:layout_marginStart="30dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
             android:src="@drawable/recortar" />
@@ -78,7 +77,7 @@
             android:layout_height="30dp"
             android:src="@drawable/hojitas"
             android:scaleType="fitCenter"
-            android:layout_marginStart="27dp"
+            android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/candadopen"
@@ -86,10 +85,7 @@
             android:layout_height="30dp"
             android:src="@drawable/basurita"
             android:scaleType="fitCenter"
-            android:layout_marginStart="27dp"
+            android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
-
-
-
 </FrameLayout>

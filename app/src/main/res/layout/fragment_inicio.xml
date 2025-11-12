@@ -89,7 +89,7 @@
             android:id="@+id/house"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="29dp"
             android:src="@drawable/house"
             android:scaleType="fitCenter"
             android:background="@android:color/transparent"/>
