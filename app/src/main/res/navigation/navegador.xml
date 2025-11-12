@@ -21,6 +21,9 @@
         <action
             android:id="@+id/action_bienvenida_to_inicioSesion"
             app:destination="@id/inicioSesion" />
+        <action
+            android:id="@+id/action_bienvenida_to_datosBiometricos"
+            app:destination="@id/datosBiometricos" />
     </fragment>
     <fragment
         android:id="@+id/registroSesion"
@@ -43,11 +46,14 @@
         android:label="fragment_inicio_sesion"
         tools:layout="@layout/fragment_inicio_sesion" >
         <action
+            android:id="@+id/action_inicioSesion_to_registroSesion"
+            app:destination="@id/registroSesion" />
+        <action
             android:id="@+id/action_inicioSesion_to_datosBiometricos"
             app:destination="@id/datosBiometricos" />
         <action
-            android:id="@+id/action_inicioSesion_to_registroSesion"
-            app:destination="@id/registroSesion" />
+            android:id="@+id/action_inicioSesion_to_inicio"
+            app:destination="@id/inicio" />
     </fragment>
     <fragment
         android:id="@+id/inicio"
@@ -108,6 +114,9 @@
         <action
             android:id="@+id/action_datosBiometricos_to_inicio"
             app:destination="@id/inicio" />
+        <action
+            android:id="@+id/action_datosBiometricos_to_inicioSesion"
+            app:destination="@id/inicioSesion" />
     </fragment>
     <fragment
         android:id="@+id/archivosCifrados2"

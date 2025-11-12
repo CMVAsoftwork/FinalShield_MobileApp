@@ -15,6 +15,7 @@
         android:backgroundTint="#10FFFFFF"
         android:text="←"
         android:textAlignment="center"
+        android:textColor="@color/white"
         android:textSize="40dp" />
     <TextView
         android:layout_width="wrap_content"
@@ -90,5 +91,6 @@
         android:text="Iniciar sesión"
         android:backgroundTint="#1E90FF"
         android:textSize="15dp"
+        android:textColor="@color/white"
         android:textStyle="bold"/>
 </LinearLayout>
