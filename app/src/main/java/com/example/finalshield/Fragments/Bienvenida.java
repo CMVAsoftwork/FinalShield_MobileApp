@@ -20,6 +20,7 @@ import com.example.finalshield.R;
 
 public class Bienvenida extends Fragment implements View.OnClickListener {
     ImageView ivescala;
+    int iniHu;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -39,6 +40,11 @@ public class Bienvenida extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        Navigation.findNavController(v).navigate(R.id.inicioSesion);
+        if(iniHu == 1){
+            Navigation.findNavController(v).navigate(R.id.datosBiometricos);
+        } else if (iniHu != 1) {
+            Navigation.findNavController(v).navigate(R.id.inicioSesion);
+            iniHu = 1;
+        }
     }
 }

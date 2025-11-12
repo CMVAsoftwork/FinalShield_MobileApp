@@ -7,9 +7,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".MainActivity">
-
-
-
     <androidx.fragment.app.FragmentContainerView
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
@@ -19,7 +16,4 @@
         tools:ignore="FragmentTagUsage"
         android:id="@+id/contenedorp">
     </androidx.fragment.app.FragmentContainerView>
-
-
-
 </LinearLayout>

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/degradado_negro_azul"
-    tools:context=".Fragments.Seleccion_imagenes">
+    tools:context=".Fragments.EscanearMasPaginas">
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -25,16 +25,49 @@
             android:layout_height="36dp"
             android:layout_marginStart="150dp"
             android:layout_marginTop="5dp"
-            android:text="Hecho"
+            android:text="Guardar pdf"
             android:backgroundTint="@color/degradado_negro_azul"
             android:textAlignment="center" />
     </LinearLayout>
-    <FrameLayout
-        android:layout_width="300dp"
-        android:layout_height="400dp"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="150dp">
-    </FrameLayout>
+    <androidx.camera.view.PreviewView
+        android:id="@+id/vistaprevia"
+        android:layout_width="280dp"
+        android:layout_marginTop="105dp"
+        android:layout_marginLeft="65dp"
+        android:layout_height="340dp" />
+    <ImageView
+        android:id="@+id/overlay"
+        android:layout_width="280dp"
+        android:layout_height="340dp"
+        android:layout_marginTop="105dp"
+        android:layout_marginLeft="65dp"
+        android:src="@drawable/cam"
+        android:scaleType="fitXY"
+        android:alpha="0.3"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:layout_marginTop="480dp">
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="90dp"
+            android:layout_marginStart="20dp"/>
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="90dp"
+            android:layout_marginStart="20dp"/>
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="90dp"
+            android:layout_marginStart="20dp"/>
+        <ImageButton
+            android:id="@+id/more"
+            android:layout_width="80dp"
+            android:layout_height="90dp"
+            android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/moreimages"/>
+    </LinearLayout>
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -55,20 +88,20 @@
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/archivo"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/circlepicture"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/picture"
             android:scaleType="fitCenter"
             android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/candadoclose"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_marginStart="30dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:src="@drawable/hojitamas" />
+            android:src="@drawable/circlemore"/>
         <ImageButton
             android:id="@+id/carpeta"
             android:layout_width="30dp"
@@ -94,4 +127,8 @@
             android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
+
+
+
+
 </RelativeLayout>
