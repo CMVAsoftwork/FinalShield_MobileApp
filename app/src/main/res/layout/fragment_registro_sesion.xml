@@ -11,7 +11,7 @@
         android:layout_width="69dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="37dp"
+        android:layout_marginTop="17dp"
         android:backgroundTint="#10FFFFFF"
         android:text="←"
         android:textAlignment="center"
@@ -25,7 +25,7 @@
         android:textSize="20dp"
         android:textStyle="bold"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="32dp"/>
+        android:layout_marginTop="15dp"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,7 +33,7 @@
         android:textColor="@color/white"
         android:textSize="17dp"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="17dp"/>
     <EditText
         android:id="@+id/nombre"
@@ -41,7 +41,7 @@
         android:layout_height="40dp"
         android:drawableStart="@drawable/person"
         android:layout_gravity="center"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="15dp"
         android:gravity="center_vertical"
         android:textColor="@color/white"
         android:textColorHint="@color/white"
@@ -114,6 +114,14 @@
         android:textColorHint="@color/white"
         android:textColor="@color/white"
         android:textSize="20dp" />
+    <RadioButton
+        android:id="@+id/btlRadio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="20dp"
+        android:text="Deseas usar la huella digital"
+        android:textColor="@color/white"/>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
