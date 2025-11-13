@@ -6,7 +6,6 @@
     android:orientation="vertical"
     android:background="@color/degradado_azul_medio"
     tools:context=".Fragments.Inicio">
-
     <ImageButton
         android:id="@+id/btnperfil"
         android:layout_width="69dp"
@@ -15,7 +14,6 @@
         android:layout_marginTop="50dp"
         android:background="@android:color/transparent"
         android:src="@drawable/user" />
-
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -29,7 +27,6 @@
             android:textStyle="bold"
             android:layout_marginStart="50dp"
             android:layout_marginTop="90dp"/>
-
         <ImageView
             android:layout_width="68dp"
             android:layout_height="63dp"
@@ -78,7 +75,6 @@
         android:layout_marginStart="90dp"
         android:textSize="20dp"
         android:textStyle="bold"/>
-
     <ListView
         android:id="@+id/listarchivos"
         android:layout_width="178dp"
@@ -139,5 +135,4 @@
             android:layout_marginStart="20dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
-
 </RelativeLayout>

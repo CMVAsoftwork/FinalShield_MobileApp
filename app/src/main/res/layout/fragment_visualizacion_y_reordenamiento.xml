@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/degradado_negro_azul"
-    tools:context=".Fragments.Seleccion_imagenes">
+    tools:context=".Fragments.VisualizacionYReordenamiento">
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
@@ -29,12 +29,14 @@
             android:backgroundTint="@color/degradado_negro_azul"
             android:textAlignment="center" />
     </LinearLayout>
-    <FrameLayout
-        android:layout_width="300dp"
-        android:layout_height="400dp"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="150dp">
-    </FrameLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/imageToEdit"
+        android:layout_width="400dp"
+        android:layout_height="348dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="180dp"
+        android:clipToPadding="false"
+        android:padding="30dp" />
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -55,9 +57,9 @@
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/archivo"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:src="@drawable/circlepicture"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/picture"
             android:scaleType="fitCenter"
             android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
@@ -79,9 +81,9 @@
             android:src="@drawable/recortar" />
         <ImageButton
             android:id="@+id/mail"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/hojitas"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ordencircle"
             android:scaleType="fitCenter"
             android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
@@ -94,4 +96,5 @@
             android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
-</RelativeLayout>
+
+</FrameLayout>
