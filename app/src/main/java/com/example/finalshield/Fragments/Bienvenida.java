@@ -1,5 +1,8 @@
 package com.example.finalshield.Fragments;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,25 +22,28 @@ import android.widget.TextView;
 import com.example.finalshield.R;
 
 public class Bienvenida extends Fragment implements View.OnClickListener {
-    ImageView ivescala;
+    ImageView ivrotation;
+    ObjectAnimator animatorrotation;
+    long animationduration = 400;
     int iniHu;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_bienvenida, container, false);
     }
-
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-        ivescala = v.findViewById(R.id.robot);
-        Animation animationscale = AnimationUtils.loadAnimation(getContext(), R.anim.escaladito);
-        ivescala.startAnimation(animationscale);
+        ivrotation = v.findViewById(R.id.brazo);
+        animatorrotation = ObjectAnimator.ofFloat(ivrotation, "rotation", -15f, -40f);
+        animatorrotation.setDuration(animationduration);
+        animatorrotation.setRepeatCount(ValueAnimator.INFINITE);
+        animatorrotation.setRepeatMode(ValueAnimator.REVERSE);
+        animatorrotation.start();
         Button comenzar;
         comenzar = v.findViewById(R.id.btncomenzar);
         comenzar.setOnClickListener(this);
     }
-
     @Override
     public void onClick(View v) {
         if(iniHu == 1){

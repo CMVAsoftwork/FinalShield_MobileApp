@@ -21,13 +21,19 @@
         android:layout_marginTop="320dp"
         android:textStyle="bold" />
     <ImageView
-        android:layout_width="144dp"
-        android:layout_height="208dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerInParent="true"
+        android:layout_width="65dp"
+        android:layout_height="65dp"
+        android:layout_marginTop="188dp"
+        android:layout_marginLeft="75dp"
+        android:id="@+id/brazo"
+        android:src="@drawable/brazor" />
+    <ImageView
+        android:layout_width="504dp"
+        android:layout_height="250dp"
         android:layout_marginTop="80dp"
-        android:id="@+id/robot"
-        android:src="@drawable/robot" />
+        android:id="@+id/robotsb"
+        android:src="@drawable/robotsb" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
