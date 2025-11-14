@@ -85,16 +85,16 @@
         <ImageButton
             android:id="@+id/candadoclose"
             android:layout_width="40dp"
-            android:layout_height="match_parent"
+            android:layout_height="40dp"
             android:layout_marginStart="20dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:src="@drawable/candadoclose" />
+            android:src="@drawable/candadoblan" />
         <ImageButton
             android:id="@+id/carpeta"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/scanblan"
+            android:src="@drawable/carpeta"
             android:scaleType="fitCenter"
             android:layout_marginStart="20dp"
             android:background="@android:color/transparent"/>
