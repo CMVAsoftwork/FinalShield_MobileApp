@@ -13,50 +13,52 @@
             android:id="@+id/regresar1"
             android:layout_width="69dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="25dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="30dp"
             android:backgroundTint="#10FFFFFF"
+            android:gravity="center"
             android:text="←"
+            android:textColor="@color/white"
             android:textAlignment="center"
             android:textSize="40dp" />
         <Button
             android:id="@+id/guardar"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
-            android:layout_marginStart="150dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginStart="160dp"
+            android:layout_marginTop="30dp"
             android:text="Hecho"
+            android:textColor="@color/white"
             android:backgroundTint="@color/degradado_negro_azul"
             android:textAlignment="center" />
     </LinearLayout>
-    <FrameLayout
-        android:layout_width="350dp"
-        android:layout_height="440dp"
-        android:layout_marginStart="35dp"
-        android:layout_marginTop="100dp">
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="8dp"
-            android:id="@+id/recycler" />
-    </FrameLayout>
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="580dp"
-        android:src="@drawable/img"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="565dp"
+        android:layout_marginTop="100dp"
+        android:padding="8dp"
+        android:id="@+id/recycler" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="670dp"
+        android:background="@drawable/img">
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginTop="630dp">
+        android:layout_marginTop="695dp"
+        android:layout_marginLeft="-26dp">
         <ImageButton
-            android:id="@+id/house"
+            android:id="@+id/house2"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/scann"
             android:scaleType="fitCenter"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="40dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/archivo"
@@ -64,7 +66,7 @@
             android:layout_height="50dp"
             android:src="@drawable/circlepicture"
             android:scaleType="fitCenter"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="20dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/candadoclose"
