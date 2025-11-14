@@ -28,7 +28,7 @@
             android:layout_height="36dp"
             android:layout_marginStart="160dp"
             android:layout_marginTop="30dp"
-            android:text="Guardar pdf"
+            android:text="Guardar PDF"
             android:textColor="@color/white"
             android:backgroundTint="@color/degradado_negro_azul"
             android:textAlignment="center" />
@@ -37,44 +37,50 @@
         android:id="@+id/vistaprevia"
         android:layout_width="280dp"
         android:layout_marginTop="145dp"
-        android:layout_marginLeft="45dp"
-        android:layout_height="350dp" />
+        android:layout_marginLeft="40dp"
+        android:layout_height="350dp" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginLeft="130dp"
+                android:layout_marginTop="520dp"
+                android:backgroundTint="#9BB9FF" />
+
+            <ImageView
+                android:id="@+id/imagencita"
+                android:layout_width="70dp"
+                android:layout_height="80dp"
+                android:layout_marginStart="50dp"
+                android:layout_marginTop="520dp"
+                android:background="@android:color/darker_gray"
+                android:contentDescription="Última foto"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:id="@+id/Contadorfot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="475dp"
+                android:text="#"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </androidx.camera.view.PreviewView>
     <ImageView
         android:id="@+id/overlay"
         android:layout_width="280dp"
         android:layout_height="350dp"
         android:layout_marginTop="145dp"
-        android:layout_marginLeft="45dp"
+        android:layout_marginLeft="40dp"
         android:src="@drawable/cam"
         android:scaleType="fitXY"
         android:alpha="0.3"/>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <Button
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:backgroundTint="#9BB9FF"
-            android:layout_marginTop="520dp"
-            android:layout_marginLeft="130dp"/>
-        <ImageView
-            android:id="@+id/imagencita"
-            android:layout_width="70dp"
-            android:layout_height="80dp"
-            android:scaleType="centerCrop"
-            android:layout_marginStart="50dp"
-            android:layout_marginTop="520dp"
-            android:background="@android:color/darker_gray"
-            android:contentDescription="Última foto" />
-        <TextView
-            android:id="@+id/Contadorfot"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="475dp"
-            android:text="#"
-            android:textColor="@android:color/white"
-            android:textSize="16sp" />
-    </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -102,13 +108,13 @@
             android:layout_height="30dp"
             android:src="@drawable/picture"
             android:scaleType="fitCenter"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="20dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/candadoclose"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="40dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
             android:src="@drawable/hojitamas" />
