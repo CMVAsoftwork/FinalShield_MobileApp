@@ -1,16 +1,15 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="180dp"
-    android:layout_margin="8dp"
-    android:background="@drawable/bg_image">
+    android:layout_height="200dp"
+    android:layout_margin="8dp">
 
     <ImageView
         android:id="@+id/img"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:clipToOutline="true"
-        android:background="@drawable/bg_image" />
+        android:background="@drawable/bg_image"
+        android:clipToOutline="true" />
 
     <View
         android:id="@+id/overlay"
@@ -18,4 +17,5 @@
         android:layout_height="match_parent"
         android:background="#5000AEEF"
         android:visibility="gone" />
+
 </FrameLayout>

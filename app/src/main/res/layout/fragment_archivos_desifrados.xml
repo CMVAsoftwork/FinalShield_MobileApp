@@ -45,7 +45,7 @@
 
     <ListView
         android:layout_width="349dp"
-        android:layout_height="331dp"
+        android:layout_height="361dp"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="40dp"
         android:layout_marginTop="30dp" />
@@ -55,7 +55,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
-        android:text="ESCANEAR Y CIFRAR"
+        android:text="DESCIFRAR ARCHIVO"
         android:backgroundTint="#1E90FF"
         android:textSize="15dp"
         android:textStyle="bold">
@@ -63,7 +63,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="72.5dp"
+        android:layout_marginTop="42.5dp"
         android:layout_marginLeft="-6dp">
         <ImageButton
             android:id="@+id/house"

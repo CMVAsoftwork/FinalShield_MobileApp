@@ -1,105 +1,66 @@
 package com.example.finalshield.Adaptadores;
 
 import android.content.Context;
-import android.content.Intent;
-import android.media.Image;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.finalshield.R;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHolder> {
+public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> {
+
+    private final List<Uri> images;
+    private final OnImageClickListener listener;
 
     public interface OnImageClickListener {
         void onImageClick(Uri uri);
     }
 
-    private Context context;
-    private List<Uri> listaImagenes;
-    private Set<Uri> imagenesSeleccionadas = new HashSet<>();
-    private boolean modoSeleccion = false;
-    private OnImageClickListener listener;
-
-    public ImageAdapter(Context context, List<Uri> listaImagenes, OnImageClickListener listener) {
-        this.context = context;
-        this.listaImagenes = listaImagenes;
+    public ImageAdapter(Context context,List<Uri> images, OnImageClickListener listener) {
+        this.images = images;
         this.listener = listener;
     }
 
     @NonNull
     @Override
-    public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(context).inflate(R.layout.item_imagen, parent, false);
-        return new ImageViewHolder(v);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_imagen, parent, false);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
-        Uri uri = listaImagenes.get(position);
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Uri uri = images.get(position);
 
-        holder.image.setImageURI(uri);
-
-        // Efecto visual cuando está seleccionado
-        holder.overlay.setVisibility(
-                imagenesSeleccionadas.contains(uri) ? View.VISIBLE : View.GONE
-        );
-
-        // Click normal
-        holder.itemView.setOnClickListener(v -> {
-            if (modoSeleccion) {
-                alternarSeleccion(uri);
-                notifyItemChanged(position);
-            } else {
-                listener.onImageClick(uri);
-            }
-        });
-
-        // Mantener presionado → activar selección múltiple
-        holder.itemView.setOnLongClickListener(v -> {
-            modoSeleccion = true;
-            alternarSeleccion(uri);
-            notifyItemChanged(position);
-            return true;
-        });
-    }
-
-    private void alternarSeleccion(Uri uri) {
-        if (imagenesSeleccionadas.contains(uri)) {
-            imagenesSeleccionadas.remove(uri);
-        } else {
-            imagenesSeleccionadas.add(uri);
-        }
-    }
-
-    public Set<Uri> getSeleccionadas() {
-        return imagenesSeleccionadas;
+        Glide.with(holder.img.getContext())
+                .load(uri)
+                .thumbnail(0.2f) // ⚡ carga previa más rápida
+                .centerCrop()
+                .placeholder(R.drawable.img_placeholder) // pon un drawable simple
+                .into(holder.img);
+        holder.itemView.setOnClickListener(v -> listener.onImageClick(uri));
     }
 
     @Override
     public int getItemCount() {
-        return listaImagenes.size();
+        return images.size();
     }
 
-    static class ImageViewHolder extends RecyclerView.ViewHolder {
-        ImageView image;
-        View overlay;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView img;
 
-        public ImageViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            image = itemView.findViewById(R.id.img);
-            overlay = itemView.findViewById(R.id.overlay);
+            img = itemView.findViewById(R.id.img);
         }
     }
 }

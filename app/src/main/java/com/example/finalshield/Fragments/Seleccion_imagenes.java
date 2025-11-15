@@ -32,10 +32,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Seleccion_imagenes extends Fragment implements View.OnClickListener {
+
     ImageButton house;
     private RecyclerView recyclerViee;
     private ImageAdapter adapter;
-    private List<Uri> listaImagenes = new ArrayList<>();
+    private final List<Uri> listaImagenes = new ArrayList<>();
 
     private static final int REQUEST_CODE = 100;
 
@@ -47,10 +48,13 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
+
         recyclerViee = v.findViewById(R.id.recycler);
         recyclerViee.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
         house = v.findViewById(R.id.house2);
         house.setOnClickListener(this);
+
         pedirPermiso();
     }
 
@@ -79,7 +83,7 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
                 ? MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
                 : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
-        String[] projection = { MediaStore.Images.Media._ID };
+        String[] projection = {MediaStore.Images.Media._ID};
 
         Cursor cursor = requireActivity()
                 .getContentResolver()
@@ -96,10 +100,13 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
             cursor.close();
         }
 
-        adapter = new ImageAdapter(getContext(), listaImagenes, uri -> {
-            Intent intent = new Intent(requireContext(), VistaImagenActivity.class);
-            intent.putExtra("uri", uri.toString());
-            startActivity(intent);
+        adapter = new ImageAdapter(getContext(), listaImagenes, new ImageAdapter.OnImageClickListener() {
+            @Override
+            public void onImageClick(Uri uri) {
+                Intent intent = new Intent(requireContext(), VistaImagenActivity.class);
+                intent.putExtra("uri", uri.toString());
+                startActivity(intent);
+            }
         });
 
         recyclerViee.setAdapter(adapter);
@@ -107,7 +114,7 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.house2){
+        if (v.getId() == R.id.house2) {
             Navigation.findNavController(v).navigate(R.id.escanerCifrado);
         }
     }
