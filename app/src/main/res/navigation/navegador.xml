@@ -27,7 +27,7 @@
     </fragment>
     <fragment
         android:id="@+id/registroSesion"
-        android:name="com.example.finalshield.Fragments.RegistroSesion"
+        android:name="com.example.finalshield.Fragments.InicioSesion.RegistroSesion"
         android:label="fragment_registro_sesion"
         tools:layout="@layout/fragment_registro_sesion" >
         <action
@@ -42,7 +42,7 @@
     </fragment>
     <fragment
         android:id="@+id/inicioSesion"
-        android:name="com.example.finalshield.Fragments.InicioSesion"
+        android:name="com.example.finalshield.Fragments.InicioSesion.InicioSesion"
         android:label="fragment_inicio_sesion"
         tools:layout="@layout/fragment_inicio_sesion" >
         <action
@@ -108,7 +108,7 @@
     </fragment>
     <fragment
         android:id="@+id/datosBiometricos"
-        android:name="com.example.finalshield.Fragments.DatosBiometricos"
+        android:name="com.example.finalshield.Fragments.InicioSesion.DatosBiometricos"
         android:label="fragment_datos_biometricos"
         tools:layout="@layout/fragment_datos_biometricos" >
         <action
