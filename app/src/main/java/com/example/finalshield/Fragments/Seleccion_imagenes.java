@@ -21,6 +21,7 @@ import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -33,7 +34,7 @@ import java.util.List;
 
 public class Seleccion_imagenes extends Fragment implements View.OnClickListener {
 
-    ImageButton house;
+    ImageButton recortar, addele,camara, edicion, eliminar;
     private RecyclerView recyclerViee;
     private ImageAdapter adapter;
     private final List<Uri> listaImagenes = new ArrayList<>();
@@ -50,8 +51,20 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
         super.onViewCreated(v, savedInstanceState);
         recyclerViee = v.findViewById(R.id.recycler);
         recyclerViee.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        house = v.findViewById(R.id.house2);
-        house.setOnClickListener(this);
+        camara = v.findViewById(R.id.scancam);
+        camara.setOnClickListener(this);
+        Button regre = v.findViewById(R.id.regresar1);
+        camara = v.findViewById(R.id.scancam);
+        addele = v.findViewById(R.id.addelements);
+        recortar = v.findViewById(R.id.recortar);
+        edicion = v.findViewById(R.id.edicion);
+        eliminar = v.findViewById(R.id.eliminar);
+        camara.setOnClickListener(this);
+        addele.setOnClickListener(this);
+        recortar.setOnClickListener(this);
+        edicion.setOnClickListener(this);
+        eliminar.setOnClickListener(this);
+        regre.setOnClickListener(this);
         pedirPermiso();
     }
 
@@ -111,8 +124,18 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.house2) {
+        if(v.getId() == R.id.scancam){
             Navigation.findNavController(v).navigate(R.id.escanerCifradoMixto);
+        } else if (v.getId() == R.id.addelements) {
+            Navigation.findNavController(v).navigate(R.id.escanearMasPaginas);
+        } else if (v.getId() == R.id.recortar) {
+            Navigation.findNavController(v).navigate(R.id.cortarRotar);
+        } else if (v.getId() == R.id.edicion) {
+            Navigation.findNavController(v).navigate(R.id.visualizacionYReordenamiento);
+        } else if (v.getId() == R.id.eliminar) {
+            Navigation.findNavController(v).navigate(R.id.eliminarPaginas);
+        }else if (v.getId() == R.id.regresar1) {
+            Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
         }
     }
 }
