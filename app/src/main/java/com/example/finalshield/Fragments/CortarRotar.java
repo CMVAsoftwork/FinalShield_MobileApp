@@ -2,65 +2,58 @@ package com.example.finalshield.Fragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.example.finalshield.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link CortarRotar#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class CortarRotar extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public CortarRotar() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CortarRotar.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CortarRotar newInstance(String param1, String param2) {
-        CortarRotar fragment = new CortarRotar();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
+public class CortarRotar extends Fragment implements View.OnClickListener {
+    ImageButton galeria, addele,camara, edicion, eliminar;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_cortar_rotar, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(v, savedInstanceState);
+        Button regre = v.findViewById(R.id.regresar1);
+        camara = v.findViewById(R.id.scancam);
+        addele = v.findViewById(R.id.addelements);
+        galeria = v.findViewById(R.id.selecgaleria);
+        edicion = v.findViewById(R.id.edicion);
+        eliminar = v.findViewById(R.id.eliminar);
+        camara.setOnClickListener(this);
+        addele.setOnClickListener(this);
+        galeria.setOnClickListener(this);
+        edicion.setOnClickListener(this);
+        eliminar.setOnClickListener(this);
+        regre.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v.getId() == R.id.scancam){
+            Navigation.findNavController(v).navigate(R.id.escanerCifradoMixto);
+        } else if (v.getId() == R.id.addelements) {
+            Navigation.findNavController(v).navigate(R.id.escanearMasPaginas);
+        } else if (v.getId() == R.id.selecgaleria) {
+            Navigation.findNavController(v).navigate(R.id.seleccion_imagenes);
+        } else if (v.getId() == R.id.edicion) {
+            Navigation.findNavController(v).navigate(R.id.visualizacionYReordenamiento);
+        } else if (v.getId() == R.id.eliminar) {
+            Navigation.findNavController(v).navigate(R.id.eliminarPaginas);
+        }else if (v.getId() == R.id.regresar1) {
+            Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
+        }
     }
 }

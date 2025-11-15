@@ -69,7 +69,7 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.regresar1){
-            Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
+            Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
         } else if (v.getId() == R.id.selecgaleria) {
             Navigation.findNavController(v).navigate(R.id.seleccion_imagenes);
         } else if (v.getId() == R.id.addelements) {

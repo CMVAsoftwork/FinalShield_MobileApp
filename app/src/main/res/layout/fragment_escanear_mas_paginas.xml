@@ -84,7 +84,7 @@
         android:layout_marginTop="695dp"
         android:layout_marginLeft="-22dp">
         <ImageButton
-            android:id="@+id/house"
+            android:id="@+id/scancam"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/scann"
@@ -92,7 +92,7 @@
             android:layout_marginStart="36dp"
             android:background="@android:color/transparent"/>
         <ImageButton
-            android:id="@+id/archivo"
+            android:id="@+id/selecgaleria"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/picture"
@@ -100,7 +100,7 @@
             android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
         <ImageButton
-            android:id="@+id/candadoclose"
+            android:id="@+id/addelements"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginStart="26dp"
@@ -108,7 +108,7 @@
             android:scaleType="fitCenter"
             android:src="@drawable/circlemore"/>
         <ImageButton
-            android:id="@+id/carpeta"
+            android:id="@+id/recortar"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_marginStart="24dp"
@@ -116,7 +116,7 @@
             android:scaleType="fitCenter"
             android:src="@drawable/recortar" />
         <ImageButton
-            android:id="@+id/mail"
+            android:id="@+id/edicion"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/hojitas"
@@ -124,7 +124,7 @@
             android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
         <ImageButton
-            android:id="@+id/candadopen"
+            android:id="@+id/eliminar"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/basurita"
@@ -132,8 +132,4 @@
             android:layout_marginStart="30dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
-
-
-
-
 </RelativeLayout>
