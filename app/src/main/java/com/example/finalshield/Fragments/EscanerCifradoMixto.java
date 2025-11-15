@@ -29,8 +29,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.ExecutionException;
 
 
-public class EscanerCifrado extends Fragment implements View.OnClickListener {
-    ImageButton archivo;
+public class EscanerCifradoMixto extends Fragment implements View.OnClickListener {
+    ImageButton galeria, addele,recortar, edicion, eliminar;
     // esta es la ventana donde se verá la cámara (nuestro recuadro negro).
     private PreviewView vistaPrevia;
     // esto es lo que nos dará acceso real a la cámara, cuando Android quiera.
@@ -40,14 +40,22 @@ public class EscanerCifrado extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_escaner_cifrado, container, false);
+        return inflater.inflate(R.layout.fragment_escaner_cifrado_mixto, container, false);
     }
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
         vistaPrevia = v.findViewById(R.id.vistaprevia);
         Button regre = v.findViewById(R.id.regresar1);
-        archivo = v.findViewById(R.id.archivo);
-        archivo.setOnClickListener(this);
+        galeria = v.findViewById(R.id.selecgaleria);
+        addele = v.findViewById(R.id.addelements);
+        recortar = v.findViewById(R.id.recortar);
+        edicion = v.findViewById(R.id.edicion);
+        eliminar = v.findViewById(R.id.eliminar);
+        galeria.setOnClickListener(this);
+        addele.setOnClickListener(this);
+        recortar.setOnClickListener(this);
+        edicion.setOnClickListener(this);
+        eliminar.setOnClickListener(this);
         regre.setOnClickListener(this);
         // checar si el usuario ya nos dio permiso
         if (allPermissionsGranted()) {
@@ -62,8 +70,16 @@ public class EscanerCifrado extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         if(v.getId() == R.id.regresar1){
             Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
-        } else if (v.getId() == R.id.archivo) {
+        } else if (v.getId() == R.id.selecgaleria) {
             Navigation.findNavController(v).navigate(R.id.seleccion_imagenes);
+        } else if (v.getId() == R.id.addelements) {
+            Navigation.findNavController(v).navigate(R.id.escanearMasPaginas);
+        } else if (v.getId() == R.id.recortar) {
+            Navigation.findNavController(v).navigate(R.id.cortarRotar);
+        } else if (v.getId() == R.id.edicion) {
+            Navigation.findNavController(v).navigate(R.id.visualizacionYReordenamiento);
+        } else if (v.getId() == R.id.eliminar) {
+            Navigation.findNavController(v).navigate(R.id.eliminarPaginas);
         }
     }
     // 1. verificar el permiso

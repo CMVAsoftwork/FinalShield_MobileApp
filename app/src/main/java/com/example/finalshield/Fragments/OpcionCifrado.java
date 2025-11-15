@@ -67,11 +67,11 @@ public class OpcionCifrado extends Fragment implements View.OnClickListener {
         } else if (v.getId() == R.id.btnperfil) {
             Navigation.findNavController(v).navigate(R.id.continuacionInicio);
         }else if (v.getId() == R.id.cifcam) {
-            Navigation.findNavController(v).navigate(R.id.escanerCifrado);
+            Navigation.findNavController(v).navigate(R.id.escanerCifradoCamara3);
         }else if (v.getId() == R.id.cifgal) {
-            Navigation.findNavController(v).navigate(R.id.escanerCifrado);
+            Navigation.findNavController(v).navigate(R.id.escanerCifradoGaleria2);
         }else if (v.getId() == R.id.cifmix) {
-            Navigation.findNavController(v).navigate(R.id.escanerCifrado);
+            Navigation.findNavController(v).navigate(R.id.escanerCifradoMixto);
         }
     }
 }
