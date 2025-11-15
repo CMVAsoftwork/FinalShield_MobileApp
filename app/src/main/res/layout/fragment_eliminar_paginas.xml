@@ -13,9 +13,10 @@
             android:id="@+id/regresar1"
             android:layout_width="69dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="25dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="30dp"
             android:backgroundTint="#10FFFFFF"
+            android:textColor="@color/white"
             android:text="←"
             android:textAlignment="center"
             android:textSize="40dp" />
@@ -23,8 +24,9 @@
             android:id="@+id/guardar"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
-            android:layout_marginStart="150dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginStart="170dp"
+            android:layout_marginTop="30dp"
+            android:textColor="@color/white"
             android:text="Hecho"
             android:backgroundTint="@color/degradado_negro_azul"
             android:textAlignment="center" />
@@ -32,18 +34,18 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/imageToEdit"
         android:layout_width="400dp"
-        android:layout_height="348dp"
+        android:layout_height="550dp"
         android:layout_marginStart="6dp"
-        android:layout_marginTop="180dp"
+        android:layout_marginTop="110dp"
         android:clipToPadding="false"
         android:padding="30dp" />
     <LinearLayout
-        android:layout_width="400dp"
+        android:layout_width="match_parent"
         android:layout_height="160dp"
         android:layout_marginTop="150dp"
         android:background="@drawable/cuadrado">
         <TextView
-            android:layout_width="400dp"
+            android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginStart="4dp"
             android:text="¿Estás seguro de que
@@ -54,7 +56,7 @@
             android:layout_marginTop="20dp"/>
     </LinearLayout>
     <LinearLayout
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
         android:layout_marginTop="250dp">
@@ -64,33 +66,38 @@
         android:backgroundTint="#1E90FF"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="90dp"/>
+        android:layout_marginStart="70dp"
+        android:layout_gravity="center"/>
     <Button
         android:id="@+id/noeliminar"
         android:text="No"
         android:backgroundTint="#1E90FF"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="80dp"/>
+        android:layout_marginStart="50dp"
+        android:layout_gravity="center"/>
 </LinearLayout>
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="580dp"
-        android:src="@drawable/img"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="670dp"
+        android:background="@drawable/img">
+    </LinearLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginTop="630dp">
+        android:layout_marginTop="695dp"
+        android:layout_marginLeft="-22dp">
         <ImageButton
             android:id="@+id/house"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/scann"
             android:scaleType="fitCenter"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="38dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/archivo"
@@ -104,7 +111,7 @@
             android:id="@+id/candadoclose"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="40dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
             android:src="@drawable/hojitamas" />
@@ -130,7 +137,7 @@
             android:layout_height="50dp"
             android:src="@drawable/basuritacicle"
             android:scaleType="fitCenter"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="18dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
 
