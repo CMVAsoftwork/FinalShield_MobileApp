@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
     <LinearLayout
         android:layout_width="300dp"
@@ -15,6 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/carpetiux"
+            app:backgroundTint="@android:color/transparent"
             android:layout_gravity="center"/>
         <TextView
             android:id="@+id/textcarp"
@@ -26,18 +28,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/play"
+            app:backgroundTint="@android:color/transparent"
             android:layout_gravity="center"/>
         <ImageButton
             android:id="@+id/pause"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/pause"
+            app:backgroundTint="@android:color/transparent"
             android:layout_gravity="center"/>
         <ImageButton
             android:id="@+id/borrar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/basurita"
+            app:backgroundTint="@android:color/transparent"
             android:layout_gravity="center"/>
     </LinearLayout>
 </LinearLayout>

@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
     <LinearLayout
         android:layout_width="300dp"
@@ -24,13 +25,15 @@
             android:id="@+id/play"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="@drawable/candadoclose"
+            android:src="@drawable/candadolist"
+            app:backgroundTint="@android:color/transparent"
             android:layout_gravity="center"/>
         <ImageButton
             android:id="@+id/borrar"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/basurita"
+            app:backgroundTint="@android:color/transparent"
             android:layout_gravity="center"/>
     </LinearLayout>
 
