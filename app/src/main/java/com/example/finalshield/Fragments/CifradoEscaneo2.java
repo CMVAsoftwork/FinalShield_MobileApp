@@ -51,23 +51,19 @@ public class CifradoEscaneo2 extends Fragment implements View.OnClickListener{
         if(v.getId() == R.id.carpeta){
             Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
         } else if (v.getId() == R.id.house) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+            Navigation.findNavController(v).navigate(R.id.inicio);
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
             Navigation.findNavController(v).navigate(R.id.continuacionInicio);
-        } else if (v.getId() == R.id.btnseleccarpeta) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
-        } else if (v.getId() == R.id.btnenvcorreo) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
         }else if (v.getId() == R.id.mail) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+            Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         }else if (v.getId() == R.id.archivo) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados);
         } else if (v.getId() == R.id.btnperfil) {
             Navigation.findNavController(v).navigate(R.id.continuacionInicio);
         }else if (v.getId() == R.id.scan) {
-            Navigation.findNavController(v).navigate(R.id.escanerCifrado);
+            Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
         }
     }
 }

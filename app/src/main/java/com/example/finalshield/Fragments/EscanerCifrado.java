@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.finalshield.R;
@@ -29,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 
 
 public class EscanerCifrado extends Fragment implements View.OnClickListener {
+    ImageButton archivo;
     // esta es la ventana donde se verá la cámara (nuestro recuadro negro).
     private PreviewView vistaPrevia;
     // esto es lo que nos dará acceso real a la cámara, cuando Android quiera.
@@ -44,6 +46,8 @@ public class EscanerCifrado extends Fragment implements View.OnClickListener {
         super.onViewCreated(v, savedInstanceState);
         vistaPrevia = v.findViewById(R.id.vistaprevia);
         Button regre = v.findViewById(R.id.regresar1);
+        archivo = v.findViewById(R.id.archivo);
+        archivo.setOnClickListener(this);
         regre.setOnClickListener(this);
         // checar si el usuario ya nos dio permiso
         if (allPermissionsGranted()) {
@@ -58,6 +62,8 @@ public class EscanerCifrado extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         if(v.getId() == R.id.regresar1){
             Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
+        } else if (v.getId() == R.id.archivo) {
+            Navigation.findNavController(v).navigate(R.id.seleccion_imagenes);
         }
     }
     // 1. verificar el permiso

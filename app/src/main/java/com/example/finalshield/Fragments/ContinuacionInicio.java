@@ -26,7 +26,6 @@ public class ContinuacionInicio extends Fragment implements  View.OnClickListene
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
         ImageButton perfil,house, archivo,candadclose, carpeta, mail, candadopen;
-        Button selecarpeta, correo;
         perfil = v.findViewById(R.id.btnperfil);
         house = v.findViewById(R.id.house);
         archivo = v.findViewById(R.id.archivo);
@@ -53,16 +52,12 @@ public class ContinuacionInicio extends Fragment implements  View.OnClickListene
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
             Navigation.findNavController(v).navigate(R.id.continuacionInicio);
-        } else if (v.getId() == R.id.btnseleccarpeta) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
-        } else if (v.getId() == R.id.btnenvcorreo) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
         }else if (v.getId() == R.id.mail) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+            Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         }else if (v.getId() == R.id.archivo) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados);
         } else if (v.getId() == R.id.btnperfil) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+
         }
     }
 }

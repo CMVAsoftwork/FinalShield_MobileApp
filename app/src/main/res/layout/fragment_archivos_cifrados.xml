@@ -60,16 +60,17 @@
         android:layout_centerHorizontal="true"
         android:layout_marginStart="40dp"
         android:id="@+id/listacarp"/>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="62dp"
-        android:layout_marginLeft="-6dp">
+        android:layout_marginLeft="-15dp">
         <ImageButton
             android:id="@+id/house"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="29dp"
             android:src="@drawable/housecolor"
             android:scaleType="fitCenter"
             android:background="@android:color/transparent"/>

@@ -51,16 +51,12 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener{
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
             Navigation.findNavController(v).navigate(R.id.continuacionInicio);
-        } else if (v.getId() == R.id.btnseleccarpeta) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
-        } else if (v.getId() == R.id.btnenvcorreo) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
-        }else if (v.getId() == R.id.mail) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        } else if (v.getId() == R.id.mail) {
+            Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         }else if (v.getId() == R.id.archivo) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+            Navigation.findNavController(v).navigate(R.id.archivosCifrados);
         } else if (v.getId() == R.id.btnperfil) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+
         }
     }
 }

@@ -42,7 +42,7 @@ public class RegistroSesion extends Fragment implements View.OnClickListener {
         } else if (v.getId() == R.id.inisesi) {
             Navigation.findNavController(v).navigate(R.id.inicioSesion);
         } else if (v.getId() == R.id.regresar2) {
-            Navigation.findNavController(v).navigate(R.id.registroSesion);
+            Navigation.findNavController(v).navigate(R.id.inicioSesion);
         }
     }
 }
