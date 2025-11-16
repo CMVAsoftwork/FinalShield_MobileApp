@@ -4,6 +4,7 @@ public class LoginResponse {
     private String token;
     private String tipoToken;
     private String correo;
+    private boolean biometricoActivo;
 
     public String getToken() {
         return token;
@@ -16,5 +17,7 @@ public class LoginResponse {
     public String getCorreo() {
         return correo;
     }
-
+    public boolean isBiometricoActivo() {
+        return biometricoActivo;
+    }
 }

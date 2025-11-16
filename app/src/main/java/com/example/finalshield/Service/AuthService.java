@@ -11,6 +11,8 @@ import com.example.finalshield.DTO.Usuario.RegistroRequest;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -22,7 +24,6 @@ public class AuthService {
     private static final String PREF_NAME = "finalshield_prefs";
     private static final String TOKEN_KEY = "jwt_token";
     private static final String CORREO_KEY = "correo_usuario";
-
     private final AuthAPI api;
     private final SharedPreferences prefs;
 
@@ -78,34 +79,37 @@ public class AuthService {
         });
     }
 
-    public void habilitarBiometrico(boolean activado, Callback<Void> callback) {
-
+    public void habilitarBiometrico(String correo, boolean activado, Callback<Void> callback) {
         Map<String, Object> body = new HashMap<>();
-        body.put("correo", obtenerCorreo());
+        body.put("correo", correo);
         body.put("huella", activado);
 
-        api.habilitarBiometrico(body).enqueue(new Callback<okhttp3.ResponseBody>() {
+        api.habilitarBiometrico(body).enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<okhttp3.ResponseBody> call, Response<okhttp3.ResponseBody> response) {
-                callback.onResponse(null, Response.success(null));
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    guardarCorreo(correo);
+                    callback.onResponse(null, Response.success(null));
+                } else {
+                callback.onFailure(null, new RuntimeException("Error HTTP al habilitar biometría: " + response.code()));
+                }
             }
 
             @Override
-            public void onFailure(Call<okhttp3.ResponseBody> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
                 callback.onFailure(null, t);
             }
         });
     }
 
-    public void loginBiometrico(Callback<LoginResponse> callback) {
-
-        LoginBioRequest req = new LoginBioRequest(obtenerCorreo());
-
+    public void loginBiometrico(String correo, Callback<LoginResponse> callback) {
+        LoginBioRequest req = new LoginBioRequest(correo);
         api.loginBiometrico(req).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     guardarToken(response.body().getToken());
+                    guardarCorreo(correo);
                 }
                 callback.onResponse(call, response);
             }
@@ -117,7 +121,11 @@ public class AuthService {
         });
     }
 
-    private void guardarToken(String token) {
+    public void isBiometricoActivo(String correo, Callback<Boolean> callback) {
+        api.isBiometricoActivo(correo).enqueue(callback);
+    }
+
+    public void guardarToken(String token) {
         prefs.edit().putString(TOKEN_KEY, token).apply();
     }
 
@@ -125,7 +133,7 @@ public class AuthService {
         return prefs.getString(TOKEN_KEY, null);
     }
 
-    private void guardarCorreo(String correo) {
+    public void guardarCorreo(String correo) {
         prefs.edit().putString(CORREO_KEY, correo).apply();
     }
 
@@ -135,6 +143,5 @@ public class AuthService {
 
     public void cerrarSesion() {
         prefs.edit().remove(TOKEN_KEY).apply();
-        prefs.edit().remove(CORREO_KEY).apply();
     }
 }

@@ -17,15 +17,23 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.finalshield.DTO.Usuario.LoginResponse;
 import com.example.finalshield.R;
+import com.example.finalshield.Service.AuthService;
 
 import java.util.concurrent.Executor;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DatosBiometricos extends Fragment implements View.OnClickListener, View.OnTouchListener {
     ImageView huella;
     private Executor executor;
     private BiometricPrompt biometricPrompt;
     private BiometricPrompt.PromptInfo promptInfo;
+    private AuthService authService;
+    private String correoParaLogin;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -34,6 +42,11 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
+
+        authService = new AuthService(requireContext());
+        if (getArguments() != null) {
+            correoParaLogin = getArguments().getString("correo_biometrico");
+        }
         Button regre;
         Button regis;
         Button inic;
@@ -45,6 +58,7 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
         inic.setOnClickListener(this);
         huella = v.findViewById(R.id.huella);
         huella.setOnTouchListener(this);
+
         executor = ContextCompat.getMainExecutor(getContext());
         biometricPrompt = new BiometricPrompt(this,
                 executor, new BiometricPrompt.AuthenticationCallback() {
@@ -52,7 +66,6 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
             @Override
             public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                 super.onAuthenticationError(errorCode, errString);
-                // Código a ejecutar si hay un error (ej: el usuario cancela, muchos intentos fallidos)
                 Toast.makeText(getContext(),
                         "Error de autenticación: " + errString,
                         Toast.LENGTH_SHORT).show();
@@ -61,29 +74,44 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
             @Override
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
-                // Código a ejecutar si la huella ta bien
                 Toast.makeText(getContext(),
-                        "¡Huella verificada correctamente!",
+                        "¡Huella verificada localmente! Validando en servidor...",
                         Toast.LENGTH_SHORT).show();
 
-                // Navegar a la siguiente pantalla (solo si el Fragment sigue adjunto)
-                if (getView() != null) {
-                    Navigation.findNavController(getView()).navigate(R.id.inicio);
+                if (correoParaLogin != null && authService != null) {
+                    authService.loginBiometrico(correoParaLogin, new Callback<LoginResponse>() {
+                        @Override
+                        public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Toast.makeText(getContext(), "Inicio de sesión biométrico exitoso", Toast.LENGTH_SHORT).show();
+                                if (getView() != null) {
+                                    Navigation.findNavController(getView()).navigate(R.id.inicio);
+                                }
+                            } else {
+                                Toast.makeText(getContext(), "Error en el login biométrico del servidor.", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                        @Override
+                        public void onFailure(Call<LoginResponse> call, Throwable t) {
+                            Toast.makeText(getContext(), "Error de conexión al intentar el login biométrico.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    Toast.makeText(getContext(), "Error: Correo de usuario no disponible.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onAuthenticationFailed() {
                 super.onAuthenticationFailed();
-                // Código a ejecutar si la huella no coincide
                 Toast.makeText(getContext(), "Huella no reconocida. Intente de nuevo.", Toast.LENGTH_SHORT).show();
             }
         });
         promptInfo = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle("Inicio de Sesión Biométrico")
                 .setSubtitle("Toca el sensor de huellas para acceder")
-                .setNegativeButtonText("Usar Contraseña") // Necesario para cancelar
-                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG) // Solo huella/rostro fuerte
+                .setNegativeButtonText("Usar Contraseña")
+                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
                 .build();
     }
 
