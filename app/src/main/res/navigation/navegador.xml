@@ -54,11 +54,6 @@
         <action
             android:id="@+id/action_inicioSesion_to_inicio"
             app:destination="@id/inicio" />
-        <action
-            android:id="@+id/action_inicioSesion_to_verClavePostLogin"
-            app:destination="@id/verClave2"
-            app:popUpTo="@id/naviegador"
-            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/inicio"
@@ -92,9 +87,6 @@
         <action
             android:id="@+id/action_inicio_to_archivosDesifrados"
             app:destination="@id/archivosDesifrados" />
-        <action
-            android:id="@+id/action_inicio_to_verClave2"
-            app:destination="@id/verClave2" />
     </fragment>
     <fragment
         android:id="@+id/continuacionInicio"
@@ -146,11 +138,6 @@
         <action
             android:id="@+id/action_datosBiometricos_to_inicioSesion"
             app:destination="@id/inicioSesion" />
-        <action
-            android:id="@+id/action_datosBiometricos_to_verClavePostLogin"
-            app:destination="@id/verClave2"
-            app:popUpTo="@id/naviegador"
-            app:popUpToInclusive="true" />
     </fragment>
     <fragment
         android:id="@+id/archivosCifrados2"
@@ -289,7 +276,7 @@
     </fragment>
     <fragment
         android:id="@+id/servivioCorreo"
-        android:name="com.example.finalshield.Fragments.Correo.ServivioCorreo"
+        android:name="com.example.finalshield.Fragments.ServivioCorreo"
         android:label="fragment_servivio_correo"
         tools:layout="@layout/fragment_servivio_correo" >
         <action
@@ -447,34 +434,4 @@
             android:id="@+id/action_escanerCifradoGaleria2_to_opcionCifrado2"
             app:destination="@id/opcionCifrado2" />
     </fragment>
-    <fragment
-        android:id="@+id/verClave2"
-        android:name="com.example.finalshield.Fragments.Correo.VerClave"
-        android:label="fragment_ver_clave"
-        tools:layout="@layout/fragment_ver_clave" >
-        <argument
-            android:name="security_token"
-            app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
-        <action
-            android:id="@+id/action_verClave2_to_inicio"
-            app:destination="@id/inicio" />
-    </fragment>
-    <fragment
-        android:id="@+id/deepLinkHandlerFragment"
-        android:name="com.example.finalshield.DeepLinkHandlerFragment"
-        android:label="fragment_deep_link_handler"
-        tools:layout="@layout/fragment_deep_link_handler">
-
-        <argument
-            android:name="security_token"
-            app:argType="string"
-            app:nullable="true" />
-
-        <deepLink
-            android:id="@+id/deepLinkVerClave"
-            app:uri="fileshield://verclave?security_token={security_token}" />
-    </fragment>
-
 </navigation>

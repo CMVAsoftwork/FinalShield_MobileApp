@@ -19,14 +19,12 @@ public class DeepLinkHandlerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
         Uri data = requireActivity().getIntent().getData();
         String token = null;
 
         if (data != null) {
             token = data.getQueryParameter("security_token");
         }
-
         requireActivity().getIntent().setData(null);
 
         NavController nav = NavHostFragment.findNavController(this);

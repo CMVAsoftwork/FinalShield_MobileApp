@@ -26,19 +26,15 @@ public interface CorreoAPI {
             @Part("correo") RequestBody correoRequestJson,
             @Part List<MultipartBody.Part> adjuntos
     );
-
     @GET("api/correos/enviados/{correoUsuario}")
     Call<List<EnvioCorreoDTO>> listarCorreosEnviados(@Path("correoUsuario") String correoUsuario);
-
     @GET("api/correos/recibidos/{correoUsuario}")
     Call<List<RecepcionCorreoDTO>> listarCorreosRecibidos(@Path("correoUsuario") String correoUsuario);
-
     @POST("api/correos/adjuntos/descifrar/{idAdjunto}")
     Call<ResponseBody> descifrarAdjunto(
             @Path("idAdjunto") Integer idAdjunto,
             @Body Map<String, String> claveBase64
     );
-
     @GET("api/enlaces/{token}")
     Call<CorreoDTO> accederClave(
             @Path("token") String token,

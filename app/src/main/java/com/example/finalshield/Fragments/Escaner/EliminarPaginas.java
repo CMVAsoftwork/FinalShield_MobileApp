@@ -1,4 +1,4 @@
-package com.example.finalshield.Fragments;
+package com.example.finalshield.Fragments.Escaner;
 
 import android.os.Bundle;
 

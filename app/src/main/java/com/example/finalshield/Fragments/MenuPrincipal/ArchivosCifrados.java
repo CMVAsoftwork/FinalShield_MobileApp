@@ -1,35 +1,33 @@
-package com.example.finalshield.Fragments;
+package com.example.finalshield.Fragments.MenuPrincipal;
 
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ListView;
 
 import com.example.finalshield.R;
 
-
-public class Inicio extends Fragment implements View.OnClickListener {
+public class ArchivosCifrados extends Fragment implements View.OnClickListener{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_inicio, container, false);
+        return inflater.inflate(R.layout.fragment_archivos_cifrados, container, false);
     }
-
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
         ImageButton perfil,house, archivo,candadclose, carpeta, mail, candadopen;
-        Button selecarpeta, correo;
+        ListView listac;
+        listac = v.findViewById(R.id.listacarp);
         perfil = v.findViewById(R.id.btnperfil);
         house = v.findViewById(R.id.house);
         archivo = v.findViewById(R.id.archivo);
@@ -37,9 +35,6 @@ public class Inicio extends Fragment implements View.OnClickListener {
         carpeta = v.findViewById(R.id.carpeta);
         mail = v.findViewById(R.id.mail);
         candadopen = v.findViewById(R.id.candadopen);
-
-        selecarpeta = v.findViewById(R.id.btnseleccarpeta);
-        correo = v.findViewById(R.id.btnenvcorreo);
         perfil.setOnClickListener(this);
         house.setOnClickListener(this);
         archivo.setOnClickListener(this);
@@ -47,8 +42,7 @@ public class Inicio extends Fragment implements View.OnClickListener {
         carpeta.setOnClickListener(this);
         mail.setOnClickListener(this);
         candadopen.setOnClickListener(this);
-        selecarpeta.setOnClickListener(this);
-        correo.setOnClickListener(this);
+
     }
 
     @Override
@@ -56,19 +50,12 @@ public class Inicio extends Fragment implements View.OnClickListener {
         if(v.getId() == R.id.carpeta){
             Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
         } else if (v.getId() == R.id.house) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+            Navigation.findNavController(v).navigate(R.id.inicio);
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
-            String token = null;
-            Bundle bundle = new Bundle();
-            bundle.putString("security_token", token);
-            Navigation.findNavController(v).navigate(R.id.action_inicio_to_verClave2, bundle);
-        } else if (v.getId() == R.id.btnseleccarpeta) {
-            Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
-        } else if (v.getId() == R.id.btnenvcorreo) {
-            Navigation.findNavController(v).navigate(R.id.servivioCorreo);
-        }else if (v.getId() == R.id.mail) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        } else if (v.getId() == R.id.mail) {
             Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         }else if (v.getId() == R.id.archivo) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados);
@@ -77,4 +64,3 @@ public class Inicio extends Fragment implements View.OnClickListener {
         }
     }
 }
-       

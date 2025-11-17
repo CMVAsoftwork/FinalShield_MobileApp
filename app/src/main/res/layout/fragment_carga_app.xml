@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/fondo1"
-    tools:context=".Fragments.CargaApp"
+    tools:context=".Fragments.InicioSesion.CargaApp"
     android:id="@+id/laybienv">
 
     <ImageView
