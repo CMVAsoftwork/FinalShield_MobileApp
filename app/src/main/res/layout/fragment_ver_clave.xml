@@ -6,32 +6,58 @@
     tools:context=".Fragments.Correo.VerClave"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#C8E4FF">
+    android:background="@color/degradado_negro_azul">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <Button
+            android:id="@+id/regresarEnlace"
+            android:layout_width="69dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="37dp"
+            android:backgroundTint="#10FFFFFF"
+            android:text="←"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="40dp" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="🔐 Ver Contenido del Correo Seguro"
-            android:textSize="22sp"
+            android:textColor="@color/white"
+            android:textSize="20dp"
             android:textStyle="bold"
-            android:layout_marginBottom="20dp"/>
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="32dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Token de Enlace Seguro:"
-            android:textStyle="bold"/>
+            android:textColor="@color/white"
+            android:textSize="16dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginEnd="17dp"/>
 
         <EditText
             android:id="@+id/etTokenSeguro"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Pega el enlace o token aquí"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:gravity="center_vertical"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:textSize="16dp"
+            android:paddingStart="49dp"
+            android:background="@drawable/edittextshape"
             android:minHeight="48dp"
             android:layout_marginBottom="8dp"/>
 
@@ -39,14 +65,24 @@
             android:id="@+id/btnVerContenido"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
             android:text="Ver Contenido"
-            android:layout_marginBottom="24dp"/>
+            android:backgroundTint="#1E90FF"
+            android:textSize="15dp"
+            android:textColor="@color/white"
+            android:textStyle="bold"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Contenido del Correo Descifrado:"
-            android:textStyle="bold"/>
+            android:textColor="@color/white"
+            android:textSize="16dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="25dp"
+            android:layout_marginEnd="17dp"/>
+
 
         <TextView
             android:id="@+id/tvContenidoDescifrado"
@@ -54,23 +90,29 @@
             android:layout_height="wrap_content"
             android:minHeight="100dp"
             android:padding="8dp"
-            android:background="@android:color/darker_gray"
+            android:background="@color/white"
             android:hint="El contenido aparecerá aquí una vez descifrado."
-            android:layout_marginBottom="24dp"/>
+            android:textColorHint="@color/degradado_negro_azul"
+            android:layout_marginBottom="24dp"
+            android:layout_marginTop="10dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Archivos Adjuntos:"
-            android:textStyle="bold"/>
+            android:textColor="@color/white"
+            android:textSize="16dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="17dp"/>
 
         <LinearLayout
             android:id="@+id/layoutAdjuntos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="#009607"
             android:orientation="vertical"
-            android:padding="8dp"
-            android:background="#CCCCCC"/>
+            android:padding="8dp" />
 
         <ProgressBar
             android:id="@+id/pbDescargaAdjuntos"

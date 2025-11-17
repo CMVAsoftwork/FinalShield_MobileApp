@@ -78,6 +78,11 @@ public class VerClave extends Fragment implements View.OnClickListener {
         authService = new AuthService(requireContext());
         descargaAPI = new DescargaService(requireContext()).getAPI();
 
+        Button btnRegresar = view.findViewById(R.id.regresarEnlace);
+        btnRegresar.setOnClickListener(v2 -> {
+            Navigation.findNavController(v2).navigate(R.id.inicio);
+        });
+
         if (getArguments() != null) {
             String token = getArguments().getString("security_token");
 
