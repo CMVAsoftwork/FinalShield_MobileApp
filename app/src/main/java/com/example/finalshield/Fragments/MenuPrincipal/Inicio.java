@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
@@ -59,7 +60,10 @@ public class Inicio extends Fragment implements View.OnClickListener {
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
-            Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
+            String token = null;
+            Bundle bundle = new Bundle();
+            bundle.putString("security_token", token);
+            Navigation.findNavController(v).navigate(R.id.action_inicio_to_verClave2, bundle);
         } else if (v.getId() == R.id.btnseleccarpeta) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.btnenvcorreo) {
