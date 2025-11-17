@@ -85,8 +85,8 @@ public class VerClave extends Fragment implements View.OnClickListener {
                 etTokenSeguro.setText(token);
 
                 if (authService.obtenerCorreo() == null) {
-                    SharedPreferences prefs = requireActivity().getSharedPreferences("DeepLinkPrefs", Context.MODE_PRIVATE);
-                    prefs.edit().putString("PENDING_TOKEN", token).apply();
+                    SharedPreferences prefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
+                    prefs.edit().putString("pending_token", token).apply();
                     Toast.makeText(requireContext(), "Inicia sesión para validar el token.", Toast.LENGTH_LONG).show();
 
                     Navigation.findNavController(view).navigate(R.id.inicioSesion);

@@ -457,11 +457,24 @@
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null" />
-        <deepLink
-            android:id="@+id/deepLinkVerClave"
-            app:uri="https://aydan-nonrepresentational-womanishly.ngrok-free.dev/api/enlaces/{security_token}/validar" />
         <action
             android:id="@+id/action_verClave2_to_inicio"
             app:destination="@id/inicio" />
     </fragment>
+    <fragment
+        android:id="@+id/deepLinkHandlerFragment"
+        android:name="com.example.finalshield.DeepLinkHandlerFragment"
+        android:label="fragment_deep_link_handler"
+        tools:layout="@layout/fragment_deep_link_handler">
+
+        <argument
+            android:name="security_token"
+            app:argType="string"
+            app:nullable="true" />
+
+        <deepLink
+            android:id="@+id/deepLinkVerClave"
+            app:uri="fileshield://verclave?security_token={security_token}" />
+    </fragment>
+
 </navigation>

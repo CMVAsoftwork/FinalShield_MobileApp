@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -131,20 +132,21 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
     }
 
     private void handlePostLoginNavigation(View view, int defaultDestination) {
-        SharedPreferences prefs = requireActivity().getSharedPreferences("DeepLinkPrefs", Context.MODE_PRIVATE);
-        String pendingToken = prefs.getString("PENDING_TOKEN", null);
+        SharedPreferences prefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
+        String pendingToken = prefs.getString("pending_token", null);
 
         if (pendingToken != null) {
-            prefs.edit().remove("PENDING_TOKEN").apply();
 
-            Bundle bundle = new Bundle();
-            bundle.putString("security_token", pendingToken);
+            prefs.edit().remove("pending_token").apply();
 
-            Navigation.findNavController(view).navigate(R.id.action_inicioSesion_to_verClavePostLogin, bundle);
+            Bundle args = new Bundle();
+            args.putString("security_token", pendingToken);
 
-        } else {
-            Navigation.findNavController(view).navigate(defaultDestination);
+            NavHostFragment.findNavController(this).navigate(R.id.verClave2, args);
+            return;
         }
+        Navigation.findNavController(view).navigate(defaultDestination);
+
     }
 
     private String extraerTokenDeUrl(String tokenOUrl) {

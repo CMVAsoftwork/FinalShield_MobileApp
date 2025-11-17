@@ -182,8 +182,11 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
     }
 
     private void handleSuccessfulBiometricAuth() {
-        SharedPreferences prefs = requireActivity().getSharedPreferences("DeepLinkPrefs", Context.MODE_PRIVATE);
-        String pendingToken = prefs.getString("PENDING_TOKEN", null);
+        SharedPreferences prefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
+        String pendingToken = prefs.getString("pending_token", null);
+
+        View v = getView();
+        if (v == null) return;
 
         if (pendingToken != null) {
             prefs.edit().remove("PENDING_TOKEN").apply();
@@ -191,10 +194,10 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
             Bundle bundle = new Bundle();
             bundle.putString("security_token", pendingToken);
 
-            Navigation.findNavController(requireView()).navigate(R.id.action_datosBiometricos_to_verClavePostLogin, bundle);
+            Navigation.findNavController(v).navigate(R.id.action_datosBiometricos_to_verClavePostLogin, bundle);
 
         } else {
-            Navigation.findNavController(requireView()).navigate(R.id.action_datosBiometricos_to_inicio);
+            Navigation.findNavController(v).navigate(R.id.action_datosBiometricos_to_inicio);
         }
     }
 }
