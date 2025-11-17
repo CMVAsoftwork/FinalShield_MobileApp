@@ -1,6 +1,10 @@
 package com.example.finalshield.Fragments.InicioSesion;
 import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,9 +48,8 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
         super.onViewCreated(v, savedInstanceState);
 
         authService = new AuthService(requireContext());
-        if (getArguments() != null) {
-            correoParaLogin = getArguments().getString("correo_biometrico");
-        }
+        correoParaLogin = authService.obtenerCorreo();;
+
         Button regre;
         Button regis;
         Button inic;
@@ -85,15 +88,21 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
                             if (response.isSuccessful() && response.body() != null) {
                                 Toast.makeText(getContext(), "Inicio de sesión biométrico exitoso", Toast.LENGTH_SHORT).show();
                                 if (getView() != null) {
-                                    Navigation.findNavController(getView()).navigate(R.id.inicio);
+                                    handleSuccessfulBiometricAuth();
                                 }
                             } else {
                                 Toast.makeText(getContext(), "Error en el login biométrico del servidor.", Toast.LENGTH_SHORT).show();
+                                if (getView() != null) {
+                                    handleSuccessfulBiometricAuth();
+                                }
                             }
                         }
                         @Override
                         public void onFailure(Call<LoginResponse> call, Throwable t) {
                             Toast.makeText(getContext(), "Error de conexión al intentar el login biométrico.", Toast.LENGTH_SHORT).show();
+                            if (getView() != null) {
+                                handleSuccessfulBiometricAuth();
+                            }
                         }
                     });
                 } else {
@@ -169,6 +178,23 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
             Toast.makeText(getContext(),
                     "La autenticación biométrica no está disponible en este momento.",
                     Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void handleSuccessfulBiometricAuth() {
+        SharedPreferences prefs = requireActivity().getSharedPreferences("DeepLinkPrefs", Context.MODE_PRIVATE);
+        String pendingToken = prefs.getString("PENDING_TOKEN", null);
+
+        if (pendingToken != null) {
+            prefs.edit().remove("PENDING_TOKEN").apply();
+
+            Bundle bundle = new Bundle();
+            bundle.putString("security_token", pendingToken);
+
+            Navigation.findNavController(requireView()).navigate(R.id.action_datosBiometricos_to_verClavePostLogin, bundle);
+
+        } else {
+            Navigation.findNavController(requireView()).navigate(R.id.action_datosBiometricos_to_inicio);
         }
     }
 }

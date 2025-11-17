@@ -1,5 +1,9 @@
 package com.example.finalshield.Fragments.InicioSesion;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -60,7 +64,7 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
                         Bundle bundle = new Bundle();
                         bundle.putString("correo_biometrico", correoGuardado);
 
-                        Navigation.findNavController(v).navigate(R.id.datosBiometricos, bundle);
+                        handlePostLoginNavigation(v, R.id.datosBiometricos);
                     }
                 }
 
@@ -99,15 +103,15 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
                                 if (resp.isSuccessful() && Boolean.TRUE.equals(resp.body())) {
                                     Bundle bundle = new Bundle();
                                     bundle.putString("correo_biometrico", correo);
-                                    Navigation.findNavController(v).navigate(R.id.datosBiometricos, bundle);
+                                    handlePostLoginNavigation(v, R.id.datosBiometricos);
                                 } else {
-                                    Navigation.findNavController(v).navigate(R.id.inicio);
+                                    handlePostLoginNavigation(v, R.id.inicio);
                                 }
                             }
 
                             @Override
                             public void onFailure(Call<Boolean> call, Throwable t) {
-                                Navigation.findNavController(v).navigate(R.id.inicio);
+                                handlePostLoginNavigation(v, R.id.inicio);
                             }
                         });
                     } else {
@@ -124,5 +128,45 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
         } else if (id == R.id.btnregis) {
             Navigation.findNavController(v).navigate(R.id.registroSesion);
         }
+    }
+
+    private void handlePostLoginNavigation(View view, int defaultDestination) {
+        SharedPreferences prefs = requireActivity().getSharedPreferences("DeepLinkPrefs", Context.MODE_PRIVATE);
+        String pendingToken = prefs.getString("PENDING_TOKEN", null);
+
+        if (pendingToken != null) {
+            prefs.edit().remove("PENDING_TOKEN").apply();
+
+            Bundle bundle = new Bundle();
+            bundle.putString("security_token", pendingToken);
+
+            Navigation.findNavController(view).navigate(R.id.action_inicioSesion_to_verClavePostLogin, bundle);
+
+        } else {
+            Navigation.findNavController(view).navigate(defaultDestination);
+        }
+    }
+
+    private String extraerTokenDeUrl(String tokenOUrl) {
+        if (tokenOUrl.contains("/api/enlaces/")) {
+            String[] segments = tokenOUrl.split("/");
+            for (int i = 0; i < segments.length; i++) {
+                if ("validar".equals(segments[i]) && i > 0) {
+                    return segments[i - 1];
+                }
+            }
+        }
+
+        if (tokenOUrl.startsWith("fileshield://")) {
+            try {
+                Uri uri = Uri.parse(tokenOUrl);
+                String securityToken = uri.getQueryParameter("security_token");
+                if (securityToken != null) {
+                    return securityToken;
+                }
+            } catch (Exception e) {
+            }
+        }
+        return tokenOUrl;
     }
 }

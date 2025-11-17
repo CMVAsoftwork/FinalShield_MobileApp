@@ -12,7 +12,9 @@ import com.example.finalshield.DTO.Usuario.RegistroRequest;
 import java.util.HashMap;
 import java.util.Map;
 
+import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -28,6 +30,12 @@ public class AuthService {
     private final SharedPreferences prefs;
 
     public AuthService(Context context) {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(logging)
+                .build();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
@@ -126,7 +134,7 @@ public class AuthService {
     }
 
     public void guardarToken(String token) {
-        prefs.edit().putString(TOKEN_KEY, token).apply();
+        prefs.edit().putString(TOKEN_KEY, token).commit();
     }
 
     public String obtenerToken() {
@@ -134,7 +142,7 @@ public class AuthService {
     }
 
     public void guardarCorreo(String correo) {
-        prefs.edit().putString(CORREO_KEY, correo).apply();
+        prefs.edit().putString(CORREO_KEY, correo).commit();
     }
 
     public String obtenerCorreo() {
@@ -142,6 +150,6 @@ public class AuthService {
     }
 
     public void cerrarSesion() {
-        prefs.edit().remove(TOKEN_KEY).apply();
+        prefs.edit().remove(TOKEN_KEY).commit();
     }
 }
