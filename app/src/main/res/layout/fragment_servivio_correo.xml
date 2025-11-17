@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/degradado_azul_medio"
-    tools:context=".Fragments.ServivioCorreo">
+    tools:context=".Fragments.MenuPrincipal.ServivioCorreo">
     <ImageButton
         android:id="@+id/btnperfil"
         android:layout_width="30dp"

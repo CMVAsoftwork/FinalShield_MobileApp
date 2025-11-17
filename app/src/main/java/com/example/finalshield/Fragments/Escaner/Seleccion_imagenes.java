@@ -1,4 +1,4 @@
-package com.example.finalshield.Fragments;
+package com.example.finalshield.Fragments.Escaner;
 
 import android.Manifest;
 import android.content.ContentUris;
@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.finalshield.Adaptadores.ImageAdapter;
@@ -30,23 +31,39 @@ import com.example.finalshield.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EscanerCifradoGaleria extends Fragment implements View.OnClickListener {
+public class Seleccion_imagenes extends Fragment implements View.OnClickListener {
+
+    ImageButton recortar, addele,camara, edicion, eliminar;
     private RecyclerView recyclerViee;
     private ImageAdapter adapter;
-    private final List<Uri> listaImagenes2 = new ArrayList<>();
+    private final List<Uri> listaImagenes = new ArrayList<>();
+
     private static final int REQUEST_CODE = 100;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_escaner_cifrado_galeria, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_seleccion_imagenes, container, false);
     }
+
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-        Button regre = v.findViewById(R.id.regresar1);
-        regre.setOnClickListener(this);
-        recyclerViee = v.findViewById(R.id.recycler2);
+        recyclerViee = v.findViewById(R.id.recycler);
         recyclerViee.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        camara = v.findViewById(R.id.scancam);
+        camara.setOnClickListener(this);
+        Button regre = v.findViewById(R.id.regresar1);
+        camara = v.findViewById(R.id.scancam);
+        addele = v.findViewById(R.id.addelements);
+        recortar = v.findViewById(R.id.recortar);
+        edicion = v.findViewById(R.id.edicion);
+        eliminar = v.findViewById(R.id.eliminar);
+        camara.setOnClickListener(this);
+        addele.setOnClickListener(this);
+        recortar.setOnClickListener(this);
+        edicion.setOnClickListener(this);
+        eliminar.setOnClickListener(this);
+        regre.setOnClickListener(this);
         pedirPermiso();
     }
 
@@ -69,7 +86,7 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
     }
 
     private void cargarImagenes() {
-        listaImagenes2.clear();
+        listaImagenes.clear();
 
         Uri collection = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                 ? MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
@@ -87,12 +104,12 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
             while (cursor.moveToNext()) {
                 long id = cursor.getLong(idColumn);
                 Uri uri = ContentUris.withAppendedId(collection, id);
-                listaImagenes2.add(uri);
+                listaImagenes.add(uri);
             }
             cursor.close();
         }
 
-        adapter = new ImageAdapter(getContext(), listaImagenes2, new ImageAdapter.OnImageClickListener() {
+        adapter = new ImageAdapter(getContext(), listaImagenes, new ImageAdapter.OnImageClickListener() {
             @Override
             public void onImageClick(Uri uri) {
                 Intent intent = new Intent(requireContext(), VistaImagenActivity.class);
@@ -106,7 +123,17 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.regresar1){
+        if(v.getId() == R.id.scancam){
+            Navigation.findNavController(v).navigate(R.id.escanerCifradoMixto);
+        } else if (v.getId() == R.id.addelements) {
+            Navigation.findNavController(v).navigate(R.id.escanearMasPaginas);
+        } else if (v.getId() == R.id.recortar) {
+            Navigation.findNavController(v).navigate(R.id.cortarRotar);
+        } else if (v.getId() == R.id.edicion) {
+            Navigation.findNavController(v).navigate(R.id.visualizacionYReordenamiento);
+        } else if (v.getId() == R.id.eliminar) {
+            Navigation.findNavController(v).navigate(R.id.eliminarPaginas);
+        }else if (v.getId() == R.id.regresar1) {
             Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
         }
     }

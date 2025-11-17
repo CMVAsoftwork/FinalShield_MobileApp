@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/degradado_azul_medio"
-    tools:context=".Fragments.ArchivosCifrados">
+    tools:context=".Fragments.MenuPrincipal.ArchivosCifrados">
 
     <ImageButton
         android:id="@+id/btnperfil"

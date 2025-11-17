@@ -1,4 +1,4 @@
-package com.example.finalshield.Fragments;
+package com.example.finalshield.Fragments.Escaner;
 
 import android.os.Bundle;
 
@@ -15,12 +15,12 @@ import android.widget.ImageButton;
 
 import com.example.finalshield.R;
 
-public class VisualizacionYReordenamiento extends Fragment implements View.OnClickListener{
-    ImageButton galeria, addele,camara, recortar, eliminar;
+public class EscanearMasPaginas extends Fragment implements View.OnClickListener {
+    ImageButton galeria, recortar,camara, edicion, eliminar;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_visualizacion_y_reordenamiento, container, false);
+        return inflater.inflate(R.layout.fragment_escanear_mas_paginas, container, false);
     }
 
     @Override
@@ -28,30 +28,31 @@ public class VisualizacionYReordenamiento extends Fragment implements View.OnCli
         super.onViewCreated(v, savedInstanceState);
         Button regre = v.findViewById(R.id.regresar1);
         camara = v.findViewById(R.id.scancam);
-        addele = v.findViewById(R.id.addelements);
-        galeria = v.findViewById(R.id.selecgaleria);
         recortar = v.findViewById(R.id.recortar);
+        galeria = v.findViewById(R.id.selecgaleria);
+        edicion = v.findViewById(R.id.edicion);
         eliminar = v.findViewById(R.id.eliminar);
         camara.setOnClickListener(this);
-        addele.setOnClickListener(this);
-        galeria.setOnClickListener(this);
         recortar.setOnClickListener(this);
+        galeria.setOnClickListener(this);
+        edicion.setOnClickListener(this);
         eliminar.setOnClickListener(this);
         regre.setOnClickListener(this);
     }
+
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.scancam){
             Navigation.findNavController(v).navigate(R.id.escanerCifradoMixto);
-        } else if (v.getId() == R.id.addelements) {
-            Navigation.findNavController(v).navigate(R.id.escanearMasPaginas);
-        } else if (v.getId() == R.id.selecgaleria) {
-            Navigation.findNavController(v).navigate(R.id.seleccion_imagenes);
         } else if (v.getId() == R.id.recortar) {
             Navigation.findNavController(v).navigate(R.id.cortarRotar);
+        } else if (v.getId() == R.id.selecgaleria) {
+            Navigation.findNavController(v).navigate(R.id.seleccion_imagenes);
+        } else if (v.getId() == R.id.edicion) {
+            Navigation.findNavController(v).navigate(R.id.visualizacionYReordenamiento);
         } else if (v.getId() == R.id.eliminar) {
             Navigation.findNavController(v).navigate(R.id.eliminarPaginas);
-        } else if (v.getId() == R.id.regresar1) {
+        }else if (v.getId() == R.id.regresar1) {
             Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
         }
     }

@@ -1,4 +1,4 @@
-package com.example.finalshield.Fragments;
+package com.example.finalshield.Fragments.MenuPrincipal;
 
 import android.os.Bundle;
 
@@ -10,24 +10,22 @@ import androidx.navigation.Navigation;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ListView;
 
 import com.example.finalshield.R;
 
-public class ArchivosCifrados extends Fragment implements View.OnClickListener{
-
+public class ArchivosCifrados2 extends Fragment implements View.OnClickListener{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_archivos_cifrados, container, false);
+        return inflater.inflate(R.layout.fragment_archivos_cifrados2, container, false);
     }
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
         ImageButton perfil,house, archivo,candadclose, carpeta, mail, candadopen;
-        ListView listac;
-        listac = v.findViewById(R.id.listacarp);
+        Button selecarpeta, correo;
         perfil = v.findViewById(R.id.btnperfil);
         house = v.findViewById(R.id.house);
         archivo = v.findViewById(R.id.archivo);
@@ -42,9 +40,7 @@ public class ArchivosCifrados extends Fragment implements View.OnClickListener{
         carpeta.setOnClickListener(this);
         mail.setOnClickListener(this);
         candadopen.setOnClickListener(this);
-
     }
-
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.carpeta){
