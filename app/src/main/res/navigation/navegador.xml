@@ -6,7 +6,7 @@
     app:startDestination="@id/cargaApp">
     <fragment
         android:id="@+id/cargaApp"
-        android:name="com.example.finalshield.Fragments.CargaApp"
+        android:name="com.example.finalshield.Fragments.InicioSesion.CargaApp"
         android:label="fragment_carga_app"
         tools:layout="@layout/fragment_carga_app" >
         <action
@@ -15,7 +15,7 @@
     </fragment>
     <fragment
         android:id="@+id/bienvenida"
-        android:name="com.example.finalshield.Fragments.Bienvenida"
+        android:name="com.example.finalshield.Fragments.InicioSesion.Bienvenida"
         android:label="fragment_bienvenida"
         tools:layout="@layout/fragment_bienvenida" >
         <action
@@ -57,7 +57,7 @@
     </fragment>
     <fragment
         android:id="@+id/inicio"
-        android:name="com.example.finalshield.Fragments.Inicio"
+        android:name="com.example.finalshield.Fragments.MenuPrincipal.Inicio"
         android:label="fragment_inicio"
         tools:layout="@layout/fragment_inicio" >
         <action
@@ -87,10 +87,13 @@
         <action
             android:id="@+id/action_inicio_to_archivosDesifrados"
             app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_inicio_to_verClave2"
+            app:destination="@id/verClave" />
     </fragment>
     <fragment
         android:id="@+id/continuacionInicio"
-        android:name="com.example.finalshield.Fragments.ContinuacionInicio"
+        android:name="com.example.finalshield.Fragments.MenuPrincipal.ContinuacionInicio"
         android:label="fragment_continuacion_inicio"
         tools:layout="@layout/fragment_continuacion_inicio" >
         <action
@@ -108,7 +111,7 @@
     </fragment>
     <fragment
         android:id="@+id/archivosCifrados"
-        android:name="com.example.finalshield.Fragments.ArchivosCifrados"
+        android:name="com.example.finalshield.Fragments.MenuPrincipal.ArchivosCifrados"
         android:label="fragment_archivos_cifrados"
         tools:layout="@layout/fragment_archivos_cifrados" >
         <action
@@ -138,10 +141,13 @@
         <action
             android:id="@+id/action_datosBiometricos_to_inicioSesion"
             app:destination="@id/inicioSesion" />
+        <action
+            android:id="@+id/action_datosBiometricos_to_verClavePostLogin"
+            app:destination="@id/verClave" />
     </fragment>
     <fragment
         android:id="@+id/archivosCifrados2"
-        android:name="com.example.finalshield.Fragments.ArchivosCifrados2"
+        android:name="com.example.finalshield.Fragments.MenuPrincipal.ArchivosCifrados2"
         android:label="fragment_archivos_cifrados2"
         tools:layout="@layout/fragment_archivos_cifrados2" >
         <action
@@ -165,7 +171,7 @@
     </fragment>
     <fragment
         android:id="@+id/cifradoEscaneo2"
-        android:name="com.example.finalshield.Fragments.CifradoEscaneo2"
+        android:name="com.example.finalshield.Fragments.MenuPrincipal.CifradoEscaneo2"
         android:label="fragment_cifrado_escaneo2"
         tools:layout="@layout/fragment_cifrado_escaneo2" >
         <action
@@ -192,7 +198,7 @@
     </fragment>
     <fragment
         android:id="@+id/seleccion_imagenes"
-        android:name="com.example.finalshield.Fragments.Seleccion_imagenes"
+        android:name="com.example.finalshield.Fragments.Escaner.Seleccion_imagenes"
         android:label="fragment_seleccion_imagenes"
         tools:layout="@layout/fragment_seleccion_imagenes" >
         <action
@@ -213,7 +219,7 @@
     </fragment>
     <fragment
         android:id="@+id/cortarRotar"
-        android:name="com.example.finalshield.Fragments.CortarRotar"
+        android:name="com.example.finalshield.Fragments.Escaner.CortarRotar"
         android:label="fragment_cortar_rotar"
         tools:layout="@layout/fragment_cortar_rotar" >
         <action
@@ -234,7 +240,7 @@
     </fragment>
     <fragment
         android:id="@+id/eliminarPaginas"
-        android:name="com.example.finalshield.Fragments.EliminarPaginas"
+        android:name="com.example.finalshield.Fragments.Escaner.EliminarPaginas"
         android:label="fragment_eliminar_paginas"
         tools:layout="@layout/fragment_eliminar_paginas" >
         <action
@@ -255,7 +261,7 @@
     </fragment>
     <fragment
         android:id="@+id/escanearMasPaginas"
-        android:name="com.example.finalshield.Fragments.EscanearMasPaginas"
+        android:name="com.example.finalshield.Fragments.Escaner.EscanearMasPaginas"
         android:label="fragment_escanear_mas_paginas"
         tools:layout="@layout/fragment_escanear_mas_paginas" >
         <action
@@ -297,7 +303,7 @@
     </fragment>
     <fragment
         android:id="@+id/visualizacionYReordenamiento"
-        android:name="com.example.finalshield.Fragments.VisualizacionYReordenamiento"
+        android:name="com.example.finalshield.Fragments.Escaner.VisualizacionYReordenamiento"
         android:label="fragment_visualizacion_y_reordenamiento"
         tools:layout="@layout/fragment_visualizacion_y_reordenamiento" >
         <action
@@ -318,7 +324,7 @@
     </fragment>
     <fragment
         android:id="@+id/opcionCifrado2"
-        android:name="com.example.finalshield.Fragments.OpcionCifrado"
+        android:name="com.example.finalshield.Fragments.MenuPrincipal.OpcionCifrado"
         android:label="fragment_opcion_cifrado"
         tools:layout="@layout/fragment_opcion_cifrado" >
         <action
@@ -369,7 +375,7 @@
     </fragment>
     <fragment
         android:id="@+id/archivosDesifrados"
-        android:name="com.example.finalshield.Fragments.ArchivosDesifrados"
+        android:name="com.example.finalshield.Fragments.MenuPrincipal.ArchivosDesifrados"
         android:label="fragment_archivos_desifrados"
         tools:layout="@layout/fragment_archivos_desifrados" >
         <action
@@ -393,7 +399,7 @@
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoMixto"
-        android:name="com.example.finalshield.Fragments.EscanerCifradoMixto"
+        android:name="com.example.finalshield.Fragments.Escaner.EscanerCifradoMixto"
         android:label="fragment_escaner_cifrado_camara"
         tools:layout="@layout/fragment_escaner_cifrado_camara" >
         <action
@@ -420,7 +426,7 @@
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoCamara3"
-        android:name="com.example.finalshield.Fragments.EscanerCifradoCamara"
+        android:name="com.example.finalshield.Fragments.Escaner.EscanerCifradoCamara"
         android:label="EscanerCifradoCamara" >
         <action
             android:id="@+id/action_escanerCifradoCamara3_to_opcionCifrado2"
@@ -428,10 +434,19 @@
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoGaleria2"
-        android:name="com.example.finalshield.Fragments.EscanerCifradoGaleria"
+        android:name="com.example.finalshield.Fragments.Escaner.EscanerCifradoGaleria"
         android:label="EscanerCifradoGaleria" >
         <action
             android:id="@+id/action_escanerCifradoGaleria2_to_opcionCifrado2"
             app:destination="@id/opcionCifrado2" />
+    </fragment>
+    <fragment
+        android:id="@+id/verClave"
+        android:name="com.example.finalshield.Fragments.Correo.VerClave"
+        android:label="fragment_ver_clave"
+        tools:layout="@layout/fragment_ver_clave" >
+        <action
+            android:id="@+id/action_verClave_to_datosBiometricos"
+            app:destination="@id/datosBiometricos" />
     </fragment>
 </navigation>

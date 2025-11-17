@@ -46,7 +46,7 @@ public class DeepLinkHandlerFragment extends Fragment {
         if (!logged) {
             nav.navigate(R.id.inicioSesion, args);
         } else {
-            nav.navigate(R.id.verClave2, args);
+            nav.navigate(R.id.verClave, args);
         }
     }
 

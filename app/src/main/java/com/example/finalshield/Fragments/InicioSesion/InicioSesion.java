@@ -142,7 +142,7 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
             Bundle args = new Bundle();
             args.putString("security_token", pendingToken);
 
-            NavHostFragment.findNavController(this).navigate(R.id.verClave2, args);
+            NavHostFragment.findNavController(this).navigate(R.id.verClave, args);
             return;
         }
         Navigation.findNavController(view).navigate(defaultDestination);
