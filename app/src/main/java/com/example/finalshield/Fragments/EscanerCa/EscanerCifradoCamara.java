@@ -1,4 +1,4 @@
-package com.example.finalshield.Fragments.Escaner;
+package com.example.finalshield.Fragments.EscanerCa;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.finalshield.R;
@@ -28,6 +29,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class EscanerCifradoCamara extends Fragment implements View.OnClickListener {
+    ImageButton addele1,recortar1, edicion1, eliminar1;
     // esta es la ventana donde se verá la cámara (nuestro recuadro negro).
     private PreviewView vistaPrevia;
     // esto es lo que nos dará acceso real a la cámara, cuando Android quiera.
@@ -42,7 +44,15 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
         vistaPrevia = v.findViewById(R.id.vistaprevia);
-        Button regre = v.findViewById(R.id.regresar1);
+        Button regre = v.findViewById(R.id.regresar4);
+        addele1 = v.findViewById(R.id.addelements1);
+        recortar1 = v.findViewById(R.id.recortar1);
+        edicion1 = v.findViewById(R.id.edicion1);
+        eliminar1 = v.findViewById(R.id.eliminar1);
+        addele1.setOnClickListener(this);
+        recortar1.setOnClickListener(this);
+        edicion1.setOnClickListener(this);
+        eliminar1.setOnClickListener(this);
         regre.setOnClickListener(this);
         // checar si el usuario ya nos dio permiso
         if (allPermissionsGranted()) {
@@ -55,8 +65,16 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
     }
     @Override
     public void onClick(View v) {
-        if(v.getId() == R.id.regresar1){
-            Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
+        if(v.getId() == R.id.regresar4){
+            Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
+        } else if (v.getId() == R.id.addelements1) {
+            Navigation.findNavController(v).navigate(R.id.escanerCaEscanearMasPaginas);
+        } else if (v.getId() == R.id.recortar1) {
+            Navigation.findNavController(v).navigate(R.id.escanerCaCortarRotar);
+        } else if (v.getId() == R.id.edicion1) {
+            Navigation.findNavController(v).navigate(R.id.escanerCaVisualizacionYReordenamiento);
+        } else if (v.getId() == R.id.eliminar1) {
+            Navigation.findNavController(v).navigate(R.id.escanerCaEliminarPaginas);
         }
     }
     // 1. verificar el permiso

@@ -88,8 +88,8 @@
             android:id="@+id/action_inicio_to_archivosDesifrados"
             app:destination="@id/archivosDesifrados" />
         <action
-            android:id="@+id/action_inicio_to_verClave2"
-            app:destination="@id/verClave" />
+            android:id="@+id/action_inicio_to_archivosDesifrados2"
+            app:destination="@id/archivosDesifrados" />
     </fragment>
     <fragment
         android:id="@+id/continuacionInicio"
@@ -107,6 +107,9 @@
             app:destination="@id/cifradoEscaneo2" />
         <action
             android:id="@+id/action_continuacionInicio_to_archivosDesifrados"
+            app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_continuacionInicio_to_archivosDesifrados2"
             app:destination="@id/archivosDesifrados" />
     </fragment>
     <fragment
@@ -426,19 +429,46 @@
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoCamara3"
-        android:name="com.example.finalshield.Fragments.Escaner.EscanerCifradoCamara"
+        android:name="com.example.finalshield.Fragments.EscanerCa.EscanerCifradoCamara"
         android:label="EscanerCifradoCamara" >
         <action
             android:id="@+id/action_escanerCifradoCamara3_to_opcionCifrado2"
             app:destination="@id/opcionCifrado2" />
+        <action
+            android:id="@+id/action_escanerCifradoCamara3_to_escanerCaVisualizacionYReordenamiento"
+            app:destination="@id/escanerCaVisualizacionYReordenamiento" />
+        <action
+            android:id="@+id/action_escanerCifradoCamara3_to_escanerCaEliminarPaginas"
+            app:destination="@id/escanerCaEliminarPaginas" />
+        <action
+            android:id="@+id/action_escanerCifradoCamara3_to_escanerCaCortarRotar"
+            app:destination="@id/escanerCaCortarRotar" />
+        <action
+            android:id="@+id/action_escanerCifradoCamara3_to_escanerCaEscanearMasPaginas"
+            app:destination="@id/escanerCaEscanearMasPaginas" />
+        <action
+            android:id="@+id/action_escanerCifradoCamara3_to_escanerCaVisualizacionYReordenamiento2"
+            app:destination="@id/escanerCaVisualizacionYReordenamiento" />
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoGaleria2"
-        android:name="com.example.finalshield.Fragments.Escaner.EscanerCifradoGaleria"
+        android:name="com.example.finalshield.Fragments.EscanerGa.EscanerCifradoGaleria"
         android:label="EscanerCifradoGaleria" >
         <action
             android:id="@+id/action_escanerCifradoGaleria2_to_opcionCifrado2"
             app:destination="@id/opcionCifrado2" />
+        <action
+            android:id="@+id/action_escanerCifradoGaleria2_to_escanerGaEliminarPaginas"
+            app:destination="@id/escanerGaEliminarPaginas" />
+        <action
+            android:id="@+id/action_escanerCifradoGaleria2_to_escanerGaCortarRotar"
+            app:destination="@id/escanerGaCortarRotar" />
+        <action
+            android:id="@+id/action_escanerCifradoGaleria2_to_escanerGaEscanearMasPaginas"
+            app:destination="@id/escanerGaEscanearMasPaginas" />
+        <action
+            android:id="@+id/action_escanerCifradoGaleria2_to_escanerGaVisualizacionYReordenamiento"
+            app:destination="@id/escanerGaVisualizacionYReordenamiento" />
     </fragment>
     <fragment
         android:id="@+id/verClave"
@@ -448,5 +478,154 @@
         <action
             android:id="@+id/action_verClave_to_datosBiometricos"
             app:destination="@id/datosBiometricos" />
+    </fragment>
+    <fragment
+        android:id="@+id/escanerCaCortarRotar"
+        android:name="com.example.finalshield.Fragments.EscanerCa.EscanerCaCortarRotar"
+        android:label="EscanerCaCortarRotar" >
+        <action
+            android:id="@+id/action_escanerCaCortarRotar_to_escanerCifradoCamara3"
+            app:destination="@id/escanerCifradoCamara3" />
+        <action
+            android:id="@+id/action_escanerCaCortarRotar_to_escanerCaEliminarPaginas"
+            app:destination="@id/escanerCaEliminarPaginas" />
+        <action
+            android:id="@+id/action_escanerCaCortarRotar_to_escanerCaEscanearMasPaginas"
+            app:destination="@id/escanerCaEscanearMasPaginas" />
+        <action
+            android:id="@+id/action_escanerCaCortarRotar_to_escanerCaVisualizacionYReordenamiento"
+            app:destination="@id/escanerCaVisualizacionYReordenamiento" />
+    </fragment>
+    <fragment
+        android:id="@+id/escanerCaEliminarPaginas"
+        android:name="com.example.finalshield.Fragments.EscanerCa.EscanerCaEliminarPaginas"
+        android:label="EscanerCaEliminarPaginas" >
+        <action
+            android:id="@+id/action_escanerCaEliminarPaginas_to_escanerCifradoCamara3"
+            app:destination="@id/escanerCifradoCamara3" />
+        <action
+            android:id="@+id/action_escanerCaEliminarPaginas_to_escanerCaVisualizacionYReordenamiento"
+            app:destination="@id/escanerCaVisualizacionYReordenamiento" />
+        <action
+            android:id="@+id/action_escanerCaEliminarPaginas_to_escanerCaEscanearMasPaginas"
+            app:destination="@id/escanerCaEscanearMasPaginas" />
+        <action
+            android:id="@+id/action_escanerCaEliminarPaginas_to_escanerCaCortarRotar"
+            app:destination="@id/escanerCaCortarRotar" />
+    </fragment>
+    <fragment
+        android:id="@+id/escanerCaEscanearMasPaginas"
+        android:name="com.example.finalshield.Fragments.EscanerCa.EscanerCaEscanearMasPaginas"
+        android:label="EscanerCaEscanearMasPaginas" >
+        <action
+            android:id="@+id/action_escanerCaEscanearMasPaginas_to_escanerCifradoCamara3"
+            app:destination="@id/escanerCifradoCamara3" />
+        <action
+            android:id="@+id/action_escanerCaEscanearMasPaginas_to_escanerCaVisualizacionYReordenamiento"
+            app:destination="@id/escanerCaVisualizacionYReordenamiento" />
+        <action
+            android:id="@+id/action_escanerCaEscanearMasPaginas_to_escanerCaCortarRotar"
+            app:destination="@id/escanerCaCortarRotar" />
+        <action
+            android:id="@+id/action_escanerCaEscanearMasPaginas_to_escanerCaEliminarPaginas"
+            app:destination="@id/escanerCaEliminarPaginas" />
+        <action
+            android:id="@+id/action_escanerCaEscanearMasPaginas_to_escanerCifradoCamara32"
+            app:destination="@id/escanerCifradoCamara3" />
+        <action
+            android:id="@+id/action_escanerCaEscanearMasPaginas_to_escanerCaVisualizacionYReordenamiento2"
+            app:destination="@id/escanerCaVisualizacionYReordenamiento" />
+    </fragment>
+    <fragment
+        android:id="@+id/escanerCaVisualizacionYReordenamiento"
+        android:name="com.example.finalshield.Fragments.EscanerCa.EscanerCaVisualizacionYReordenamiento"
+        android:label="EscanerCaVisualizacionYReordenamiento" >
+        <action
+            android:id="@+id/action_escanerCaVisualizacionYReordenamiento_to_escanerCifradoCamara3"
+            app:destination="@id/escanerCifradoCamara3" />
+        <action
+            android:id="@+id/action_escanerCaVisualizacionYReordenamiento_to_escanerCifradoCamara32"
+            app:destination="@id/escanerCifradoCamara3" />
+        <action
+            android:id="@+id/action_escanerCaVisualizacionYReordenamiento_to_escanerCaEliminarPaginas"
+            app:destination="@id/escanerCaEliminarPaginas" />
+        <action
+            android:id="@+id/action_escanerCaVisualizacionYReordenamiento_to_escanerCaCortarRotar"
+            app:destination="@id/escanerCaCortarRotar" />
+        <action
+            android:id="@+id/action_escanerCaVisualizacionYReordenamiento_to_escanerCaEscanearMasPaginas"
+            app:destination="@id/escanerCaEscanearMasPaginas" />
+    </fragment>
+    <fragment
+        android:id="@+id/escanerGaCortarRotar"
+        android:name="com.example.finalshield.Fragments.EscanerGa.EscanerGaCortarRotar"
+        android:label="fragment_escaner_ga_cortar_rotar"
+        tools:layout="@layout/fragment_escaner_ga_cortar_rotar" >
+        <action
+            android:id="@+id/action_escanerGaCortarRotar_to_escanerGaEliminarPaginas"
+            app:destination="@id/escanerGaEliminarPaginas" />
+        <action
+            android:id="@+id/action_escanerGaCortarRotar_to_escanerCifradoGaleria2"
+            app:destination="@id/escanerCifradoGaleria2" />
+        <action
+            android:id="@+id/action_escanerGaCortarRotar_to_escanerGaEscanearMasPaginas"
+            app:destination="@id/escanerGaEscanearMasPaginas" />
+        <action
+            android:id="@+id/action_escanerGaCortarRotar_to_escanerGaVisualizacionYReordenamiento"
+            app:destination="@id/escanerGaVisualizacionYReordenamiento" />
+    </fragment>
+    <fragment
+        android:id="@+id/escanerGaEliminarPaginas"
+        android:name="com.example.finalshield.Fragments.EscanerGa.EscanerGaEliminarPaginas"
+        android:label="fragment_escaner_ga_eliminar_paginas"
+        tools:layout="@layout/fragment_escaner_ga_eliminar_paginas" >
+        <action
+            android:id="@+id/action_escanerGaEliminarPaginas_to_escanerCifradoGaleria2"
+            app:destination="@id/escanerCifradoGaleria2" />
+        <action
+            android:id="@+id/action_escanerGaEliminarPaginas_to_escanerGaCortarRotar"
+            app:destination="@id/escanerGaCortarRotar" />
+        <action
+            android:id="@+id/action_escanerGaEliminarPaginas_to_escanerGaEscanearMasPaginas"
+            app:destination="@id/escanerGaEscanearMasPaginas" />
+        <action
+            android:id="@+id/action_escanerGaEliminarPaginas_to_escanerGaVisualizacionYReordenamiento"
+            app:destination="@id/escanerGaVisualizacionYReordenamiento" />
+    </fragment>
+    <fragment
+        android:id="@+id/escanerGaEscanearMasPaginas"
+        android:name="com.example.finalshield.Fragments.EscanerGa.EscanerGaEscanearMasPaginas"
+        android:label="fragment_escaner_ga_escanear_mas_paginas"
+        tools:layout="@layout/fragment_escaner_ga_escanear_mas_paginas" >
+        <action
+            android:id="@+id/action_escanerGaEscanearMasPaginas_to_escanerGaCortarRotar"
+            app:destination="@id/escanerGaCortarRotar" />
+        <action
+            android:id="@+id/action_escanerGaEscanearMasPaginas_to_escanerGaEliminarPaginas"
+            app:destination="@id/escanerGaEliminarPaginas" />
+        <action
+            android:id="@+id/action_escanerGaEscanearMasPaginas_to_escanerCifradoGaleria2"
+            app:destination="@id/escanerCifradoGaleria2" />
+        <action
+            android:id="@+id/action_escanerGaEscanearMasPaginas_to_escanerGaVisualizacionYReordenamiento"
+            app:destination="@id/escanerGaVisualizacionYReordenamiento" />
+    </fragment>
+    <fragment
+        android:id="@+id/escanerGaVisualizacionYReordenamiento"
+        android:name="com.example.finalshield.Fragments.EscanerGa.EscanerGaVisualizacionYReordenamiento"
+        android:label="fragment_escaner_ga_visualizacion_y_reordenamiento"
+        tools:layout="@layout/fragment_escaner_ga_visualizacion_y_reordenamiento" >
+        <action
+            android:id="@+id/action_escanerGaVisualizacionYReordenamiento_to_escanerGaEscanearMasPaginas"
+            app:destination="@id/escanerGaEscanearMasPaginas" />
+        <action
+            android:id="@+id/action_escanerGaVisualizacionYReordenamiento_to_escanerGaCortarRotar"
+            app:destination="@id/escanerGaCortarRotar" />
+        <action
+            android:id="@+id/action_escanerGaVisualizacionYReordenamiento_to_escanerGaEliminarPaginas"
+            app:destination="@id/escanerGaEliminarPaginas" />
+        <action
+            android:id="@+id/action_escanerGaVisualizacionYReordenamiento_to_escanerCifradoGaleria2"
+            app:destination="@id/escanerCifradoGaleria2" />
     </fragment>
 </navigation>

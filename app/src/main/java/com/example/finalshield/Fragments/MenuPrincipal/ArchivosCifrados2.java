@@ -25,7 +25,6 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener{
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
         ImageButton perfil,house, archivo,candadclose, carpeta, mail, candadopen;
-        Button selecarpeta, correo;
         perfil = v.findViewById(R.id.btnperfil);
         house = v.findViewById(R.id.house);
         archivo = v.findViewById(R.id.archivo);
@@ -50,7 +49,7 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener{
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+            Navigation.findNavController(v).navigate(R.id.archivosdescifrados);
         } else if (v.getId() == R.id.mail) {
             Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         }else if (v.getId() == R.id.archivo) {

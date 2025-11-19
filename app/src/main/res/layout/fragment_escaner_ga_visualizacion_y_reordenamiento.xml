@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/degradado_negro_azul"
+    tools:context=".Fragments.EscanerGa.EscanerGaVisualizacionYReordenamiento">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/regresar3"
+            android:layout_width="69dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="30dp"
+            android:backgroundTint="#10FFFFFF"
+            android:text="←"
+            android:textColor="@color/white"
+            android:textAlignment="center"
+            android:textSize="40dp" />
+        <Button
+            android:id="@+id/guardar"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginStart="170dp"
+            android:layout_marginTop="30dp"
+            android:textColor="@color/white"
+            android:text="Hecho"
+            android:backgroundTint="@color/degradado_negro_azul"
+            android:textAlignment="center" />
+    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/imageToEdit"
+        android:layout_width="400dp"
+        android:layout_height="530dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="110dp"
+        android:clipToPadding="false"
+        android:padding="30dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="670dp"
+        android:background="@drawable/img">
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="695dp"
+        android:layout_marginLeft="-22dp">
+        <ImageButton
+            android:id="@+id/selecgaleria2"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/picture"
+            android:scaleType="fitCenter"
+            android:layout_marginStart="41dp"
+            android:background="@android:color/transparent"/>
+        <ImageButton
+            android:id="@+id/addelements2"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="50dp"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/hojitamas" />
+        <ImageButton
+            android:id="@+id/recortar2"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginStart="40dp"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/recortar" />
+        <ImageButton
+            android:id="@+id/edicion2"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ordencircle"
+            android:scaleType="fitCenter"
+            android:layout_marginStart="30dp"
+            android:background="@android:color/transparent"/>
+        <ImageButton
+            android:id="@+id/eliminar2"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/basurita"
+            android:scaleType="fitCenter"
+            android:layout_marginStart="30dp"
+            android:background="@android:color/transparent"/>
+    </LinearLayout>
+</FrameLayout>

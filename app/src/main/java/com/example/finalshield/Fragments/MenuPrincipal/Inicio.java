@@ -60,12 +60,9 @@ public class Inicio extends Fragment implements View.OnClickListener {
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
-            String token = null;
-            Bundle bundle = new Bundle();
-            bundle.putString("security_token", token);
-            Navigation.findNavController(v).navigate(R.id.action_inicio_to_verClave2, bundle);
+            Navigation.findNavController(v).navigate(R.id.archivosdescifrados);
         } else if (v.getId() == R.id.btnseleccarpeta) {
-            Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
+            Navigation.findNavController(v).navigate(R.id.archivosCifrados);
         } else if (v.getId() == R.id.btnenvcorreo) {
             Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         }else if (v.getId() == R.id.mail) {

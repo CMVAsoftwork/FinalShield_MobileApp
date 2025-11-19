@@ -11,6 +11,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -22,6 +23,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.finalshield.Adaptadores.ImageAdapter;
@@ -31,12 +34,14 @@ import com.example.finalshield.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Seleccion_imagenes extends Fragment implements View.OnClickListener {
+public class Seleccion_imagenes extends Fragment {
 
-    ImageButton recortar, addele,camara, edicion, eliminar;
-    private RecyclerView recyclerViee;
+    private RecyclerView recycler;
     private ImageAdapter adapter;
     private final List<Uri> listaImagenes = new ArrayList<>();
+    private LinearLayout selectionBar;
+    private TextView selectionCount;
+    private Button clearSelection;
 
     private static final int REQUEST_CODE = 100;
 
@@ -48,41 +53,36 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-        recyclerViee = v.findViewById(R.id.recycler);
-        recyclerViee.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        camara = v.findViewById(R.id.scancam);
-        camara.setOnClickListener(this);
-        Button regre = v.findViewById(R.id.regresar1);
-        camara = v.findViewById(R.id.scancam);
-        addele = v.findViewById(R.id.addelements);
-        recortar = v.findViewById(R.id.recortar);
-        edicion = v.findViewById(R.id.edicion);
-        eliminar = v.findViewById(R.id.eliminar);
-        camara.setOnClickListener(this);
-        addele.setOnClickListener(this);
-        recortar.setOnClickListener(this);
-        edicion.setOnClickListener(this);
-        eliminar.setOnClickListener(this);
-        regre.setOnClickListener(this);
+
+        recycler = v.findViewById(R.id.recycler);
+        recycler.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
+        selectionBar = v.findViewById(R.id.selectionBar);
+        selectionCount = v.findViewById(R.id.selectionCount);
+        clearSelection = v.findViewById(R.id.clearSelection);
+
+        clearSelection.setOnClickListener(view -> {
+            adapter.clearSelection();
+            selectionBar.setVisibility(View.GONE);
+        });
+
         pedirPermiso();
     }
 
     private void pedirPermiso() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             requestPermissions(new String[]{Manifest.permission.READ_MEDIA_IMAGES}, REQUEST_CODE);
-        } else {
+        else
             requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_CODE);
-        }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_CODE && grantResults.length > 0 &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                grantResults[0] == PackageManager.PERMISSION_GRANTED)
             cargarImagenes();
-        } else {
+        else
             Toast.makeText(getContext(), "Permiso requerido", Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void cargarImagenes() {
@@ -92,49 +92,39 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
                 ? MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
                 : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
-        String[] projection = {MediaStore.Images.Media._ID};
-
         Cursor cursor = requireActivity()
                 .getContentResolver()
-                .query(collection, projection, null, null, MediaStore.Images.Media.DATE_ADDED + " DESC");
+                .query(collection, new String[]{MediaStore.Images.Media._ID},
+                        null, null, MediaStore.Images.Media.DATE_ADDED + " DESC");
 
         if (cursor != null) {
             int idColumn = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-
             while (cursor.moveToNext()) {
                 long id = cursor.getLong(idColumn);
-                Uri uri = ContentUris.withAppendedId(collection, id);
-                listaImagenes.add(uri);
+                listaImagenes.add(ContentUris.withAppendedId(collection, id));
             }
             cursor.close();
         }
 
-        adapter = new ImageAdapter(getContext(), listaImagenes, new ImageAdapter.OnImageClickListener() {
+        adapter = new ImageAdapter(listaImagenes, new ImageAdapter.Callbacks() {
             @Override
-            public void onImageClick(Uri uri) {
+            public void onImageClicked(Uri uri) {
                 Intent intent = new Intent(requireContext(), VistaImagenActivity.class);
                 intent.putExtra("uri", uri.toString());
                 startActivity(intent);
             }
+
+            @Override
+            public void onSelectionChanged(int count) {
+                if (count > 0) {
+                    selectionBar.setVisibility(View.VISIBLE);
+                    selectionCount.setText(count + " seleccionadas");
+                } else {
+                    selectionBar.setVisibility(View.GONE);
+                }
+            }
         });
 
-        recyclerViee.setAdapter(adapter);
-    }
-
-    @Override
-    public void onClick(View v) {
-        if(v.getId() == R.id.scancam){
-            Navigation.findNavController(v).navigate(R.id.escanerCifradoMixto);
-        } else if (v.getId() == R.id.addelements) {
-            Navigation.findNavController(v).navigate(R.id.escanearMasPaginas);
-        } else if (v.getId() == R.id.recortar) {
-            Navigation.findNavController(v).navigate(R.id.cortarRotar);
-        } else if (v.getId() == R.id.edicion) {
-            Navigation.findNavController(v).navigate(R.id.visualizacionYReordenamiento);
-        } else if (v.getId() == R.id.eliminar) {
-            Navigation.findNavController(v).navigate(R.id.eliminarPaginas);
-        }else if (v.getId() == R.id.regresar1) {
-            Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
-        }
+        recycler.setAdapter(adapter);
     }
 }
