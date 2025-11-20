@@ -41,7 +41,6 @@ public class ServivioCorreo extends Fragment implements View.OnClickListener {
     private EditText etMensaje;
     private Button btnAdjuntar;
     private Button btnEnviar;
-
     private CorreoService correoService;
     private AuthService authService;
     private final List<Uri> adjuntosUri = new ArrayList<>();

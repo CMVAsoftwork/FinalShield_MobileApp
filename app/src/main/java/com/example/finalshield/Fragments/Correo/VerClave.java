@@ -54,7 +54,6 @@ public class VerClave extends Fragment implements View.OnClickListener {
     private TextView tvContenidoDescifrado;
     private LinearLayout layoutAdjuntos;
     private ProgressBar pbDescargaAdjuntos;
-
     private EnlaceService enlaceService;
     private AuthService authService;
     private DescargaAPI descargaAPI;

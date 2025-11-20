@@ -90,6 +90,12 @@
         <action
             android:id="@+id/action_inicio_to_archivosDesifrados2"
             app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_inicio_to_archivosDesifrados3"
+            app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_inicio_to_perfil"
+            app:destination="@id/perfil" />
     </fragment>
     <fragment
         android:id="@+id/continuacionInicio"
@@ -111,6 +117,12 @@
         <action
             android:id="@+id/action_continuacionInicio_to_archivosDesifrados2"
             app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_continuacionInicio_to_archivosDesifrados3"
+            app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_continuacionInicio_to_perfil"
+            app:destination="@id/perfil" />
     </fragment>
     <fragment
         android:id="@+id/archivosCifrados"
@@ -132,6 +144,12 @@
         <action
             android:id="@+id/action_archivosCifrados_to_inicio2"
             app:destination="@id/inicio" />
+        <action
+            android:id="@+id/action_archivosCifrados_to_archivosDesifrados"
+            app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_archivosCifrados_to_perfil"
+            app:destination="@id/perfil" />
     </fragment>
     <fragment
         android:id="@+id/datosBiometricos"
@@ -171,6 +189,12 @@
         <action
             android:id="@+id/action_archivosCifrados2_to_archivosDesifrados"
             app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_archivosCifrados2_to_archivosDesifrados2"
+            app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_archivosCifrados2_to_perfil"
+            app:destination="@id/perfil" />
     </fragment>
     <fragment
         android:id="@+id/cifradoEscaneo2"
@@ -198,6 +222,12 @@
         <action
             android:id="@+id/action_cifradoEscaneo2_to_archivosDesifrados"
             app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_cifradoEscaneo2_to_archivosDesifrados2"
+            app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_cifradoEscaneo2_to_perfil"
+            app:destination="@id/perfil" />
     </fragment>
     <fragment
         android:id="@+id/seleccion_imagenes"
@@ -303,6 +333,12 @@
         <action
             android:id="@+id/action_servivioCorreo_to_archivosDesifrados"
             app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_servivioCorreo_to_archivosDesifrados2"
+            app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_servivioCorreo_to_perfil"
+            app:destination="@id/perfil" />
     </fragment>
     <fragment
         android:id="@+id/visualizacionYReordenamiento"
@@ -375,6 +411,9 @@
         <action
             android:id="@+id/action_opcionCifrado2_to_escanerCifradoCamara3"
             app:destination="@id/escanerCifradoCamara3" />
+        <action
+            android:id="@+id/action_opcionCifrado2_to_perfil"
+            app:destination="@id/perfil" />
     </fragment>
     <fragment
         android:id="@+id/archivosDesifrados"
@@ -399,6 +438,27 @@
         <action
             android:id="@+id/action_archivosDesifrados_to_continuacionInicio2"
             app:destination="@id/continuacionInicio" />
+        <action
+            android:id="@+id/action_archivosDesifrados_to_inicio2"
+            app:destination="@id/inicio" />
+        <action
+            android:id="@+id/action_archivosDesifrados_to_continuacionInicio"
+            app:destination="@id/continuacionInicio" />
+        <action
+            android:id="@+id/action_archivosDesifrados_to_archivosCifrados22"
+            app:destination="@id/archivosCifrados2" />
+        <action
+            android:id="@+id/action_archivosDesifrados_to_cifradoEscaneo22"
+            app:destination="@id/cifradoEscaneo2" />
+        <action
+            android:id="@+id/action_archivosDesifrados_to_archivosCifrados3"
+            app:destination="@id/archivosCifrados" />
+        <action
+            android:id="@+id/action_archivosDesifrados_to_servivioCorreo2"
+            app:destination="@id/servivioCorreo" />
+        <action
+            android:id="@+id/action_archivosDesifrados_to_perfil"
+            app:destination="@id/perfil" />
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoMixto"
@@ -426,6 +486,9 @@
         <action
             android:id="@+id/action_escanerCifradoMixto_to_cortarRotar"
             app:destination="@id/cortarRotar" />
+        <action
+            android:id="@+id/action_escanerCifradoMixto_to_verFotosTomadas"
+            app:destination="@id/verFotosTomadas" />
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoCamara3"
@@ -449,6 +512,9 @@
         <action
             android:id="@+id/action_escanerCifradoCamara3_to_escanerCaVisualizacionYReordenamiento2"
             app:destination="@id/escanerCaVisualizacionYReordenamiento" />
+        <action
+            android:id="@+id/action_escanerCifradoCamara3_to_escanerCaVerFotosTomadas"
+            app:destination="@id/escanerCaVerFotosTomadas" />
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoGaleria2"
@@ -627,5 +693,55 @@
         <action
             android:id="@+id/action_escanerGaVisualizacionYReordenamiento_to_escanerCifradoGaleria2"
             app:destination="@id/escanerCifradoGaleria2" />
+    </fragment>
+    <fragment
+        android:id="@+id/perfil"
+        android:name="com.example.finalshield.Fragments.MenuPrincipal.Perfil"
+        android:label="Perfil" >
+        <action
+            android:id="@+id/action_perfil_to_opcionCifrado2"
+            app:destination="@id/opcionCifrado2" />
+        <action
+            android:id="@+id/action_perfil_to_cifradoEscaneo2"
+            app:destination="@id/cifradoEscaneo2" />
+        <action
+            android:id="@+id/action_perfil_to_inicio"
+            app:destination="@id/inicio" />
+        <action
+            android:id="@+id/action_perfil_to_continuacionInicio"
+            app:destination="@id/continuacionInicio" />
+        <action
+            android:id="@+id/action_perfil_to_archivosCifrados2"
+            app:destination="@id/archivosCifrados2" />
+        <action
+            android:id="@+id/action_perfil_to_archivosDesifrados"
+            app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_perfil_to_archivosCifrados"
+            app:destination="@id/archivosCifrados" />
+        <action
+            android:id="@+id/action_perfil_to_servivioCorreo"
+            app:destination="@id/servivioCorreo" />
+        <action
+            android:id="@+id/action_perfil_to_cifradoEscaneo22"
+            app:destination="@id/cifradoEscaneo2" />
+    </fragment>
+    <fragment
+        android:id="@+id/verFotosTomadas"
+        android:name="com.example.finalshield.Fragments.Escaner.VerFotosTomadas"
+        android:label="fragment_ver_fotos_tomadas"
+        tools:layout="@layout/fragment_ver_fotos_tomadas" >
+        <action
+            android:id="@+id/action_verFotosTomadas_to_escanerCifradoMixto"
+            app:destination="@id/escanerCifradoMixto" />
+    </fragment>
+    <fragment
+        android:id="@+id/escanerCaVerFotosTomadas"
+        android:name="com.example.finalshield.Fragments.EscanerCa.EscanerCaVerFotosTomadas"
+        android:label="fragment_escaner_ca_ver_fotos_tomadas"
+        tools:layout="@layout/fragment_escaner_ca_ver_fotos_tomadas" >
+        <action
+            android:id="@+id/action_escanerCaVerFotosTomadas_to_escanerCifradoCamara3"
+            app:destination="@id/escanerCifradoCamara3" />
     </fragment>
 </navigation>

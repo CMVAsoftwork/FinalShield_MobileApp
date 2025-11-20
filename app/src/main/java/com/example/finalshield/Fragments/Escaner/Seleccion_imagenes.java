@@ -34,8 +34,8 @@ import com.example.finalshield.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Seleccion_imagenes extends Fragment {
-
+public class Seleccion_imagenes extends Fragment implements View.OnClickListener {
+    ImageButton camara, addele,recortar, edicion, eliminar;
     private RecyclerView recycler;
     private ImageAdapter adapter;
     private final List<Uri> listaImagenes = new ArrayList<>();
@@ -53,14 +53,24 @@ public class Seleccion_imagenes extends Fragment {
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-
+        Button regre;
         recycler = v.findViewById(R.id.recycler);
         recycler.setLayoutManager(new GridLayoutManager(getContext(), 2));
-
+        regre = v.findViewById(R.id.regresar1);
+        camara = v.findViewById(R.id.scann);
+        addele = v.findViewById(R.id.addelements);
+        recortar = v.findViewById(R.id.recortar);
+        edicion = v.findViewById(R.id.edicion);
+        eliminar = v.findViewById(R.id.eliminar);
         selectionBar = v.findViewById(R.id.selectionBar);
         selectionCount = v.findViewById(R.id.selectionCount);
         clearSelection = v.findViewById(R.id.clearSelection);
-
+        camara.setOnClickListener(this);
+        addele.setOnClickListener(this);
+        recortar.setOnClickListener(this);
+        edicion.setOnClickListener(this);
+        eliminar.setOnClickListener(this);
+        regre.setOnClickListener(this);
         clearSelection.setOnClickListener(view -> {
             adapter.clearSelection();
             selectionBar.setVisibility(View.GONE);
@@ -126,5 +136,23 @@ public class Seleccion_imagenes extends Fragment {
         });
 
         recycler.setAdapter(adapter);
+    }
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        if(id == R.id.scann){
+            Navigation.findNavController(v).navigate(R.id.escanerCifradoMixto);
+        } else if (id == R.id.addelements) {
+            Navigation.findNavController(v).navigate(R.id.escanearMasPaginas);
+        } else if (id == R.id.recortar) {
+            Navigation.findNavController(v).navigate(R.id.cortarRotar);
+        } else if (id == R.id.edicion) {
+            Navigation.findNavController(v).navigate(R.id.visualizacionYReordenamiento);
+        } else if (id == R.id.eliminar) {
+            Navigation.findNavController(v).navigate(R.id.eliminarPaginas);
+        } else if (id == R.id.regresar1) {
+            Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
+        }
     }
 }
