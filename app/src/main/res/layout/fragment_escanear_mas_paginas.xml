@@ -89,7 +89,7 @@
             android:layout_height="30dp"
             android:src="@drawable/scann"
             android:scaleType="fitCenter"
-            android:layout_marginStart="36dp"
+            android:layout_marginStart="60dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/selecgaleria"
@@ -97,39 +97,39 @@
             android:layout_height="30dp"
             android:src="@drawable/picture"
             android:scaleType="fitCenter"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="40dp"
             android:background="@android:color/transparent"/>
-        <ImageButton
-            android:id="@+id/addelements"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="26dp"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/circlemore"/>
-        <ImageButton
-            android:id="@+id/recortar"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginStart="24dp"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/recortar" />
-        <ImageButton
-            android:id="@+id/edicion"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/hojitas"
-            android:scaleType="fitCenter"
-            android:layout_marginStart="30dp"
-            android:background="@android:color/transparent"/>
-        <ImageButton
-            android:id="@+id/eliminar"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/basurita"
-            android:scaleType="fitCenter"
-            android:layout_marginStart="30dp"
-            android:background="@android:color/transparent"/>
-    </LinearLayout>
-</RelativeLayout>
+        <!--  <ImageButton
+             android:id="@+id/addelements"
+             android:layout_width="50dp"
+             android:layout_height="50dp"
+             android:layout_marginStart="26dp"
+             android:background="@android:color/transparent"
+             android:scaleType="fitCenter"
+             android:src="@drawable/circlemore"/>-->
+         <ImageButton
+             android:id="@+id/recortar"
+             android:layout_width="30dp"
+             android:layout_height="30dp"
+             android:layout_marginStart="40dp"
+             android:background="@android:color/transparent"
+             android:scaleType="fitCenter"
+             android:src="@drawable/recortar" />
+         <ImageButton
+             android:id="@+id/edicion"
+             android:layout_width="30dp"
+             android:layout_height="30dp"
+             android:src="@drawable/hojitas"
+             android:scaleType="fitCenter"
+             android:layout_marginStart="40dp"
+             android:background="@android:color/transparent"/>
+         <ImageButton
+             android:id="@+id/eliminar"
+             android:layout_width="30dp"
+             android:layout_height="30dp"
+             android:src="@drawable/basurita"
+             android:scaleType="fitCenter"
+             android:layout_marginStart="40dp"
+             android:background="@android:color/transparent"/>
+     </LinearLayout>
+ </RelativeLayout>

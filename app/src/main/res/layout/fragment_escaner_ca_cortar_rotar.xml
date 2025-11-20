@@ -63,40 +63,40 @@
             android:layout_height="30dp"
             android:src="@drawable/scann"
             android:scaleType="fitCenter"
-            android:layout_marginStart="55dp"
+            android:layout_marginStart="70dp"
             android:background="@android:color/transparent"/>
-        <ImageButton
-            android:id="@+id/addelements1"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginStart="50dp"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/hojitamas" />
-        <ImageButton
-            android:id="@+id/recortar1"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="30dp"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/circlecut" />
-        <ImageButton
-            android:id="@+id/edicion1"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/hojitas"
-            android:scaleType="fitCenter"
-            android:layout_marginStart="30dp"
-            android:background="@android:color/transparent"/>
-        <ImageButton
-            android:id="@+id/eliminar1"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/basurita"
-            android:scaleType="fitCenter"
-            android:layout_marginStart="40dp"
-            android:background="@android:color/transparent"/>
-    </LinearLayout>
+        <!--  <ImageButton
+             android:id="@+id/addelements1"
+             android:layout_width="30dp"
+             android:layout_height="30dp"
+             android:layout_marginStart="50dp"
+             android:background="@android:color/transparent"
+             android:scaleType="fitCenter"
+             android:src="@drawable/hojitamas" />-->
+         <ImageButton
+             android:id="@+id/recortar1"
+             android:layout_width="50dp"
+             android:layout_height="50dp"
+             android:layout_marginStart="50dp"
+             android:background="@android:color/transparent"
+             android:scaleType="fitCenter"
+             android:src="@drawable/circlecut" />
+         <ImageButton
+             android:id="@+id/edicion1"
+             android:layout_width="30dp"
+             android:layout_height="30dp"
+             android:src="@drawable/hojitas"
+             android:scaleType="fitCenter"
+             android:layout_marginStart="50dp"
+             android:background="@android:color/transparent"/>
+         <ImageButton
+             android:id="@+id/eliminar1"
+             android:layout_width="30dp"
+             android:layout_height="30dp"
+             android:src="@drawable/basurita"
+             android:scaleType="fitCenter"
+             android:layout_marginStart="50dp"
+             android:background="@android:color/transparent"/>
+     </LinearLayout>
 
-</FrameLayout>
+ </FrameLayout>

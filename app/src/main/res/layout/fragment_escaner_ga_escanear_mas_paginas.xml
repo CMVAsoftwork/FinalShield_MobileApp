@@ -89,21 +89,21 @@
             android:layout_height="30dp"
             android:src="@drawable/picture"
             android:scaleType="fitCenter"
-            android:layout_marginStart="40dp"
+            android:layout_marginStart="70dp"
             android:background="@android:color/transparent"/>
-        <ImageButton
+        <!-- <ImageButton
             android:id="@+id/addelements2"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginStart="36dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:src="@drawable/circlemore"/>
+            android:src="@drawable/circlemore"/>-->
         <ImageButton
             android:id="@+id/recortar2"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginStart="34dp"
+            android:layout_marginStart="50dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
             android:src="@drawable/recortar" />
@@ -113,7 +113,7 @@
             android:layout_height="30dp"
             android:src="@drawable/hojitas"
             android:scaleType="fitCenter"
-            android:layout_marginStart="40dp"
+            android:layout_marginStart="50dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/eliminar2"
@@ -121,7 +121,7 @@
             android:layout_height="30dp"
             android:src="@drawable/basurita"
             android:scaleType="fitCenter"
-            android:layout_marginStart="40dp"
+            android:layout_marginStart="50dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
 </RelativeLayout>

@@ -51,14 +51,14 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_marginTop="695dp"
-        android:layout_marginLeft="-22dp">
+        android:layout_marginLeft="-10dp">
         <ImageButton
             android:id="@+id/scancam"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/scann"
             android:scaleType="fitCenter"
-            android:layout_marginStart="35dp"
+            android:layout_marginStart="40dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/selecgaleria"
@@ -66,21 +66,21 @@
             android:layout_height="30dp"
             android:src="@drawable/picture"
             android:scaleType="fitCenter"
-            android:layout_marginStart="31dp"
-            android:background="@android:color/transparent"/>
-        <ImageButton
-            android:id="@+id/addelements"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
             android:layout_marginStart="40dp"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/hojitamas" />
+            android:background="@android:color/transparent"/>
+        <!-- <ImageButton
+             android:id="@+id/addelements"
+             android:layout_width="30dp"
+             android:layout_height="30dp"
+             android:layout_marginStart="40dp"
+             android:background="@android:color/transparent"
+             android:scaleType="fitCenter"
+             android:src="@drawable/hojitamas" /> -->
         <ImageButton
             android:id="@+id/recortar"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="40dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
             android:src="@drawable/recortar" />
@@ -90,7 +90,7 @@
             android:layout_height="50dp"
             android:src="@drawable/ordencircle"
             android:scaleType="fitCenter"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="40dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/eliminar"
@@ -98,7 +98,7 @@
             android:layout_height="30dp"
             android:src="@drawable/basurita"
             android:scaleType="fitCenter"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="40dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
 </FrameLayout>

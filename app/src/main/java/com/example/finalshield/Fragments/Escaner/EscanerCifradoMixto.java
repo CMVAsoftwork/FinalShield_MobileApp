@@ -3,133 +3,254 @@ package com.example.finalshield.Fragments.Escaner;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
-
+import com.bumptech.glide.Glide;
 import com.example.finalshield.R;
 import com.google.common.util.concurrent.ListenableFuture;
-
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-
 public class EscanerCifradoMixto extends Fragment implements View.OnClickListener {
-    ImageButton galeria, addele,recortar, edicion, eliminar;
-    // esta es la ventana donde se verá la cámara (nuestro recuadro negro).
+
+    // prefijo para identificar las fotos de la sesión en la caché
+    private static final String FOTO_PREFIX = "MIXTO_TEMP_";
+    // variables de la UI
+    ImageButton addele, recortar, edicion, eliminar, galeria;
+    Button regresar, guardarPdf;
     private PreviewView vistaPrevia;
-    // esto es lo que nos dará acceso real a la cámara, cuando Android quiera.
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
-    // un ID para identificar la petición de permiso de cámara.
+    private ImageCapture imageCapture;
+    private Button tomarfoto;
+    private ImageView imagencita;
+    private TextView contadorfot;
+    // variables de la Lógica
+    private int contador = 0;
+    private List<File> fotosTomadas = new ArrayList<>();
     private static final int CAMERA_REQUEST_CODE = 10;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_escaner_cifrado_mixto, container, false);
     }
+
+    @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
+        // Si el estado es nulo (primera vez), se asume que se debe iniciar una nueva sesión
+        // y limpiar. Si NO es nulo, significa que se está restaurando el estado,
+        // y onResume se encargará de recontar.
+        // onResume re-cuente siempre, a menos que el botón "Regresar" sea presionado.
         vistaPrevia = v.findViewById(R.id.vistaprevia);
-        Button regre = v.findViewById(R.id.regresar1);
-        galeria = v.findViewById(R.id.selecgaleria);
+        regresar = v.findViewById(R.id.regresar4);
+        guardarPdf = v.findViewById(R.id.guardar);
+        tomarfoto = v.findViewById(R.id.tomarfoto);
+        imagencita = v.findViewById(R.id.imagencita);
+        contadorfot = v.findViewById(R.id.Contadorfot);
         addele = v.findViewById(R.id.addelements);
         recortar = v.findViewById(R.id.recortar);
         edicion = v.findViewById(R.id.edicion);
         eliminar = v.findViewById(R.id.eliminar);
-        galeria.setOnClickListener(this);
+        galeria = v.findViewById(R.id.selecgaleria);
+
+        regresar.setOnClickListener(this);
+        tomarfoto.setOnClickListener(this);
+        if (imagencita != null) imagencita.setOnClickListener(this);
         addele.setOnClickListener(this);
         recortar.setOnClickListener(this);
         edicion.setOnClickListener(this);
         eliminar.setOnClickListener(this);
-        regre.setOnClickListener(this);
-        // checar si el usuario ya nos dio permiso
+        galeria.setOnClickListener(this);
+
         if (allPermissionsGranted()) {
-            // si si, encendemos la cámara.
             startCamera();
         } else {
-            // si no mostramos la ventanita para pedir permiso.
             requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
         }
     }
+
+    // esta función solo se usa ahora para el borrado explícito .
+    private void limpiarArchivosDeSesionAnterior() {
+        File cacheDir = requireContext().getCacheDir();
+        File[] files = cacheDir.listFiles((dir, name) -> name.startsWith(FOTO_PREFIX) && name.endsWith(".jpg"));
+        if (files != null) {
+            for (File file : files) {
+                if (file.delete()) {
+                    Log.d("MixtoCache", "Archivo de sesión eliminado: " + file.getName());
+                }
+            }
+        }
+        // reinicializa el estado interno
+        contador = 0;
+        fotosTomadas.clear();
+        if (contadorfot != null) actualizarContadorUI();
+        if (imagencita != null) Glide.with(this).load((String) null).into(imagencita);
+    }
+
+    //se llama cada vez que el fragmento vuelve a ser visible (al regresar de VerFotosTomadas)
     @Override
-    public void onClick(View v) {
-        if(v.getId() == R.id.regresar1){
-            Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
-        } else if (v.getId() == R.id.selecgaleria) {
-            Navigation.findNavController(v).navigate(R.id.seleccion_imagenes);
-        } else if (v.getId() == R.id.addelements) {
-            Navigation.findNavController(v).navigate(R.id.escanearMasPaginas);
-        } else if (v.getId() == R.id.recortar) {
-            Navigation.findNavController(v).navigate(R.id.cortarRotar);
-        } else if (v.getId() == R.id.edicion) {
-            Navigation.findNavController(v).navigate(R.id.visualizacionYReordenamiento);
-        } else if (v.getId() == R.id.eliminar) {
-            Navigation.findNavController(v).navigate(R.id.eliminarPaginas);
+    public void onResume() {
+        super.onResume();
+        // lee el disco y restablece el estado del contador.
+        recontarFotosDesdeCache();
+    }
+    private void recontarFotosDesdeCache() {
+        fotosTomadas.clear();
+        File cacheDir = requireContext().getCacheDir();
+        File[] cachedFiles = cacheDir.listFiles();
+        if (cachedFiles != null) {
+            for (File file : cachedFiles) {
+                // filtra solo los archivos que tienen nuestro prefijo (los que no se eliminaron en VerFotosTomadas)
+                if (file.isFile() && file.getName().startsWith(FOTO_PREFIX) && file.getName().endsWith(".jpg")) {
+                    fotosTomadas.add(file);
+                }
+            }
+        }
+        contador = fotosTomadas.size();
+        actualizarContadorUI();
+        if (!fotosTomadas.isEmpty()) {
+            // mostrar la última foto de la lista restante
+            mostrarUltimaFoto(fotosTomadas.get(fotosTomadas.size() - 1));
+        } else {
+            // B}borra la imagen si la lista está vacía
+            Glide.with(this).load((String) null).into(imagencita);
         }
     }
-    // 1. verificar el permiso
+    private void actualizarContadorUI() {
+        contadorfot.setText(String.valueOf(contador));
+    }
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        if(id == R.id.imagencita) {
+            if (!fotosTomadas.isEmpty()) {
+                Bundle bundle = new Bundle();
+
+                ArrayList<String> filePaths = new ArrayList<>();
+                for (File file : fotosTomadas) {
+                    filePaths.add(file.getAbsolutePath());
+                }
+                bundle.putStringArrayList("FOTOS_CAPTURA", filePaths);
+
+                Navigation.findNavController(v).navigate(R.id.verFotosTomadas, bundle);
+            } else {
+                Toast.makeText(requireContext(), "No hay fotos para visualizar.", Toast.LENGTH_SHORT).show();
+            }
+        } else if(id == R.id.regresar4){
+            // si el usuario presiona regresar, borramos los archivos.
+            limpiarArchivosDeSesionAnterior();
+            Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
+        } else if (id == R.id.tomarfoto) {
+            tomarFoto();
+        } else if (id == R.id.addelements) {
+            Navigation.findNavController(v).navigate(R.id.escanearMasPaginas);
+        } else if (id == R.id.recortar) {
+            Navigation.findNavController(v).navigate(R.id.cortarRotar);
+        } else if (id == R.id.edicion) {
+            Navigation.findNavController(v).navigate(R.id.visualizacionYReordenamiento);
+        } else if (id == R.id.eliminar) {
+            Navigation.findNavController(v).navigate(R.id.eliminarPaginas);
+        } else if (id == R.id.selecgaleria) {
+            Navigation.findNavController(v).navigate(R.id.seleccion_imagenes);
+        }
+    }
+
+    // función para Tomar la Foto
+    private void tomarFoto() {
+        if (imageCapture == null) {
+            Log.e("EscanerCifrado", "ImageCapture no está inicializado.");
+            Toast.makeText(requireContext(), "Cámara no lista.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        File outputDirectory = requireContext().getCacheDir();
+        // usar el prefijo en el nombre del archivo
+        File photoFile = new File(outputDirectory, FOTO_PREFIX + System.currentTimeMillis() + ".jpg");
+        ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
+        imageCapture.takePicture(
+                outputFileOptions,
+                ContextCompat.getMainExecutor(requireContext()),
+                new ImageCapture.OnImageSavedCallback() {
+                    @Override
+                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                        fotosTomadas.add(photoFile);
+                        contador = fotosTomadas.size();
+                        actualizarContadorUI();
+                        mostrarUltimaFoto(photoFile);
+                        Toast.makeText(requireContext(), "Foto #" + contador + " capturada.", Toast.LENGTH_SHORT).show();
+                    }
+                    @Override
+                    public void onError(@NonNull ImageCaptureException exception) {
+                        Log.e("EscanerCifrado", "Error al capturar la imagen: " + exception.getMessage(), exception);
+                        Toast.makeText(requireContext(), "Error al tomar foto.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+    }
+    // función para Mostrar la ultima foto
+    private void mostrarUltimaFoto(File photoFile) {
+        Glide.with(this)
+                .load(photoFile)
+                .centerCrop()
+                .into(imagencita);
+    }
+    //verificar el permiso
     private boolean allPermissionsGranted() {
-        // Comprobamos si el permiso de cámara está en "Permitido".
         return ContextCompat.checkSelfPermission(
                 requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
-    // 2. manejamos la respuesta de lo de permisos
+    // manejar la respuesta de los permisos
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // Nos aseguramos de que la respuesta sea para nuestra solicitud de cámara.
         if (requestCode == CAMERA_REQUEST_CODE) {
-            // Si después de la respuesta, el permiso SÍ se concedió (revisamos otra vez):
             if (allPermissionsGranted()) {
-                startCamera(); //Encendemos la cámara.
+                startCamera();
             } else {
-                // Si el usuario dijo "No", le avisamos con un mensajito rápido.
                 Toast.makeText(requireContext(), "Permiso de cámara no concedido.", Toast.LENGTH_SHORT).show();
             }
         }
     }
-    // 3. la funcion de iniciar la camara con el camarax
+
+    //función para Iniciar la Cámara
     private void startCamera() {
-        // pedimos el motor principal de CameraX.
         cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext());
-        // cuando el motor esté listo ejecuta este código:
         cameraProviderFuture.addListener(() -> {
             try {
-                // motor listo
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
-                // 1. configuramos la vista previa el "caso de uso" para mostrar video.
+
                 Preview preview = new Preview.Builder().build();
-                // 2. le decimos que queremos usar la cámara de atrás.
                 CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
-                // 3. conectamos el video en vivo al visor
+
+                imageCapture = new ImageCapture.Builder().build();
+
                 preview.setSurfaceProvider(vistaPrevia.getSurfaceProvider());
-                // (extra) Configuramos la herramienta para poder tomar la foto después.
-                ImageCapture imageCapture = new ImageCapture.Builder().build();
-                // 4. Conectamos lo anterior
-                // primero, limpiamos cualquier conexión anterior.
+
                 cameraProvider.unbindAll();
-                // luego, le decimos a CameraX: "Usa el visor, la cámara trasera y la herramienta de foto,
-                // y que esto se apague cuando el fragmento se cierre."
-                cameraProvider.bindToLifecycle(getViewLifecycleOwner(), cameraSelector,preview,imageCapture);
+                cameraProvider.bindToLifecycle(getViewLifecycleOwner(), cameraSelector, preview, imageCapture);
             } catch (ExecutionException | InterruptedException e) {
-                // si algo se falla al intentar prender la cámara, lo registramos.
                 Log.e("EscanerCifrado", "Error al inicializar CameraX.", e);
             }
-        }, ContextCompat.getMainExecutor(requireContext())); // nos aseguramos que corra en el hilo principal
+        }, ContextCompat.getMainExecutor(requireContext()));
     }
 }

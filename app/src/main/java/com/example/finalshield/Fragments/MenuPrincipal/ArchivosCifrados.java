@@ -54,13 +54,13 @@ public class ArchivosCifrados extends Fragment implements View.OnClickListener{
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
-            Navigation.findNavController(v).navigate(R.id.archivosdescifrados);
+            Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
         } else if (v.getId() == R.id.mail) {
             Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         }else if (v.getId() == R.id.archivo) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados);
         } else if (v.getId() == R.id.btnperfil) {
-
+            Navigation.findNavController(v).navigate(R.id.perfil);
         }
     }
 }
