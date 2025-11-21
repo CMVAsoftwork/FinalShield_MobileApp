@@ -36,7 +36,7 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
     // prefijo para identificar las fotos de la sesión en la caché
     private static final String FOTO_PREFIX = "MIXTO_TEMP_";
     // variables de la UI
-    ImageButton addele, recortar, edicion, eliminar, galeria;
+    ImageButton  recortar, edicion, eliminar, galeria;
     Button regresar, guardarPdf;
     private PreviewView vistaPrevia;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -67,7 +67,6 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
         tomarfoto = v.findViewById(R.id.tomarfoto);
         imagencita = v.findViewById(R.id.imagencita);
         contadorfot = v.findViewById(R.id.Contadorfot);
-        addele = v.findViewById(R.id.addelements);
         recortar = v.findViewById(R.id.recortar);
         edicion = v.findViewById(R.id.edicion);
         eliminar = v.findViewById(R.id.eliminar);
@@ -76,7 +75,6 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
         regresar.setOnClickListener(this);
         tomarfoto.setOnClickListener(this);
         if (imagencita != null) imagencita.setOnClickListener(this);
-        addele.setOnClickListener(this);
         recortar.setOnClickListener(this);
         edicion.setOnClickListener(this);
         eliminar.setOnClickListener(this);
@@ -162,8 +160,6 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
             Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
         } else if (id == R.id.tomarfoto) {
             tomarFoto();
-        } else if (id == R.id.addelements) {
-            Navigation.findNavController(v).navigate(R.id.escanearMasPaginas);
         } else if (id == R.id.recortar) {
             Navigation.findNavController(v).navigate(R.id.cortarRotar);
         } else if (id == R.id.edicion) {

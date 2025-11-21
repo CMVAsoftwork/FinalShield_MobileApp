@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.example.finalshield.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,6 +62,13 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
             return true;
         });
     }
+    //  alternativa más eficiente
+    public void moverItemEficiente(int fromPosition, int toPosition) {
+        Uri itemMovido = lista.remove(fromPosition);
+        lista.add(toPosition, itemMovido);
+        notifyItemMoved(fromPosition, toPosition);
+    }
+
     @Override
     public int getItemCount() {
         return lista.size();

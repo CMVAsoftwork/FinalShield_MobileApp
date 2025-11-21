@@ -45,7 +45,7 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
     private ImageButton clearSelection;
 
     // Botones inferiores
-    ImageButton addele2, recortar2, edicion2, eliminar2;
+    ImageButton  recortar2, edicion2, eliminar2;
 
     private static final int REQUEST_CODE = 100;
 
@@ -73,12 +73,10 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
         });
 
         // === botones inferiores ===
-        addele2 = v.findViewById(R.id.addelements2);
         recortar2 = v.findViewById(R.id.recortar2);
         edicion2 = v.findViewById(R.id.edicion2);
         eliminar2 = v.findViewById(R.id.eliminar2);
 
-        addele2.setOnClickListener(this);
         recortar2.setOnClickListener(this);
         edicion2.setOnClickListener(this);
         eliminar2.setOnClickListener(this);
@@ -174,10 +172,7 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
     public void onClick(View v) {
         int id = v.getId();
 
-        if (id == R.id.addelements2) {
-            Navigation.findNavController(v).navigate(R.id.escanerGaEscanearMasPaginas);
-
-        } else if (id == R.id.recortar2) {
+       if (id == R.id.recortar2) {
             Navigation.findNavController(v).navigate(R.id.escanerGaCortarRotar);
 
         } else if (id == R.id.edicion2) {

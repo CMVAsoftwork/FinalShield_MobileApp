@@ -82,14 +82,6 @@
              android:scaleType="fitCenter"
              android:src="@drawable/circlecut" />
          <ImageButton
-             android:id="@+id/edicion1"
-             android:layout_width="30dp"
-             android:layout_height="30dp"
-             android:src="@drawable/hojitas"
-             android:scaleType="fitCenter"
-             android:layout_marginStart="50dp"
-             android:background="@android:color/transparent"/>
-         <ImageButton
              android:id="@+id/eliminar1"
              android:layout_width="30dp"
              android:layout_height="30dp"

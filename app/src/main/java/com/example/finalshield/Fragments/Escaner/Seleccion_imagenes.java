@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Seleccion_imagenes extends Fragment implements View.OnClickListener {
-    ImageButton camara, addele,recortar, edicion, eliminar;
+    ImageButton camara,recortar, edicion, eliminar;
     private RecyclerView recycler;
     private ImageAdapter adapter;
     private final List<Uri> listaImagenes = new ArrayList<>();
@@ -58,7 +58,6 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
         recycler.setLayoutManager(new GridLayoutManager(getContext(), 2));
         regre = v.findViewById(R.id.regresar1);
         camara = v.findViewById(R.id.scann);
-        addele = v.findViewById(R.id.addelements);
         recortar = v.findViewById(R.id.recortar);
         edicion = v.findViewById(R.id.edicion);
         eliminar = v.findViewById(R.id.eliminar);
@@ -66,7 +65,6 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
         selectionCount = v.findViewById(R.id.selectionCount);
         clearSelection = v.findViewById(R.id.clearSelection);
         camara.setOnClickListener(this);
-        addele.setOnClickListener(this);
         recortar.setOnClickListener(this);
         edicion.setOnClickListener(this);
         eliminar.setOnClickListener(this);
@@ -143,8 +141,6 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
         int id = v.getId();
         if(id == R.id.scann){
             Navigation.findNavController(v).navigate(R.id.escanerCifradoMixto);
-        } else if (id == R.id.addelements) {
-            Navigation.findNavController(v).navigate(R.id.escanearMasPaginas);
         } else if (id == R.id.recortar) {
             Navigation.findNavController(v).navigate(R.id.cortarRotar);
         } else if (id == R.id.edicion) {
