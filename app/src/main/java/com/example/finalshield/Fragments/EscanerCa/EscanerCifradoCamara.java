@@ -186,7 +186,7 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
     public void onResume() {
         super.onResume();
 
-        // CORRECCIÓN CLAVE: Llama a actualizar la UI siempre que el fragmento esté visible
+        // llama a actualizar la UI siempre que el fragmento esté visible
         // Si fotosTomadas está vacío, llama a recontar (que ya actualiza la UI).
         if (fotosTomadas.isEmpty()) {
             recontarFotosDesdeCache();
