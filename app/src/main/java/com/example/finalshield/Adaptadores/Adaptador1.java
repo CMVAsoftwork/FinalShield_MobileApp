@@ -21,7 +21,7 @@ public class Adaptador1 extends BaseAdapter {
 
     public Adaptador1(Context context, String[] listadeportes, String[] listacomentar, int[] listaimagenes) {
         this.contexto = context;
-        this.listadeportes = listadeportes;
+        //this.listadeportes = listadeportes;
         this.listacomentar = listacomentar;
         this.listaimagenes = listaimagenes;
         this.inflater = LayoutInflater.from(contexto);
