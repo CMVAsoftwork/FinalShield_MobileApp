@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,9 +34,9 @@ public class EscanerCaReordenar extends Fragment implements View.OnClickListener
     private Button regresar;
     private Button guardar;
 
-    // CLAVES
-    public static final String KEY_REORDENAR_RESULT = "reordenar_key_verfotos";
-    public static final String BUNDLE_REORDENAR_URI_LIST = "reordenar_uri_list_verfotos";
+    // Claves para el FragmentResultListener (las definimos aquí para mantenerlas centralizadas)
+    public static final String KEY_REORDENAR_RESULT = "reordenar_key";
+    public static final String BUNDLE_REORDENAR_URI_LIST = "reordenar_uri_list";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,88 +60,116 @@ public class EscanerCaReordenar extends Fragment implements View.OnClickListener
         cargarFotosDesdeArgumentos();
 
         // **CONFIGURACIÓN DEL DRAG AND DROP CON ITEMTOUCHHELPER**
-        // Asumiendo que SimpleItemTouchHelperCallback existe y usa el adaptador
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapter);
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
         touchHelper.attachToRecyclerView(recycler);
+
+        // **SOLUCIÓN AL PROBLEMA DE SELECCIÓN:** Deshabilitar Long Click
+        deshabilitarLongClickEnItems();
     }
 
-    // --- LÓGICA DE CARGA ---
+    /**
+     * CLAVE: Desactiva el OnLongClickListener de cada item del RecyclerView.
+     * Esto evita que el ImageAdapter inicie el selectionMode al mantener presionado,
+     * permitiendo que ItemTouchHelper tome control para el arrastre.
+     */
+    private void deshabilitarLongClickEnItems() {
+        recycler.addOnChildAttachStateChangeListener(new RecyclerView.OnChildAttachStateChangeListener() {
+            @Override
+            public void onChildViewAttachedToWindow(@NonNull View view) {
+                // Anula el OnLongClickListener que inicia el modo de selección
+                view.setOnLongClickListener(null);
+            }
+
+            @Override
+            public void onChildViewDetachedFromWindow(@NonNull View view) {
+                // No es necesario hacer nada aquí
+            }
+        });
+    }
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        if (id == R.id.regresar1 || id == R.id.guardar) {
+            // Recolectar la lista de URIs EN EL ORDEN ACTUALIZADO
+            Bundle result = new Bundle();
+            ArrayList<String> reordenadasStr = new ArrayList<>();
+
+            // Recorremos la lista que ya fue reordenada en memoria por el adaptador
+            for (Uri uri : listaFotosCamara) {
+                // **CLAVE:** Enviamos el String de la URI, pero en EscanerCifradoCamara
+                // tendremos que manejar la resolución a File nuevamente.
+                reordenadasStr.add(uri.toString());
+            }
+
+            result.putStringArrayList(BUNDLE_REORDENAR_URI_LIST, reordenadasStr);
+
+            // Enviamos el resultado al Fragmento anterior
+            getParentFragmentManager().setFragmentResult(KEY_REORDENAR_RESULT, result);
+
+            // Regresamos
+            Navigation.findNavController(v).popBackStack();
+        }
+    }
 
     private void cargarFotosDesdeArgumentos() {
         listaFotosCamara.clear();
         Bundle args = getArguments();
 
         if (args != null) {
-            ArrayList<String> uriStrings = args.getStringArrayList("FOTOS_CAPTURA");
+            // RECIBIMOS RUTAS ABSOLUTAS (String) del Fragmento anterior
+            ArrayList<String> filePaths = args.getStringArrayList("FOTOS_CAPTURA");
 
-            if (uriStrings != null) {
-                for (String uriStr : uriStrings) {
-                    try {
-                        Uri fileUri = Uri.parse(uriStr);
+            if (filePaths != null) {
+                for (String path : filePaths) {
+                    File file = new File(path);
+                    if (file.exists()) {
+                        // crear URI con FileProvider
+                        Uri fileUri = FileProvider.getUriForFile(
+                                requireContext(),
+                                requireContext().getPackageName() + ".fileprovider",
+                                file);
+                        // Guardamos el URI en la lista
                         listaFotosCamara.add(fileUri);
-                    } catch (Exception e) {
-                        Log.e("Reordenar", "Error al parsear URI: " + uriStr, e);
                     }
                 }
             }
         }
+        adapter = new ImageAdapter(listaFotosCamara, this);
 
-        adapter = new ImageAdapter(listaFotosCamara, this, R.layout.item_imagen);
         recycler.setAdapter(adapter);
     }
 
-    // --- MANEJO DE CLICKS ---
-
-    @Override
-    public void onClick(View v) {
-        int id = v.getId();
-        if (id == R.id.regresar1 || id == R.id.guardar) {
-            regresarConResultado();
-        }
-    }
-
-    // Método que regresa el resultado (debe usar la lista de URIs reordenada)
-    private void regresarConResultado() {
-        Bundle result = new Bundle();
-        ArrayList<String> uris = new ArrayList<>();
-
-        // Obtiene la lista final ordenada
-        List<Uri> finalUris = (adapter != null) ? adapter.getRetainedItems() : listaFotosCamara;
-
-        for (Uri uri : finalUris) uris.add(uri.toString());
-
-        result.putStringArrayList(BUNDLE_REORDENAR_URI_LIST, uris);
-
-        getParentFragmentManager().setFragmentResult(KEY_REORDENAR_RESULT, result);
-        Navigation.findNavController(requireView()).popBackStack();
-    }
-
-    // --- CALLBACKS DEL ADAPTADOR ---
+    // Implementación de la interfaz ImageAdapter.Callbacks
 
     @Override
     public void onImageClicked(Uri uri) {
-        ArrayList<String> uriStringList = new ArrayList<>();
+        // La lista de URIs ya existe como 'listaFotosCamara' en EscanerCaReordenar
 
+        // 1. Convertir la lista de Uri a lista de String
+        ArrayList<String> uriStringList = new ArrayList<>();
         for (Uri u : listaFotosCamara) {
-            uriStringList.add(u.toString());   // ✔ PASAR URI COMPLETO
+            uriStringList.add(u.toString());
         }
 
+        // 2. Encontrar la posición del URI clickeado
         int position = listaFotosCamara.indexOf(uri);
 
-        if (position == -1) return;
-
+        // 3. Iniciar la actividad con la lista y la posición
         Intent intent = new Intent(requireContext(), VistaImagenActivity.class);
-        intent.putStringArrayListExtra("uri_list", uriStringList);
-        intent.putExtra("position", position);
+
+        // Usar las CLAVES estáticas de la nueva VistaImagenActivity
+        intent.putStringArrayListExtra(VistaImagenActivity.EXTRA_URI_LIST, uriStringList);
+        intent.putExtra(VistaImagenActivity.EXTRA_POSITION, position);
 
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
         startActivity(intent);
     }
 
     @Override
     public void onSelectionChanged(int count) {
-        // No usado en Reordenar
+        // Este método se mantiene vacío porque solo usamos el adaptador para arrastrar/clic
+        // y no para el modo de selección. Si en otras vistas lo usas, se mantiene.
     }
 }

@@ -10,9 +10,11 @@ import android.widget.TextView;
 
 import com.example.finalshield.R;
 
+import java.util.List;
+
 public class Adaptador1 extends BaseAdapter {
     Context contexto;
-    String listadeportes[];
+    List<String> listadeportes[];
     String listacomentar[];
     int listaimagenes[];
     LayoutInflater inflater;
