@@ -23,11 +23,11 @@
             android:textSize="40dp" />
         <Button
             android:id="@+id/guardar"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="36dp"
-            android:layout_marginStart="160dp"
+            android:layout_marginStart="120dp"
             android:layout_marginTop="30dp"
-            android:text="Guardar PDF"
+            android:text="CIFRAR TODO"
             android:textColor="@color/white"
             android:backgroundTint="@color/degradado_negro_azul"
             android:textAlignment="center" />
@@ -48,7 +48,7 @@
             android:layout_height="80dp"
             android:layout_marginLeft="135dp"
             android:layout_marginTop="570dp"
-            android:backgroundTint="#9BB9FF" />
+            android:backgroundTint="#00BFFF" />
         <ImageView
             android:id="@+id/imagencita"
             android:layout_width="70dp"

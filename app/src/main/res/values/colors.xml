@@ -7,4 +7,6 @@
     <color name="degradado_azul_oscuro_1">#180A59</color>
     <color name="degradado_azul_oscuro_2">#171446</color>
     <color name="degradado_negro_azul">#000328</color>
+
+    <color name="transparencia_negro">#B3000000</color>
 </resources>

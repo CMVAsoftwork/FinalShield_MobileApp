@@ -35,7 +35,7 @@ import java.util.List;
 
 public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickListener, ImageAdapter.Callbacks {
 
-    // Claves de resultado para EscanerCifradoCamara
+    // Claves de resultado
     public static final String KEY_REORDENAR_RESULT = "reordenar_key_verfotos";
     public static final String BUNDLE_REORDENAR_URI_LIST = "reordenar_uri_list_verfotos";
 
@@ -81,7 +81,6 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
         clearSelection = v.findViewById(R.id.clearSelection);
         descartarSeleccion = v.findViewById(R.id.descartarSeleccion);
 
-        // Inicialización de las vistas del Diálogo (IDs del XML modificado)
         dialogContainer = v.findViewById(R.id.dialogContainer);
         siEliminarBtn = v.findViewById(R.id.sieliminar);
         noEliminarBtn = v.findViewById(R.id.noeliminar);
@@ -99,14 +98,12 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
             }
         });
 
-        // Lógica: Muestra el diálogo de confirmación en lugar de eliminar directamente
         descartarSeleccion.setOnClickListener(view -> {
             if (adapter != null && adapter.getSelectedCount() > 0) {
                 mostrarDialogoConfirmacion();
             }
         });
 
-        // Listeners del Diálogo
         siEliminarBtn.setOnClickListener(view -> {
             descartarFotosSeleccionadas();
             ocultarDialogoConfirmacion();
@@ -139,23 +136,28 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
         Bundle args = getArguments();
 
         if (args != null) {
-            ArrayList<String> filePaths = args.getStringArrayList("FOTOS_CAPTURA");
+            ArrayList<String> uriStrings = args.getStringArrayList("FOTOS_CAPTURA");
 
-            if (filePaths != null) {
-                for (String path : filePaths) {
-                    File file = new File(path);
-                    if (file.exists()) {
-                        // crear URI con FileProvider
-                        Uri fileUri = FileProvider.getUriForFile(
-                                requireContext(),
-                                requireContext().getPackageName() + ".fileprovider",
-                                file);
+            if (uriStrings != null) {
+                for (String uriStr : uriStrings) {
+                    try {
+                        // CLAVE: Parsear el String URI directamente
+                        Uri fileUri = Uri.parse(uriStr);
                         listaFotosCamara.add(fileUri);
+                    } catch (Exception e) {
+                        Log.e("VerFotosTomadas", "Error al parsear URI: " + uriStr, e);
                     }
                 }
             }
         }
-        adapter = new ImageAdapter(listaFotosCamara, this);
+
+        adapter = new ImageAdapter(
+                listaFotosCamara,
+                this,
+                R.layout.item_imagen,
+                true
+        );
+
         recycler.setAdapter(adapter);
     }
 
@@ -168,12 +170,16 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
         // Eliminar físicamente los archivos del disco
         for (Uri uri : discardedUris) {
             try {
-                // Intenta eliminar el archivo por su ruta (si es una Uri de FileProvider)
-                File file = new File(uri.getPath());
-                if (file.exists() && file.delete()) {
-                    Log.d("Visualizador", "Archivo descartado eliminado: " + file.getName());
-                } else {
-                    requireContext().getContentResolver().delete(uri, null, null);
+                // Buscamos el archivo en caché por su nombre
+                String fileName = uri.getLastPathSegment();
+                if (fileName != null) {
+                    File file = new File(requireContext().getCacheDir(), fileName);
+                    if (file.exists() && file.delete()) {
+                        Log.d("Visualizador", "Archivo descartado eliminado: " + file.getName());
+                    } else {
+                        // Fallback para URIs que no apuntan a la caché (raro en este flujo)
+                        requireContext().getContentResolver().delete(uri, null, null);
+                    }
                 }
             } catch (Exception e) {
                 Log.e("Visualizador", "Error al eliminar archivo URI: " + uri.toString(), e);
@@ -183,65 +189,75 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
         selectionBar.setVisibility(View.GONE);
         Toast.makeText(getContext(), count + " fotos descartadas y eliminadas del disco.", Toast.LENGTH_SHORT).show();
 
-        // Si no quedan fotos, regresa
         if (listaFotosCamara.isEmpty()) {
-            Navigation.findNavController(requireView()).popBackStack();
+            regresarA_EscanerCifradoCamara();
         }
     }
+
+    /**
+     * Envía la lista actual de URIs (retenidas o vacía) a EscanerCifradoCamara y navega hacia atrás.
+     */
+    private void regresarA_EscanerCifradoCamara() {
+        Bundle result = new Bundle();
+        ArrayList<String> retainedUrisStr = new ArrayList<>();
+
+        for (Uri uri : listaFotosCamara) {
+            retainedUrisStr.add(uri.toString());
+        }
+
+        result.putStringArrayList(BUNDLE_REORDENAR_URI_LIST, retainedUrisStr);
+
+        getParentFragmentManager().setFragmentResult(KEY_REORDENAR_RESULT, result);
+
+        Navigation.findNavController(requireView()).popBackStack();
+    }
+
 
     @Override
     public void onClick(View v) {
         int id = v.getId();
-
+        // Crea el Bundle de URIs para navegación (si es necesario)
+        Bundle bundle = new Bundle();
+        ArrayList<String> filePaths = new ArrayList<>();
+        for (Uri uri : listaFotosCamara) {
+            filePaths.add(uri.toString());
+        }
+        bundle.putStringArrayList("FOTOS_CAPTURA", filePaths);
         if (id == R.id.regresar1) {
-            // Prepara el resultado con el orden actual de las fotos que NO fueron eliminadas
-            Bundle result = new Bundle();
-            ArrayList<String> retainedUrisStr = new ArrayList<>();
-
-            for (Uri uri : listaFotosCamara) {
-                retainedUrisStr.add(uri.toString());
-            }
-
-            result.putStringArrayList(BUNDLE_REORDENAR_URI_LIST, retainedUrisStr);
-
-            // Envía el resultado a EscanerCifradoCamara (el fragmento anterior)
-            getParentFragmentManager().setFragmentResult(KEY_REORDENAR_RESULT, result);
-
-            // Regresa
-            Navigation.findNavController(v).popBackStack();
-
+            regresarA_EscanerCifradoCamara();
         } else if (id == R.id.guardar) {
-            if (adapter != null) {
-                List<Uri> retainedUris = adapter.getRetainedItems();
-                if (retainedUris.isEmpty()) {
-                    Toast.makeText(getContext(), "No hay imágenes para guardar.", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(getContext(), "Guardando " + retainedUris.size() + " imágenes...", Toast.LENGTH_SHORT).show();
-                    // Aquí debe ir la lógica real de guardado y cifrado
-                    Navigation.findNavController(v).popBackStack();
-                }
-            }
+            regresarA_EscanerCifradoCamara();
         } else if (id == R.id.scancam1) {
-            Navigation.findNavController(v).navigate(R.id.escanerCifradoCamara3);
+            regresarA_EscanerCifradoCamara();
         } else if (id == R.id.recortar1) {
-            Navigation.findNavController(v).navigate(R.id.escanerCaCortarRotar);
+            // Navegar a la herramienta de recorte/rotación
+            if (!listaFotosCamara.isEmpty()) {
+                Navigation.findNavController(v).navigate(R.id.escanerCaCortarRotar, bundle);
+            } else {
+                Toast.makeText(requireContext(), "No hay fotos para editar.", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     @Override
     public void onImageClicked(Uri uri) {
-        // Lanza la actividad de visualización (VistaImagenActivity)
+
         ArrayList<String> uriStringList = new ArrayList<>();
+
         for (Uri u : listaFotosCamara) {
-            uriStringList.add(u.toString());
+            uriStringList.add(u.toString());   // ✔ PASAR URI COMPLETO
         }
 
         int position = listaFotosCamara.indexOf(uri);
 
+        if (position == -1) return;
+
         Intent intent = new Intent(requireContext(), VistaImagenActivity.class);
-        intent.putStringArrayListExtra(VistaImagenActivity.EXTRA_URI_LIST, uriStringList);
-        intent.putExtra(VistaImagenActivity.EXTRA_POSITION, position);
+        intent.putStringArrayListExtra("uri_list", uriStringList);
+        intent.putExtra("position", position);
+
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
         startActivity(intent);
     }
 

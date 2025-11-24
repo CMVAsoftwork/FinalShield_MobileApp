@@ -32,6 +32,8 @@ android {
 }
 
 dependencies {
+    implementation("com.github.CanHub:Android-Image-Cropper:4.3.2")
+
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
 
     implementation("com.github.bumptech.glide:glide:4.16.0")

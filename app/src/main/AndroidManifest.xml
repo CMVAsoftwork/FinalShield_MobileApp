@@ -51,7 +51,7 @@
         </activity>
         <activity
             android:name=".Adaptadores.VistaImagenActivity"
-            android:exported="false"/>
+            android:hardwareAccelerated="true" />
     </application>
 
 </manifest>
