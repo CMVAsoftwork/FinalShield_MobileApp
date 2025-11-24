@@ -35,17 +35,14 @@ import java.util.List;
 
 public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickListener, ImageAdapter.Callbacks {
 
-    // Claves de resultado
     public static final String KEY_REORDENAR_RESULT = "reordenar_key_verfotos";
     public static final String BUNDLE_REORDENAR_URI_LIST = "reordenar_uri_list_verfotos";
 
-    // Vistas y Componentes
     ImageButton cam1, cortar1;
     private RecyclerView recycler;
     private ImageAdapter adapter;
     private final List<Uri> listaFotosCamara = new ArrayList<>();
 
-    // Barras de UI
     private LinearLayout selectionBar;
     private TextView selectionCount;
     private Button clearSelection;
@@ -53,7 +50,6 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
     private Button regresar;
     private Button guardar;
 
-    // Elementos del Diálogo de Confirmación
     private LinearLayout dialogContainer;
     private Button siEliminarBtn;
     private Button noEliminarBtn;
@@ -67,7 +63,6 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
 
-        // 1. Inicialización de Vistas
         recycler = v.findViewById(R.id.recycler);
         recycler.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
@@ -85,7 +80,6 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
         siEliminarBtn = v.findViewById(R.id.sieliminar);
         noEliminarBtn = v.findViewById(R.id.noeliminar);
 
-        // 2. Listeners
         regresar.setOnClickListener(this);
         guardar.setOnClickListener(this);
         cam1.setOnClickListener(this);
@@ -99,9 +93,7 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
         });
 
         descartarSeleccion.setOnClickListener(view -> {
-            if (adapter != null && adapter.getSelectedCount() > 0) {
-                mostrarDialogoConfirmacion();
-            }
+            if (adapter != null && adapter.getSelectedCount() > 0) mostrarDialogoConfirmacion();
         });
 
         siEliminarBtn.setOnClickListener(view -> {
@@ -109,27 +101,18 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
             ocultarDialogoConfirmacion();
         });
 
-        noEliminarBtn.setOnClickListener(view -> {
-            ocultarDialogoConfirmacion();
-        });
+        noEliminarBtn.setOnClickListener(view -> ocultarDialogoConfirmacion());
 
-        // 3. Cargar datos
         cargarFotosDesdeArgumentos();
     }
 
-    // --- LÓGICA DEL DIÁLOGO ---
     private void mostrarDialogoConfirmacion() {
-        if (dialogContainer != null) {
-            dialogContainer.setVisibility(View.VISIBLE);
-        }
+        if (dialogContainer != null) dialogContainer.setVisibility(View.VISIBLE);
     }
 
     private void ocultarDialogoConfirmacion() {
-        if (dialogContainer != null) {
-            dialogContainer.setVisibility(View.GONE);
-        }
+        if (dialogContainer != null) dialogContainer.setVisibility(View.GONE);
     }
-    // -------------------------
 
     private void cargarFotosDesdeArgumentos() {
         listaFotosCamara.clear();
@@ -137,11 +120,9 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
 
         if (args != null) {
             ArrayList<String> uriStrings = args.getStringArrayList("FOTOS_CAPTURA");
-
             if (uriStrings != null) {
                 for (String uriStr : uriStrings) {
                     try {
-                        // CLAVE: Parsear el String URI directamente
                         Uri fileUri = Uri.parse(uriStr);
                         listaFotosCamara.add(fileUri);
                     } catch (Exception e) {
@@ -151,13 +132,7 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
             }
         }
 
-        adapter = new ImageAdapter(
-                listaFotosCamara,
-                this,
-                R.layout.item_imagen,
-                true
-        );
-
+        adapter = new ImageAdapter(listaFotosCamara, this, R.layout.item_imagen, true);
         recycler.setAdapter(adapter);
     }
 
@@ -167,17 +142,14 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
         List<Uri> discardedUris = adapter.discardSelectedItems();
         int count = discardedUris.size();
 
-        // Eliminar físicamente los archivos del disco
         for (Uri uri : discardedUris) {
             try {
-                // Buscamos el archivo en caché por su nombre
                 String fileName = uri.getLastPathSegment();
                 if (fileName != null) {
                     File file = new File(requireContext().getCacheDir(), fileName);
                     if (file.exists() && file.delete()) {
                         Log.d("Visualizador", "Archivo descartado eliminado: " + file.getName());
                     } else {
-                        // Fallback para URIs que no apuntan a la caché (raro en este flujo)
                         requireContext().getContentResolver().delete(uri, null, null);
                     }
                 }
@@ -194,35 +166,25 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
         }
     }
 
-    /**
-     * Envía la lista actual de URIs (retenidas o vacía) a EscanerCifradoCamara y navega hacia atrás.
-     */
     private void regresarA_EscanerCifradoCamara() {
         Bundle result = new Bundle();
         ArrayList<String> retainedUrisStr = new ArrayList<>();
-
-        for (Uri uri : listaFotosCamara) {
-            retainedUrisStr.add(uri.toString());
-        }
-
+        for (Uri uri : listaFotosCamara) retainedUrisStr.add(uri.toString());
         result.putStringArrayList(BUNDLE_REORDENAR_URI_LIST, retainedUrisStr);
 
         getParentFragmentManager().setFragmentResult(KEY_REORDENAR_RESULT, result);
-
-        Navigation.findNavController(requireView()).navigate(R.id.escanerCifradoCamara3, result);
+        // volvemos atrás en el stack
+        Navigation.findNavController(requireView()).popBackStack();
     }
-
 
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        // Crea el Bundle de URIs para navegación (si es necesario)
         Bundle bundle = new Bundle();
         ArrayList<String> filePaths = new ArrayList<>();
-        for (Uri uri : listaFotosCamara) {
-            filePaths.add(uri.toString());
-        }
+        for (Uri uri : listaFotosCamara) filePaths.add(uri.toString());
         bundle.putStringArrayList("FOTOS_CAPTURA", filePaths);
+
         if (id == R.id.regresar1) {
             regresarA_EscanerCifradoCamara();
         } else if (id == R.id.guardar) {
@@ -230,7 +192,6 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
         } else if (id == R.id.scancam1) {
             regresarA_EscanerCifradoCamara();
         } else if (id == R.id.recortar1) {
-            // Navegar a la herramienta de recorte/rotación
             if (!listaFotosCamara.isEmpty()) {
                 Navigation.findNavController(v).navigate(R.id.escanerCaCortarRotar, bundle);
             } else {
@@ -241,29 +202,21 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
 
     @Override
     public void onImageClicked(Uri uri) {
-
         ArrayList<String> uriStringList = new ArrayList<>();
-
-        for (Uri u : listaFotosCamara) {
-            uriStringList.add(u.toString());   // ✔ PASAR URI COMPLETO
-        }
+        for (Uri u : listaFotosCamara) uriStringList.add(u.toString());
 
         int position = listaFotosCamara.indexOf(uri);
-
         if (position == -1) return;
 
         Intent intent = new Intent(requireContext(), VistaImagenActivity.class);
         intent.putStringArrayListExtra("uri_list", uriStringList);
         intent.putExtra("position", position);
-
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
         startActivity(intent);
     }
 
     @Override
     public void onSelectionChanged(int count) {
-        // Actualiza la barra de selección
         if (count > 0) {
             selectionBar.setVisibility(View.VISIBLE);
             selectionCount.setText(count + " seleccionadas");

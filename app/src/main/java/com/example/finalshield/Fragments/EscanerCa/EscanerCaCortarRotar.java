@@ -31,31 +31,23 @@ import java.util.List;
 
 public class EscanerCaCortarRotar extends Fragment implements View.OnClickListener, ImageAdapter.Callbacks {
 
-    // Vistas
     ImageButton cam1, eliminar1;
     private Button regresarBtn, guardarBtn;
     private Button cortarBtn, girar90Btn, girar180Btn;
 
-    // Cropper
     private CropImageView imageToEdit;
-
     private RecyclerView recyclerViewImgs;
 
-    // Datos
     private ImageAdapter adapter;
     private final List<Uri> listaFotosCamara = new ArrayList<>();
     private Uri currentSelectedUri = null;
     private int currentSelectedPosition = RecyclerView.NO_POSITION;
 
-    // Claves
     public static final String KEY_REORDENAR_RESULT = "reordenar_key_verfotos";
     public static final String BUNDLE_REORDENAR_URI_LIST = "reordenar_uri_list_verfotos";
 
-    // --- CICLO DE VIDA ---
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_escaner_ca_cortar_rotar, container, false);
     }
 
@@ -63,7 +55,6 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
 
-        // Inicialización de Vistas (código omitido para brevedad, asumo que es correcto)
         regresarBtn = v.findViewById(R.id.regresar4);
         guardarBtn = v.findViewById(R.id.guardar);
         girar90Btn = v.findViewById(R.id.deg90);
@@ -76,14 +67,12 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
 
         recyclerViewImgs.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        // Configuración del CropImageView
         imageToEdit.setFixedAspectRatio(false);
         imageToEdit.setShowCropOverlay(true);
         imageToEdit.setAutoZoomEnabled(true);
 
         cargarFotosDesdeArgumentos();
 
-        // Asignación de Click Listeners (código omitido para brevedad, asumo que es correcto)
         regresarBtn.setOnClickListener(this);
         guardarBtn.setOnClickListener(this);
         cam1.setOnClickListener(this);
@@ -93,15 +82,12 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
         cortarBtn.setOnClickListener(this);
     }
 
-    // --- LÓGICA DE CARGA ---
-
     private void cargarFotosDesdeArgumentos() {
         listaFotosCamara.clear();
         Bundle args = getArguments();
 
         if (args != null) {
             ArrayList<String> uriStrings = args.getStringArrayList("FOTOS_CAPTURA");
-
             if (uriStrings != null) {
                 for (String uriStr : uriStrings) {
                     try {
@@ -117,80 +103,49 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
         adapter = new ImageAdapter(listaFotosCamara, this, R.layout.activity_item_imagen_delgado);
         recyclerViewImgs.setAdapter(adapter);
 
-        if (!listaFotosCamara.isEmpty()) {
-            onImageClicked(listaFotosCamara.get(0));
-        }
+        if (!listaFotosCamara.isEmpty()) onImageClicked(listaFotosCamara.get(0));
     }
-
-    // --- CALLBACKS DEL ADAPTADOR ---
 
     @Override
     public void onImageClicked(Uri uri) {
         currentSelectedUri = uri;
         currentSelectedPosition = listaFotosCamara.indexOf(uri);
 
-        // Importante: Reinicia el CropImageView con la imagen original
         imageToEdit.setImageUriAsync(uri);
 
         if (adapter != null) adapter.setSelectedIndex(currentSelectedPosition);
     }
 
     @Override
-    public void onSelectionChanged(int count) {
-        // Implementación vacía
-    }
+    public void onSelectionChanged(int count) { /* no usado */ }
 
-    // --- MÉTODOS AUXILIARES Y LÓGICA DE EDICIÓN CORREGIDA ---
-
-    /**
-     * Resuelve un Uri de FileProvider a un objeto File buscando en la caché.
-     */
     private File getFileFromUri(Uri uri) {
-        String fileName = uri.getLastPathSegment();
+        String fileName = (uri == null) ? null : uri.getLastPathSegment();
         if (fileName == null) return null;
 
         File cacheDir = requireContext().getCacheDir();
         File[] cachedFiles = cacheDir.listFiles();
-
         if (cachedFiles != null) {
             for (File file : cachedFiles) {
-                if (file.isFile() && file.getName().equals(fileName)) {
-                    return file;
-                }
+                if (file.isFile() && file.getName().equals(fileName)) return file;
             }
         }
         return null;
     }
 
-    /**
-     * Guarda el Bitmap sobrescribiendo el archivo físico original, manteniendo la misma URI.
-     * @param bitmap El Bitmap editado (recorte o rotación).
-     * @param fileOriginal El File original que debe ser sobrescrito.
-     * @return La URI del archivo guardado (la misma que la original).
-     */
     private Uri guardarBitmapSobrescribiendo(Bitmap bitmap, File fileOriginal) {
-
         if (fileOriginal == null || !fileOriginal.exists()) {
             Log.e("CortarRotar", "El archivo original para sobrescribir no es válido.");
             return null;
         }
 
-        File fileToSave = fileOriginal;
-
-        try (FileOutputStream out = new FileOutputStream(fileToSave)) {
-            // Comprimir el bitmap y escribirlo en el archivo
+        try (FileOutputStream out = new FileOutputStream(fileOriginal)) {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
             out.flush();
 
-            // Devolvemos la URI del archivo guardado
-            return FileProvider.getUriForFile(
-                    requireContext(),
-                    requireContext().getPackageName() + ".fileprovider",
-                    fileToSave
-            );
-
+            return FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".fileprovider", fileOriginal);
         } catch (Exception e) {
-            Log.e("CortarRotar", "Error guardando bitmap: " + e.getMessage());
+            Log.e("CortarRotar", "Error guardando bitmap: " + e.getMessage(), e);
             return null;
         }
     }
@@ -201,11 +156,7 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
             return;
         }
 
-        // 1. Aplicar la rotación visual en el CropImageView
         imageToEdit.rotateImage(grados);
-
-        // 2. Obtener la imagen rotada (Bitmap)
-        // CropImageView.getCroppedImage() obtiene el bitmap con la rotación actual aplicada.
         Bitmap rotatedBitmap = imageToEdit.getCroppedImage();
 
         if (rotatedBitmap == null) {
@@ -213,31 +164,23 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
             return;
         }
 
-        // 3. Obtener el archivo original para sobrescribir
         File fileOriginal = getFileFromUri(currentSelectedUri);
-
         if (fileOriginal == null) {
             Toast.makeText(requireContext(), "Error: Archivo original no encontrado.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 4. Guardar sobrescribiendo el archivo original
         Uri nuevaUri = guardarBitmapSobrescribiendo(rotatedBitmap, fileOriginal);
-
         if (nuevaUri != null) {
-            // 5. Refrescar la vista y la miniatura
+            listaFotosCamara.set(currentSelectedPosition, nuevaUri);
+            if (adapter != null) adapter.notifyItemChanged(currentSelectedPosition);
             imageToEdit.setImageUriAsync(nuevaUri);
-
-            if (adapter != null) {
-                adapter.notifyItemChanged(currentSelectedPosition);
-            }
-
-            Toast.makeText(requireContext(), "Imagen rotada y actualizada.", Toast.LENGTH_SHORT).show();
+            currentSelectedUri = nuevaUri;
+            Toast.makeText(requireContext(), "Imagen rotada y guardada.", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(requireContext(), "Error al guardar la rotación.", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     private void procesarRecorteYGuardar() {
         if (currentSelectedUri == null || currentSelectedPosition == RecyclerView.NO_POSITION) {
@@ -245,28 +188,20 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
             return;
         }
 
-        // Obtener el File del archivo actual a partir de la URI seleccionada
         File fileOriginal = getFileFromUri(currentSelectedUri);
-
         if (fileOriginal == null) {
             Toast.makeText(requireContext(), "Error: No se encontró el archivo original para el recorte.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Obtener el bitmap recortado (esto incluye rotaciones si se aplicaron antes)
         Bitmap bitmap = imageToEdit.getCroppedImage();
-
         if (bitmap != null) {
-            // Guardar sobrescribiendo el archivo original
             Uri nuevaUri = guardarBitmapSobrescribiendo(bitmap, fileOriginal);
-
             if (nuevaUri != null) {
-                // Recargar la imagen y refrescar la miniatura
+                listaFotosCamara.set(currentSelectedPosition, nuevaUri);
+                if (adapter != null) adapter.notifyItemChanged(currentSelectedPosition);
                 imageToEdit.setImageUriAsync(nuevaUri);
-                if (adapter != null) {
-                    adapter.notifyItemChanged(currentSelectedPosition);
-                }
-
+                currentSelectedUri = nuevaUri;
                 Toast.makeText(requireContext(), "Recorte aplicado y guardado.", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(requireContext(), "Error al guardar el recorte.", Toast.LENGTH_SHORT).show();
@@ -280,9 +215,7 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
         Bundle result = new Bundle();
         ArrayList<String> uris = new ArrayList<>();
         for (Uri uri : listaFotosCamara) uris.add(uri.toString());
-
         result.putStringArrayList(BUNDLE_REORDENAR_URI_LIST, uris);
-
         getParentFragmentManager().setFragmentResult(KEY_REORDENAR_RESULT, result);
         Navigation.findNavController(requireView()).popBackStack();
     }
@@ -290,17 +223,10 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
     private Bundle crearBundleConUris() {
         Bundle bundle = new Bundle();
         ArrayList<String> uriStrings = new ArrayList<>();
-
-        for (Uri uri : listaFotosCamara) {
-            uriStrings.add(uri.toString());
-        }
-
+        for (Uri uri : listaFotosCamara) uriStrings.add(uri.toString());
         bundle.putStringArrayList("FOTOS_CAPTURA", uriStrings);
         return bundle;
     }
-
-
-    // --- MANEJO DE CLICKS ---
 
     @Override
     public void onClick(View v) {
@@ -308,12 +234,9 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
 
         if (id == R.id.regresar4 || id == R.id.guardar) {
             regresarConResultado();
-
         } else if (id == R.id.scancam1) {
             Bundle bundle = crearBundleConUris();
             Navigation.findNavController(v).navigate(R.id.escanerCifradoCamara3, bundle);
-
-
         } else if (id == R.id.eliminar1) {
             if (!listaFotosCamara.isEmpty()) {
                 Bundle bundle = crearBundleConUris();
@@ -321,19 +244,12 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
             } else {
                 Toast.makeText(requireContext(), "No hay fotos para eliminar.", Toast.LENGTH_SHORT).show();
             }
-
         } else if (id == R.id.deg90) {
-            // Rotar 90 grados y guardar
             rotarImagen(90);
-
         } else if (id == R.id.deg180) {
-            // Rotar 180 grados y guardar
             rotarImagen(180);
-
-        }  else if (id == R.id.cutt) {
-            // Aplicar recorte y guardar
+        } else if (id == R.id.cutt) {
             procesarRecorteYGuardar();
-
         }
     }
 }

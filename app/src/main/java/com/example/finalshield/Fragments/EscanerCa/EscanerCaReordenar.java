@@ -32,16 +32,14 @@ public class EscanerCaReordenar extends Fragment implements View.OnClickListener
     private RecyclerView recycler;
     private ImageAdapter adapter;
     private final List<Uri> listaFotosCamara = new ArrayList<>();
-    private Button regresar;
-    private Button guardar;
+    private View regresar;
+    private View guardar;
 
-    // CLAVES
     public static final String KEY_REORDENAR_RESULT = "reordenar_key_verfotos";
     public static final String BUNDLE_REORDENAR_URI_LIST = "reordenar_uri_list_verfotos";
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_escaner_ca_reordenar, container, false);
     }
 
@@ -60,22 +58,17 @@ public class EscanerCaReordenar extends Fragment implements View.OnClickListener
 
         cargarFotosDesdeArgumentos();
 
-        // **CONFIGURACIÓN DEL DRAG AND DROP CON ITEMTOUCHHELPER**
-        // Asumiendo que SimpleItemTouchHelperCallback existe y usa el adaptador
+        // Configurar ItemTouchHelper (tu implementación de SimpleItemTouchHelperCallback debe existir)
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapter);
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
         touchHelper.attachToRecyclerView(recycler);
     }
 
-    // --- LÓGICA DE CARGA ---
-
     private void cargarFotosDesdeArgumentos() {
         listaFotosCamara.clear();
         Bundle args = getArguments();
-
         if (args != null) {
             ArrayList<String> uriStrings = args.getStringArrayList("FOTOS_CAPTURA");
-
             if (uriStrings != null) {
                 for (String uriStr : uriStrings) {
                     try {
@@ -92,8 +85,6 @@ public class EscanerCaReordenar extends Fragment implements View.OnClickListener
         recycler.setAdapter(adapter);
     }
 
-    // --- MANEJO DE CLICKS ---
-
     @Override
     public void onClick(View v) {
         int id = v.getId();
@@ -102,47 +93,32 @@ public class EscanerCaReordenar extends Fragment implements View.OnClickListener
         }
     }
 
-    // Método que regresa el resultado (debe usar la lista de URIs reordenada)
     private void regresarConResultado() {
         Bundle result = new Bundle();
         ArrayList<String> uris = new ArrayList<>();
-
-        // Obtiene la lista final ordenada
         List<Uri> finalUris = (adapter != null) ? adapter.getRetainedItems() : listaFotosCamara;
-
         for (Uri uri : finalUris) uris.add(uri.toString());
-
         result.putStringArrayList(BUNDLE_REORDENAR_URI_LIST, uris);
-
         getParentFragmentManager().setFragmentResult(KEY_REORDENAR_RESULT, result);
         Navigation.findNavController(requireView()).popBackStack();
     }
 
-    // --- CALLBACKS DEL ADAPTADOR ---
-
     @Override
     public void onImageClicked(Uri uri) {
         ArrayList<String> uriStringList = new ArrayList<>();
-
-        for (Uri u : listaFotosCamara) {
-            uriStringList.add(u.toString());   // ✔ PASAR URI COMPLETO
-        }
+        for (Uri u : listaFotosCamara) uriStringList.add(u.toString());
 
         int position = listaFotosCamara.indexOf(uri);
-
         if (position == -1) return;
 
+        // Inicia actividad para ver imagen
         Intent intent = new Intent(requireContext(), VistaImagenActivity.class);
         intent.putStringArrayListExtra("uri_list", uriStringList);
         intent.putExtra("position", position);
-
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
         startActivity(intent);
     }
 
     @Override
-    public void onSelectionChanged(int count) {
-        // No usado en Reordenar
-    }
+    public void onSelectionChanged(int count) { /* No usado en reordenar */ }
 }

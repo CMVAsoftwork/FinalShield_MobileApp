@@ -31,6 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.finalshield.R;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -79,64 +80,54 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
     private static final String FOTO_PREFIX = "CAMARA_TEMP_";
     private static final int CAMERA_REQUEST_CODE = 10;
 
-    // Vistas y CameraX
     ImageButton recortar1, eliminar1;
     Button regresar, guardarPdf;
-    private PreviewView vistaPrevia;
+    private androidx.camera.view.PreviewView vistaPrevia;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private ImageCapture imageCapture;
     private Button tomarfoto;
     private ImageView imagencita;
     private TextView contadorfot;
 
-    // Datos de sesión
     private int contador = 0;
     private final List<File> fotosTomadas = new ArrayList<>();
 
-    // Claves del resultado de reordenamiento/eliminación
     public static final String KEY_REORDENAR_RESULT = "reordenar_key_verfotos";
     public static final String BUNDLE_REORDENAR_URI_LIST = "reordenar_uri_list_verfotos";
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_escaner_cifrado_camara, container, false);
     }
 
+    @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
 
-        // **1. Manejo del Resultado de Reordenamiento/Eliminación**
-        getParentFragmentManager().setFragmentResultListener(
-                KEY_REORDENAR_RESULT,
-                this,
-                (requestKey, result) -> {
-                    if (requestKey.equals(KEY_REORDENAR_RESULT)) {
-                        ArrayList<String> nuevasRutasStr = result.getStringArrayList(BUNDLE_REORDENAR_URI_LIST);
-
-                        if (nuevasRutasStr != null) {
-
-                            List<File> reordenadas = new ArrayList<>();
-                            for (String uriStr : nuevasRutasStr) {
-                                // Buscamos el File en la caché basado en el URI devuelto
-                                File file = getFileFromUri(Uri.parse(uriStr));
-                                if (file != null && file.exists()) {
-                                    reordenadas.add(file);
-                                } else {
-                                    Log.w("Camara", "Archivo no encontrado para URI devuelta: " + uriStr);
-                                }
-                            }
-
-                            // Actualizar la lista principal
-                            fotosTomadas.clear();
-                            fotosTomadas.addAll(reordenadas);
+        // Escucha los resultados que vienen de Reordenar / VerFotos / CortarRotar
+        getParentFragmentManager().setFragmentResultListener(KEY_REORDENAR_RESULT, this, (requestKey, result) -> {
+            if (requestKey.equals(KEY_REORDENAR_RESULT)) {
+                ArrayList<String> nuevasRutasStr = result.getStringArrayList(BUNDLE_REORDENAR_URI_LIST);
+                if (nuevasRutasStr != null) {
+                    List<File> reordenadas = new ArrayList<>();
+                    for (String uriStr : nuevasRutasStr) {
+                        try {
+                            Uri u = Uri.parse(uriStr);
+                            File f = getFileFromUri(u);
+                            if (f != null && f.exists()) reordenadas.add(f);
+                            else Log.w("Camara", "Archivo no encontrado para URI devuelta: " + uriStr);
+                        } catch (Exception ex) {
+                            Log.e("Camara", "Error parseando URI devuelta: " + uriStr, ex);
                         }
-
-                        actualizarUIConDatosActuales();
                     }
-                });
 
-        // 2. Inicialización de Vistas
+                    fotosTomadas.clear();
+                    fotosTomadas.addAll(reordenadas);
+                    actualizarUIConDatosActuales();
+                }
+            }
+        });
+
         vistaPrevia = v.findViewById(R.id.vistaprevia);
         regresar = v.findViewById(R.id.regresar4);
         guardarPdf = v.findViewById(R.id.guardar);
@@ -146,54 +137,38 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
         recortar1 = v.findViewById(R.id.recortar1);
         eliminar1 = v.findViewById(R.id.eliminar1);
 
-        // 3. Listeners
         tomarfoto.setOnClickListener(this);
         if (imagencita != null) imagencita.setOnClickListener(this);
         recortar1.setOnClickListener(this);
         eliminar1.setOnClickListener(this);
         regresar.setOnClickListener(this);
 
-        // 4. Iniciar Cámara
-        if (allPermissionsGranted()) {
-            startCamera();
-        } else {
-            requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
-        }
+        if (allPermissionsGranted()) startCamera();
+        else requestPermissions(new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
     }
 
     /**
-     * Resuelve un Uri de FileProvider a un objeto File buscando en la caché.
+     * Resuelve un Uri (FileProvider) a File buscando en cache dir por nombre.
      */
     private File getFileFromUri(Uri uri) {
+        if (uri == null) return null;
         String fileName = uri.getLastPathSegment();
         if (fileName == null) return null;
 
         File cacheDir = requireContext().getCacheDir();
         File[] cachedFiles = cacheDir.listFiles();
-
         if (cachedFiles != null) {
             for (File file : cachedFiles) {
-                // Buscamos el archivo por nombre (EDITADO_ o CAMARA_TEMP_)
-                if (file.isFile() && file.getName().equals(fileName)) {
-                    return file;
-                }
+                if (file.isFile() && file.getName().equals(fileName)) return file;
             }
         }
         return null;
     }
 
-    /**
-     * Crea y devuelve la lista de URIs (Strings) para la navegación.
-     */
     private ArrayList<String> crearListaUrisParaNavegacion() {
         ArrayList<String> uriStrings = new ArrayList<>();
         for (File file : fotosTomadas) {
-            // Convertir el File a Uri de FileProvider ANTES de enviarlo
-            Uri fileUri = FileProvider.getUriForFile(
-                    requireContext(),
-                    requireContext().getPackageName() + ".fileprovider",
-                    file
-            );
+            Uri fileUri = FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".fileprovider", file);
             uriStrings.add(fileUri.toString());
         }
         return uriStrings;
@@ -202,16 +177,10 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
     @Override
     public void onResume() {
         super.onResume();
-        if (fotosTomadas.isEmpty()) {
-            recontarFotosDesdeCache();
-        } else {
-            actualizarUIConDatosActuales();
-        }
+        if (fotosTomadas.isEmpty()) recontarFotosDesdeCache();
+        else actualizarUIConDatosActuales();
     }
 
-    /**
-     * Actualiza el contador y la miniatura con la última foto de la lista actual.
-     */
     private void actualizarUIConDatosActuales() {
         if (!fotosTomadas.isEmpty()) {
             contador = fotosTomadas.size();
@@ -228,19 +197,13 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
         if (imagencita != null) Glide.with(this).load((String) null).into(imagencita);
     }
 
-    /**
-     * Limpia los archivos temporales de la caché (ambos CAMARA_TEMP y EDITADO_).
-     */
     private void limpiarArchivosDeSesionAnterior() {
         File cacheDir = requireContext().getCacheDir();
-        // Identificar todos los archivos temporales creados por esta funcionalidad
         File[] files = cacheDir.listFiles((dir, name) ->
                 (name.startsWith(FOTO_PREFIX) || name.startsWith("EDITADO_")) && name.endsWith(".jpg"));
 
         if (files != null) {
-            for (File file : files) {
-                file.delete();
-            }
+            for (File file : files) file.delete();
         }
         fotosTomadas.clear();
         limpiarUI();
@@ -252,19 +215,15 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
         File[] cachedFiles = cacheDir.listFiles();
 
         List<File> tempFiles = new ArrayList<>();
-
         if (cachedFiles != null) {
             for (File file : cachedFiles) {
-                // Recuperar archivos temporales que aún existan
                 if (file.isFile() && (file.getName().startsWith(FOTO_PREFIX) || file.getName().startsWith("EDITADO_")) && file.getName().endsWith(".jpg")) {
                     tempFiles.add(file);
                 }
             }
         }
 
-        // Ordenar por fecha de última modificación (para orden consistente)
         tempFiles.sort(Comparator.comparingLong(File::lastModified));
-
         fotosTomadas.addAll(tempFiles);
         actualizarUIConDatosActuales();
     }
@@ -276,7 +235,7 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        if(id == R.id.imagencita) {
+        if (id == R.id.imagencita) {
             if (!fotosTomadas.isEmpty()) {
                 Bundle bundle = new Bundle();
                 bundle.putStringArrayList("FOTOS_CAPTURA", crearListaUrisParaNavegacion());
@@ -284,8 +243,7 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
             } else {
                 Toast.makeText(requireContext(), "No hay fotos para visualizar.", Toast.LENGTH_SHORT).show();
             }
-        } else if(id == R.id.regresar4){
-            // CLAVE: Limpiar al salir de la funcionalidad sin guardar
+        } else if (id == R.id.regresar4) {
             limpiarArchivosDeSesionAnterior();
             Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
         } else if (id == R.id.tomarfoto) {
@@ -309,8 +267,6 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
         }
     }
 
-    // --- MÉTODOS DE CÁMARA ---
-
     private void tomarFoto() {
         if (imageCapture == null) return;
 
@@ -326,8 +282,9 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                         fotosTomadas.add(photoFile);
                         actualizarUIConDatosActuales();
-                        Toast.makeText(requireContext(), "Foto #" + contador + " capturada.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Foto capturada.", Toast.LENGTH_SHORT).show();
                     }
+
                     @Override
                     public void onError(@NonNull ImageCaptureException exception) {
                         Log.e("EscanerCifrado", "Error al capturar la imagen: " + exception.getMessage());
@@ -340,24 +297,22 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
     private void mostrarUltimaFoto(File photoFile) {
         Glide.with(this)
                 .load(photoFile)
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .centerCrop()
                 .into(imagencita);
     }
 
     private boolean allPermissionsGranted() {
-        return ContextCompat.checkSelfPermission(
-                requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_REQUEST_CODE) {
-            if (allPermissionsGranted()) {
-                startCamera();
-            } else {
-                Toast.makeText(requireContext(), "Permiso de cámara no concedido.", Toast.LENGTH_SHORT).show();
-            }
+            if (allPermissionsGranted()) startCamera();
+            else Toast.makeText(requireContext(), "Permiso de cámara no concedido.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -367,12 +322,12 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
             try {
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 Preview preview = new Preview.Builder().build();
-                CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
+                androidx.camera.core.CameraSelector cameraSelector = androidx.camera.core.CameraSelector.DEFAULT_BACK_CAMERA;
                 imageCapture = new ImageCapture.Builder().build();
                 preview.setSurfaceProvider(vistaPrevia.getSurfaceProvider());
                 cameraProvider.unbindAll();
                 cameraProvider.bindToLifecycle(getViewLifecycleOwner(), cameraSelector, preview, imageCapture);
-            } catch (ExecutionException | InterruptedException e) {
+            } catch (Exception e) {
                 Log.e("EscanerCifrado", "Error al inicializar CameraX.", e);
             }
         }, ContextCompat.getMainExecutor(requireContext()));
