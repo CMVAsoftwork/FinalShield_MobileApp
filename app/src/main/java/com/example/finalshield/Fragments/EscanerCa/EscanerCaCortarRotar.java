@@ -1,6 +1,7 @@
 package com.example.finalshield.Fragments.EscanerCa;
 
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -12,6 +13,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,11 +48,6 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
 
     public static final String KEY_REORDENAR_RESULT = "reordenar_key_verfotos";
     public static final String BUNDLE_REORDENAR_URI_LIST = "reordenar_uri_list_verfotos";
-
-
-    // ---------------------------------------------------------------------------------
-    // Ciclo de Vida del Fragment
-    // ---------------------------------------------------------------------------------
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -151,9 +148,6 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
         File[] cachedFiles = cacheDir.listFiles();
         if (cachedFiles != null) {
             for (File file : cachedFiles) {
-                // Buscamos un archivo en el caché que termine con el mismo nombre que el path segment de la URI
-                // Nota: Esto puede ser simplificado si solo guardas el File en lugar de la URI en la lista.
-                // Pero manteniendo tu lógica:
                 if (file.isFile() && file.getName().equals(fileName)) return file;
             }
         }
@@ -187,37 +181,70 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
     // Lógica de Rotación y Recorte (CORREGIDA)
     // ---------------------------------------------------------------------------------
 
+    /**
+     * Lee la URI como un Bitmap, le aplica la rotación y devuelve el nuevo Bitmap.
+     */
+    private Bitmap rotarBitmapManualmente(Uri uri, int grados) {
+        try {
+            // 1. Lee el Bitmap de la URI (sin las transformaciones de la vista)
+            Bitmap originalBitmap = MediaStore.Images.Media.getBitmap(requireContext().getContentResolver(), uri);
+
+            if (originalBitmap == null) return null;
+
+            // 2. Crea la matriz de rotación y la aplica
+            Matrix matrix = new Matrix();
+            matrix.postRotate(grados);
+
+            // 3. Aplica la rotación a un nuevo Bitmap
+            Bitmap rotatedBitmap = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, true);
+
+            // 4. Libera la memoria del original
+            originalBitmap.recycle();
+            return rotatedBitmap;
+
+        } catch (Exception e) {
+            Log.e("CortarRotar", "Error al rotar bitmap manualmente: " + e.getMessage(), e);
+            return null;
+        }
+    }
+
+
     private void rotarImagen(int grados) {
         if (currentSelectedUri == null || currentSelectedPosition == RecyclerView.NO_POSITION) {
             Toast.makeText(requireContext(), "Seleccione una imagen primero.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 1. Aplica la rotación visualmente en el editor
+        // 1. Aplica la rotación visualmente en el editor (SÓLO la vista, no el archivo)
         imageToEdit.rotateImage(grados);
 
-        // 2. Obtiene la imagen rotada como Bitmap
-        Bitmap rotatedBitmap = imageToEdit.getCroppedImage();
-        if (rotatedBitmap == null) {
-            Toast.makeText(requireContext(), "Error al obtener la imagen rotada.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+        // 2. Obtiene el archivo original
         File fileOriginal = getFileFromUri(currentSelectedUri);
         if (fileOriginal == null) {
             Toast.makeText(requireContext(), "Error: Archivo original no encontrado.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 3. Guarda el nuevo Bitmap sobrescribiendo el archivo original
+        // 3. Obtiene el Bitmap de la URI (sin recorte) y le aplica la rotación
+        Bitmap rotatedBitmap = rotarBitmapManualmente(currentSelectedUri, grados);
+
+        if (rotatedBitmap == null) {
+            Toast.makeText(requireContext(), "Error al obtener o rotar la imagen.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 4. Guarda el nuevo Bitmap sobrescribiendo el archivo original
         Uri nuevaUri = guardarBitmapSobrescribiendo(rotatedBitmap, fileOriginal);
 
+        // 5. Libera la memoria del Bitmap rotado
+        rotatedBitmap.recycle();
+
         if (nuevaUri != null) {
-            // 4. Actualiza la lista y notifica al RecyclerView
+            // 6. Actualiza la lista y notifica al RecyclerView
             listaFotosCamara.set(currentSelectedPosition, nuevaUri);
             if (adapter != null) adapter.notifyItemChanged(currentSelectedPosition);
 
-            // 5. Vuelve a cargar la imagen en el editor desde la URI para reflejar el cambio y restablecer el zoom/pan
+            // 7. Vuelve a cargar la imagen en el editor para reflejar el cambio y restablecer el zoom/pan.
             imageToEdit.setImageUriAsync(nuevaUri);
             currentSelectedUri = nuevaUri;
             Toast.makeText(requireContext(), "Imagen rotada y guardada.", Toast.LENGTH_SHORT).show();
@@ -238,7 +265,7 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
             return;
         }
 
-        // 1. Obtiene la imagen recortada como Bitmap
+        // 1. Obtiene la imagen recortada como Bitmap (Esto sí incluye el recorte)
         Bitmap bitmap = imageToEdit.getCroppedImage();
         if (bitmap != null) {
             // 2. Guarda el nuevo Bitmap sobrescribiendo el archivo original

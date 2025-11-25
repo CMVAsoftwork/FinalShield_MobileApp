@@ -317,20 +317,31 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
                 Toast.makeText(getContext(), "No hay elementos guardados para recortar.", Toast.LENGTH_SHORT).show();
                 return;
             }
+            sharedViewModel.setImageUriList(listaSeleccionadaParaGuardar);
+
+            // 2. Navegar al fragmento de eliminación
             Navigation.findNavController(v).navigate(R.id.escanerGaCortarRotar);
+            if (adapter != null) {
+                adapter.clearSelection();
+                actualizarBarra();
+            }
         } else if (id == R.id.edicion2) {
             if (listaSeleccionadaParaGuardar.isEmpty()) {
                 Toast.makeText(getContext(), "No hay elementos guardados para editar.", Toast.LENGTH_SHORT).show();
                 return;
             }
+            sharedViewModel.setImageUriList(listaSeleccionadaParaGuardar);
             Navigation.findNavController(v).navigate(R.id.escanerGaVisualizacionYReordenamiento);
+            if (adapter != null) {
+                adapter.clearSelection();
+                actualizarBarra();
+            }
         } else if (id == R.id.eliminar2) {
             // CORRECCIÓN: Navegar a eliminación con la lista MAESTRA, no la selección de la galería
             if (listaSeleccionadaParaGuardar.isEmpty()) {
                 Toast.makeText(getContext(), "No hay elementos guardados para eliminar.", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             // 1. Almacenar la lista MAESTRA en el ViewModel (ya está actualizado en guardarImagenesSeleccionadas,
             // pero lo hacemos aquí para asegurarnos antes de navegar)
             sharedViewModel.setImageUriList(listaSeleccionadaParaGuardar);
