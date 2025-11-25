@@ -34,14 +34,15 @@
     </LinearLayout>
 
 
-    <!-- BARRA DE SELECCIÓN -->
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/selectionBar"
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="56dp"
         android:layout_below="@id/topBar"
-        android:background="#3300A3FF"
-        android:padding="10dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="#222"
         android:visibility="gone">
 
         <TextView
@@ -51,16 +52,24 @@
             android:text="0 seleccionadas"
             android:textSize="18sp"
             android:textColor="@android:color/white"
-            android:layout_centerVertical="true"/>
+            android:layout_weight="1" />
 
-        <ImageButton
+        <Button
+            android:id="@+id/guardarSeleccion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Guardar"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#FF4444"
+            android:layout_marginEnd="8dp"/>
+        <Button
             android:id="@+id/clearSelection"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
-            android:layout_alignParentEnd="true"
-            android:src="@drawable/ic_close"
-            android:background="@android:color/transparent"/>
-    </RelativeLayout>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancelar"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#444" />
+    </LinearLayout>
 
 
     <!-- RECYCLER -->

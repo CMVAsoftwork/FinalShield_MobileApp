@@ -1,5 +1,7 @@
 package com.example.finalshield.Adaptadores;
 
+import android.net.Uri;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -9,9 +11,11 @@ import java.util.List;
 
 public class ImagePagerAdapter extends FragmentStateAdapter {
 
-    private final List<String> uriList; // Lista de todos los URIs
+    // *** CAMBIO 1: Cambiar el tipo de la lista interna a List<Uri> ***
+    private final List<Uri> uriList;
 
-    public ImagePagerAdapter(@NonNull FragmentActivity fragmentActivity, List<String> uriList) {
+    // *** CAMBIO 2: Aceptar List<Uri> en el constructor ***
+    public ImagePagerAdapter(@NonNull FragmentActivity fragmentActivity, List<Uri> uriList) {
         super(fragmentActivity);
         this.uriList = uriList;
     }
@@ -20,12 +24,16 @@ public class ImagePagerAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position) {
         // Crea un ImageFragment para el URI en esa posición
-        String uriString = uriList.get(position);
+        Uri uri = uriList.get(position);
+
+        // *** CAMBIO 3: Convertir Uri a String para pasarlo al Fragmento (Si ImageFragment lo espera) ***
+        String uriString = uri.toString();
+
         return ImageFragment.newInstance(uriString);
     }
 
     @Override
     public int getItemCount() {
-        return uriList.size(); // Total de imágenes
+        return uriList.size();
     }
 }
