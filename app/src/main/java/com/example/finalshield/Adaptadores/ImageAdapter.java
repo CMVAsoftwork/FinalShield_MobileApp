@@ -76,7 +76,14 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
         Uri uri = lista.get(pos);
 
         // Carga de imagen
-        h.img.setImageURI(uri);
+        Glide.with(h.itemView.getContext())
+                .load(uri)
+                // Opciones para forzar la recarga:
+                // 1. Saltamos la caché de memoria para que no use la miniatura antigua.
+                .skipMemoryCache(true)
+                // 2. Saltamos la caché de disco para asegurar que se lee el archivo sobrescrito.
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .into(h.img);
 
         // Manejo del MODO SELECCIÓN MÚLTIPLE (Visual)
         boolean isSelectedMultiple = seleccionadas.contains(uri);
@@ -149,16 +156,29 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     }
 
     public void toggleSelection(Uri uri) {
+        // 1. Encontrar la posición
+        int position = lista.indexOf(uri);
+        if (position == RecyclerView.NO_POSITION) return;
+
+        // 2. Cambiar el estado de selección
         if (seleccionadas.contains(uri)) {
             seleccionadas.remove(uri);
         } else {
             seleccionadas.add(uri);
         }
+
         listener.onSelectionChanged(seleccionadas.size());
-        notifyDataSetChanged();
+
+        // 3. ¡ACTUALIZAR SOLO EL ÍTEM ESPECÍFICO!
+        // Esto evita el parpadeo general.
+        notifyItemChanged(position);
 
         if (seleccionadas.size() == 0) {
             selectionMode = false;
+            // Si al deseleccionar el último elemento quieres asegurar que el modo selección
+            // se desactiva visualmente en el resto (por si hay algún borde/efecto global),
+            // podrías considerar notificar cambios en los elementos visibles, pero generalmente
+            // con 'notifyItemChanged' es suficiente si tu 'onBindViewHolder' maneja bien el 'selectionMode'.
         }
     }
 
@@ -171,9 +191,26 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     }
 
     public void clearSelection() {
+
+        // 1. Obtener una lista de las posiciones a limpiar ANTES de borrar el 'Set'
+        List<Integer> positionsToClear = new ArrayList<>();
+        for (Uri uri : seleccionadas) {
+            int position = lista.indexOf(uri);
+            if (position != RecyclerView.NO_POSITION) {
+                positionsToClear.add(position);
+            }
+        }
+
+        // 2. Limpiar el estado
         seleccionadas.clear();
         selectionMode = false;
-        notifyDataSetChanged();
+
+        // 3. Notificar los cambios de manera eficiente
+        // Solo se actualizan las celdas que tenían un estado de selección.
+        for (int position : positionsToClear) {
+            notifyItemChanged(position);
+        }
+
         listener.onSelectionChanged(0);
     }
 

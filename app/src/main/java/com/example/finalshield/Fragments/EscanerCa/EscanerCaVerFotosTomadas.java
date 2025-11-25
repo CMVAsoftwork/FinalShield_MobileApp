@@ -174,7 +174,7 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
 
         getParentFragmentManager().setFragmentResult(KEY_REORDENAR_RESULT, result);
         // volvemos atrás en el stack
-        Navigation.findNavController(requireView()).popBackStack();
+        Navigation.findNavController(requireView()).navigate(R.id.escanerCifradoCamara3, result);
     }
 
     @Override
