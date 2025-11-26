@@ -27,6 +27,19 @@ public class FileUtils {
         return MultipartBody.Part.createFormData("adjuntos", fileName, fileBody);
     }
 
+    public static MultipartBody.Part prepareFilePartArchivo(Context context, Uri fileUri) {
+        String fileName = getFileName(context, fileUri);
+        String mimeType = context.getContentResolver().getType(fileUri);
+
+        if (mimeType == null) {
+            mimeType = "application/octet-stream";
+        }
+
+        RequestBody fileBody = new InputStreamRequestBody(context, fileUri, MediaType.parse(mimeType));
+
+        return MultipartBody.Part.createFormData("archivo", fileName, fileBody);
+    }
+
     private static String getFileName(Context context, Uri uri) {
         String result = null;
         if ("content".equals(uri.getScheme())) {

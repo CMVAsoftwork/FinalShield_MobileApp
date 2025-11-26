@@ -39,6 +39,10 @@
         <action
             android:id="@+id/action_registroSesion_to_inicioSesion2"
             app:destination="@id/inicioSesion" />
+
+        <action
+            android:id="@+id/action_datosBiometricos_to_verClavePostLogin"
+            app:destination="@id/verClave"/>
     </fragment>
     <fragment
         android:id="@+id/inicioSesion"
@@ -449,4 +453,9 @@
             android:id="@+id/action_verClave_to_datosBiometricos"
             app:destination="@id/datosBiometricos" />
     </fragment>
+    <fragment
+        android:id="@+id/verClave"
+        android:name="com.example.finalshield.Fragments.Correo.VerClave"
+        android:label="fragment_ver_clave"
+        tools:layout="@layout/fragment_ver_clave" />
 </navigation>
