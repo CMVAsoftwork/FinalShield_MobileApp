@@ -5,8 +5,6 @@
     android:layout_height="match_parent"
     android:background="@color/degradado_negro_azul"
     tools:context=".Fragments.EscanerGa.EscanerCifradoGaleria">
-
-    <!-- BARRA SUPERIOR -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
@@ -27,8 +25,8 @@
             android:id="@+id/guardar3"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
-            android:layout_marginStart="160dp"
-            android:text="Hecho"
+            android:layout_marginStart="140dp"
+            android:text="Cifrar todo"
             android:textColor="@color/white"
             android:backgroundTint="@color/degradado_negro_azul"/>
     </LinearLayout>
@@ -71,8 +69,6 @@
             android:backgroundTint="#444" />
     </LinearLayout>
 
-
-    <!-- RECYCLER -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler2"
         android:layout_width="match_parent"
@@ -98,15 +94,6 @@
             android:scaleType="fitCenter"
             android:layout_marginStart="70dp"
             android:background="@android:color/transparent"/>
-
-        <!-- <ImageButton
-            android:id="@+id/addelements2"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginStart="40dp"
-            android:src="@drawable/hojitamas"
-            android:scaleType="fitCenter"
-            android:background="@android:color/transparent"/>-->
 
         <ImageButton
             android:id="@+id/recortar2"

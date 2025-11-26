@@ -13,6 +13,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.lifecycle.ViewModelProvider;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,16 +38,21 @@ import com.example.finalshield.Adaptadores.SharedImageViewModel;
 import com.example.finalshield.Adaptadores.VistaImagenActivity;
 import com.example.finalshield.R;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class EscanerCifradoGaleria extends Fragment implements View.OnClickListener {
 
     public static final String KEY_GUARDAR_SELECCION = "guardar_seleccion_key";
     public static final String BUNDLE_REORDENAR_URI_LIST = "reordenar_uri_list_verfotos";
     private static final int REQUEST_CODE = 100;
+    private static final String TAG = "EscanerGaleria";
 
     private SharedImageViewModel sharedViewModel;
 
@@ -53,7 +60,7 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
     private ImageAdapter adapter;
     private final List<Uri> listaImagenes2 = new ArrayList<>(); // Lista de la galería completa
 
-    // Lista MAESTRA: Contiene las URIs que el usuario ha seleccionado/consolidado para trabajar
+    // Lista MAESTRA: Contiene las URIs de FileProvider que se han seleccionado/consolidado
     private final List<Uri> listaSeleccionadaParaGuardar = new ArrayList<>();
 
     private TextView selectionCount;
@@ -75,7 +82,7 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
 
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedImageViewModel.class);
 
-        // Listener para recibir la lista actualizada después de la eliminación
+        // ✅ RECEPTOR DEL RESULTADO DE ELIMINACIÓN/EDICIÓN
         getParentFragmentManager().setFragmentResultListener(
                 EscanerGaEliminarPaginas.KEY_ACTUALIZACION_LISTA,
                 this,
@@ -93,12 +100,6 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
                     }
                 }
         );
-
-        // CORRECCIÓN DE FLUJO: Inicializa la listaSeleccionadaParaGuardar desde el ViewModel al iniciar
-        List<Uri> viewModelList = sharedViewModel.getImageUriList();
-        if (!viewModelList.isEmpty()) {
-            listaSeleccionadaParaGuardar.addAll(viewModelList);
-        }
     }
 
     @Override
@@ -146,10 +147,17 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
         regresar.setOnClickListener(this);
         guardar.setOnClickListener(this);
 
+        // ✅ CARGA INICIAL DESDE VIEWMODEL (Reflejar estado al volver)
+        listaSeleccionadaParaGuardar.clear();
+        List<Uri> viewModelList = sharedViewModel.getImageUriList();
+        if (!viewModelList.isEmpty()) {
+            listaSeleccionadaParaGuardar.addAll(viewModelList);
+        }
+
         pedirPermiso();
     }
 
-    // ... (pedirPermiso y onRequestPermissionsResult sin cambios)
+    // --- MANEJO DE PERMISOS Y CARGA DE GALERÍA (Sin cambios) ---
 
     private void pedirPermiso() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
@@ -172,7 +180,6 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
     }
 
     private void cargarImagenes() {
-        // Lógica de MediaStore para cargar listaImagenes2 (galería completa)
         listaImagenes2.clear();
         List<Uri> loadedUris = new ArrayList<>();
 
@@ -198,6 +205,7 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
                 }
             }
         } catch (Exception e) {
+            Log.e(TAG, "Error al consultar MediaStore: " + e.getMessage(), e);
             Toast.makeText(getContext(), "Error al consultar MediaStore: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
@@ -222,10 +230,10 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
         recyclerViee.setAdapter(adapter);
     }
 
+    // --- LÓGICA DE ACTUALIZACIÓN Y GUARDADO ---
+
     /**
-     * Procesa el resultado de eliminación.
-     * CORRECCIÓN: Refleja los cambios en la lista MAESTRA (listaSeleccionadaParaGuardar)
-     * Y en la lista de la galería (listaImagenes2).
+     * Procesa el resultado de eliminación y actualiza la lista maestra.
      */
     private void actualizarListaDespuesDeEliminacion(ArrayList<String> updatedUriStrings) {
 
@@ -234,49 +242,60 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
             retainedUris.add(Uri.parse(uriStr));
         }
 
-        // 1. **ACTUALIZAR LISTA MAESTRA**
-        // La lista devuelta por el fragmento de eliminación es la lista MAESTRA sin los ítems eliminados.
         int initialMasterSize = listaSeleccionadaParaGuardar.size();
+
+        // 1. Reemplazar la lista maestra con el resultado actualizado
         listaSeleccionadaParaGuardar.clear();
         listaSeleccionadaParaGuardar.addAll(retainedUris);
-        sharedViewModel.setImageUriList(listaSeleccionadaParaGuardar); // Actualizar ViewModel
 
-        int deletedFromMaster = initialMasterSize - listaSeleccionadaParaGuardar.size();
+        // 2. Actualizar el ViewModel
+        sharedViewModel.setImageUriList(listaSeleccionadaParaGuardar);
 
-        // 2. **ACTUALIZAR LISTA DE GALERÍA** (listaImagenes2)
-        // Esto es necesario si EscanerGaEliminarPaginas elimina permanentemente archivos de la galería.
-        // Si EscanerGaEliminarPaginas SOLO elimina ítems de la lista MAESTRA (listaSeleccionadaParaGuardar),
-        // este paso no es necesario. Basado en el flujo, asumo que SÓLO elimina de la lista MAESTRA.
+        int finalSize = listaSeleccionadaParaGuardar.size();
+        int deletedFromMaster = initialMasterSize - finalSize;
 
-        Toast.makeText(getContext(), deletedFromMaster + " imágenes eliminadas de la lista de trabajo. Total: " + listaSeleccionadaParaGuardar.size(), Toast.LENGTH_LONG).show();
+        if (finalSize == 0) {
+            Toast.makeText(getContext(), "Se eliminaron todos los elementos. La lista de trabajo está vacía.", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getContext(), deletedFromMaster + " imágenes eliminadas/editadas. Total: " + finalSize, Toast.LENGTH_LONG).show();
+        }
     }
 
 
     /**
-     * Guarda las imágenes seleccionadas, evitando duplicados en la lista de guardado.
+     * Guarda las imágenes seleccionadas, creando una copia única para edición.
      */
     private void guardarImagenesSeleccionadas() {
         if (adapter == null || adapter.getSelectedCount() == 0) return;
 
-        List<Uri> selectedUris = adapter.getSelectedItems();
+        List<Uri> selectedUris = adapter.getSelectedItems(); // URIs de la Galería
         int countAdded = 0;
 
-        // VALIDACIÓN DE DUPLICADOS: Añadir solo los ítems nuevos a la lista MAESTRA.
-        Set<Uri> currentSavedSet = new HashSet<>(listaSeleccionadaParaGuardar);
+        // 1. Obtener los identificadores únicos (IDs) de las URIs de la Galería que ya están en la lista MAESTRA
+        Set<String> originalIdInMaster = getOriginalIdInMaster(listaSeleccionadaParaGuardar);
 
-        for (Uri uri : selectedUris) {
-            if (!currentSavedSet.contains(uri)) {
-                listaSeleccionadaParaGuardar.add(uri);
-                currentSavedSet.add(uri);
-                countAdded++;
+        // 2. Iterar sobre las selecciones de la Galería
+        for (Uri galleryUri : selectedUris) {
+            String galleryId = galleryUri.getLastPathSegment();
+
+            // Comprobar duplicado por ID original (para que no se añada la misma imagen de la galería dos veces)
+            if (!originalIdInMaster.contains(galleryId)) {
+
+                // Si es un archivo nuevo, creamos una copia editable ÚNICA
+                Uri localEditableUri = obtenerCopiaEditableUnica(galleryUri);
+
+                if (localEditableUri != null) {
+                    listaSeleccionadaParaGuardar.add(localEditableUri);
+                    originalIdInMaster.add(galleryId);
+                    countAdded++;
+                }
             }
         }
 
-        // CORRECCIÓN CLAVE: Almacenar la lista final consolidada en el ViewModel
-        // para que otros botones puedan usarla para navegar.
+        // Almacenar la lista final consolidada en el ViewModel
         sharedViewModel.setImageUriList(listaSeleccionadaParaGuardar);
 
-        // Notificar al fragmento padre sobre la selección
+        // Notificar al fragmento padre sobre la selección (opcional, dependiendo del flujo)
         Bundle result = new Bundle();
         ArrayList<String> selectedUrisStr = new ArrayList<>();
         for (Uri uri : listaSeleccionadaParaGuardar) selectedUrisStr.add(uri.toString());
@@ -289,6 +308,61 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
         actualizarBarra();
 
         Toast.makeText(getContext(), countAdded + " nuevas fotos añadidas para guardar. Total: " + listaSeleccionadaParaGuardar.size(), Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * Auxiliar: Obtiene los IDs de la Galería a partir de las URIs de FileProvider en la lista MAESTRA.
+     */
+    private Set<String> getOriginalIdInMaster(List<Uri> masterList) {
+        Set<String> ids = new HashSet<>();
+        for (Uri fileProviderUri : masterList) {
+            // El formato es "editable_<original_segment>_<uuid>.jpg"
+            String path = fileProviderUri.getLastPathSegment();
+            if (path != null) {
+                // Buscamos el segmento entre "editable_" y "_<uuid>"
+                int start = path.indexOf('_');
+                int end = path.lastIndexOf('_');
+                if (start != -1 && end > start) {
+                    ids.add(path.substring(start + 1, end));
+                }
+            }
+        }
+        return ids;
+    }
+
+    /**
+     * Auxiliar: Crea una copia editable única en el caché.
+     */
+    private Uri obtenerCopiaEditableUnica(Uri galleryUri) {
+        try {
+            // Usamos un UUID para asegurar la unicidad del archivo
+            String uniqueId = UUID.randomUUID().toString().substring(0, 8);
+            String originalSegment = galleryUri.getLastPathSegment();
+
+            // Formato: editable_<original_segment>_<uniqueId>.jpg
+            String filename = "editable_" + originalSegment + "_" + uniqueId + ".jpg";
+            File file = new File(requireContext().getCacheDir(), filename);
+
+            InputStream inputStream = requireContext().getContentResolver().openInputStream(galleryUri);
+            if (inputStream == null) return null;
+
+            FileOutputStream outputStream = new FileOutputStream(file);
+
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            outputStream.close();
+            inputStream.close();
+
+            return FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".fileprovider", file);
+
+        } catch (Exception e) {
+            Log.e(TAG, "Fallo al crear copia editable única: " + e.getMessage(), e);
+            return null;
+        }
     }
 
     private void actualizarBarra() {
@@ -309,17 +383,14 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
     public void onClick(View v) {
         int id = v.getId();
 
-        // CORRECCIÓN CLAVE: Botones de Edición, Recorte y Eliminación
-        // usan la lista MAESTRA (listaSeleccionadaParaGuardar) del ViewModel
+        // ✅ CLAVE: Asegurarse de que el ViewModel esté sincronizado ANTES de navegar
+        sharedViewModel.setImageUriList(listaSeleccionadaParaGuardar);
 
         if (id == R.id.recortar2) {
             if (listaSeleccionadaParaGuardar.isEmpty()) {
                 Toast.makeText(getContext(), "No hay elementos guardados para recortar.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            sharedViewModel.setImageUriList(listaSeleccionadaParaGuardar);
-
-            // 2. Navegar al fragmento de eliminación
             Navigation.findNavController(v).navigate(R.id.escanerGaCortarRotar);
             if (adapter != null) {
                 adapter.clearSelection();
@@ -330,26 +401,18 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
                 Toast.makeText(getContext(), "No hay elementos guardados para editar.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            sharedViewModel.setImageUriList(listaSeleccionadaParaGuardar);
             Navigation.findNavController(v).navigate(R.id.escanerGaVisualizacionYReordenamiento);
             if (adapter != null) {
                 adapter.clearSelection();
                 actualizarBarra();
             }
         } else if (id == R.id.eliminar2) {
-            // CORRECCIÓN: Navegar a eliminación con la lista MAESTRA, no la selección de la galería
             if (listaSeleccionadaParaGuardar.isEmpty()) {
                 Toast.makeText(getContext(), "No hay elementos guardados para eliminar.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // 1. Almacenar la lista MAESTRA en el ViewModel (ya está actualizado en guardarImagenesSeleccionadas,
-            // pero lo hacemos aquí para asegurarnos antes de navegar)
-            sharedViewModel.setImageUriList(listaSeleccionadaParaGuardar);
-
-            // 2. Navegar al fragmento de eliminación
             Navigation.findNavController(v).navigate(R.id.escanerGaEliminarPaginas);
 
-            // 3. La selección visual del RecyclerView se limpia, ya que no se usó
             if (adapter != null) {
                 adapter.clearSelection();
                 actualizarBarra();
@@ -361,6 +424,7 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
             Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
         } else if (id == R.id.guardar3) {
             Toast.makeText(getContext(), "Guardando " + listaSeleccionadaParaGuardar.size() + " imágenes...", Toast.LENGTH_SHORT).show();
+            // Implementa aquí la lógica final de guardado cifrado
         }
     }
 }
