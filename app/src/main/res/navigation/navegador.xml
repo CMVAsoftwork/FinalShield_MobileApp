@@ -453,6 +453,9 @@
         <action
             android:id="@+id/action_escanerCifradoMixto_to_verFotosTomadas"
             app:destination="@id/verFotosTomadas" />
+        <action
+            android:id="@+id/action_escanerCifradoMixto_to_escanerReordenarFotosTomadas"
+            app:destination="@id/escanerReordenarFotosTomadas" />
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoCamara3"
@@ -614,5 +617,14 @@
         <action
             android:id="@+id/action_escanerCaReordenar_to_escanerCifradoCamara3"
             app:destination="@id/escanerCifradoCamara3" />
+    </fragment>
+    <fragment
+        android:id="@+id/escanerReordenarFotosTomadas"
+        android:name="com.example.finalshield.Fragments.Escaner.EscanerReordenarFotosTomadas"
+        android:label="fragment_escaner_reordenar_fotos_tomadas"
+        tools:layout="@layout/fragment_escaner_reordenar_fotos_tomadas" >
+        <action
+            android:id="@+id/action_escanerReordenarFotosTomadas_to_escanerCifradoMixto"
+            app:destination="@id/escanerCifradoMixto" />
     </fragment>
 </navigation>

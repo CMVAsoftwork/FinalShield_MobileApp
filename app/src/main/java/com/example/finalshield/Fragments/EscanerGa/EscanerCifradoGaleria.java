@@ -112,7 +112,7 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
 
-        recyclerViee = v.findViewById(R.id.recycler2);
+        recyclerViee = v.findViewById(R.id.recycler);
         recyclerViee.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         selectionBar = v.findViewById(R.id.selectionBar);
@@ -422,9 +422,9 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
             sharedViewModel.clearList();
             Toast.makeText(getContext(), "Selección de trabajo borrada. Regresando.", Toast.LENGTH_SHORT).show();
             Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
-        } else if (id == R.id.guardar3) {
-            Toast.makeText(getContext(), "Guardando " + listaSeleccionadaParaGuardar.size() + " imágenes...", Toast.LENGTH_SHORT).show();
+        } //else if (id == R.id.guardar3) {
+            //Toast.makeText(getContext(), "Guardando " + listaSeleccionadaParaGuardar.size() + " imágenes...", Toast.LENGTH_SHORT).show();
             // Implementa aquí la lógica final de guardado cifrado
-        }
+        //}
     }
 }

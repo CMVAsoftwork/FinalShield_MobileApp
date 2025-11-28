@@ -6,7 +6,6 @@
     android:background="@color/degradado_negro_azul"
     tools:context=".Fragments.Escaner.Seleccion_imagenes">
 
-    <!-- ░░░░░ BARRA SUPERIOR ░░░░░ -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
@@ -16,7 +15,7 @@
         android:paddingHorizontal="16dp">
 
         <Button
-            android:id="@+id/regresar1"
+            android:id="@+id/regresar"
             android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:text="←"
@@ -28,7 +27,7 @@
             android:id="@+id/guardar"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
-            android:text="Hecho"
+            android:text="Cifrar Todo"
             android:textColor="@color/white"
             android:backgroundTint="@android:color/transparent"
             android:layout_marginStart="160dp" />
@@ -55,7 +54,14 @@
             android:textSize="18sp"
             android:textColor="@android:color/white"
             android:layout_weight="1" />
-
+        <Button
+            android:id="@+id/guardarSeleccion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Añadir"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#60FF44"
+            android:layout_marginEnd="8dp"/>
         <Button
             android:id="@+id/clearSelection"
             android:layout_width="wrap_content"
