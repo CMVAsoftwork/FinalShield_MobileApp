@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
 
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.contenedorp);
-
         if (navHostFragment != null) {
             NavController navController = navHostFragment.getNavController();
             navController.handleDeepLink(getIntent());

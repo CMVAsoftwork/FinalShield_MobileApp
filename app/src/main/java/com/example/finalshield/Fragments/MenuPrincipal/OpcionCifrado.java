@@ -10,6 +10,7 @@ import androidx.navigation.Navigation;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 
@@ -26,6 +27,9 @@ public class OpcionCifrado extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
+        if (getActivity() != null) {
+            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        }
         Button cam,gal,mixt;
         ImageButton perfil,house, archivo,candadclose, carpeta, mail, candadopen;
         perfil = v.findViewById(R.id.btnperfil);
