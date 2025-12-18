@@ -61,18 +61,6 @@
             android:minHeight="48dp"
             android:layout_marginBottom="8dp"/>
 
-        <Button
-            android:id="@+id/btnVerContenido"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="20dp"
-            android:text="Ver Contenido"
-            android:backgroundTint="#1E90FF"
-            android:textSize="15dp"
-            android:textColor="@color/white"
-            android:textStyle="bold"/>
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

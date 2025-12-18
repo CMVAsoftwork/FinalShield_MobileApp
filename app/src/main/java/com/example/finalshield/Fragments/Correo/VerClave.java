@@ -1,5 +1,8 @@
 package com.example.finalshield.Fragments.Correo;
 
+import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -10,6 +13,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
@@ -49,15 +53,16 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class VerClave extends Fragment implements View.OnClickListener {
+public class VerClave extends Fragment {
     private EditText etTokenSeguro;
-    private Button btnVerContenido;
     private TextView tvContenidoDescifrado;
     private LinearLayout layoutAdjuntos;
     private ProgressBar pbDescargaAdjuntos;
     private EnlaceService enlaceService;
     private AuthService authService;
     private DescargaAPI descargaAPI;
+    private boolean contenidoCargado = false;
+    private boolean isDownloading = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -69,7 +74,6 @@ public class VerClave extends Fragment implements View.OnClickListener {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         etTokenSeguro = view.findViewById(R.id.etTokenSeguro);
-        btnVerContenido = view.findViewById(R.id.btnVerContenido);
         tvContenidoDescifrado = view.findViewById(R.id.tvContenidoDescifrado);
         layoutAdjuntos = view.findViewById(R.id.layoutAdjuntos);
         pbDescargaAdjuntos = view.findViewById(R.id.pbDescargaAdjuntos);
@@ -102,42 +106,13 @@ public class VerClave extends Fragment implements View.OnClickListener {
                     Navigation.findNavController(view).navigate(R.id.inicioSesion, null, navOptions);
                     return;
                 } else {
-                    verContenido(token);
+                    if (!contenidoCargado) {
+                        verContenido(token);
+                        contenidoCargado = true;
+                    }
                 }
             }
         }
-        btnVerContenido.setOnClickListener(this);
-    }
-
-    @Override
-    public void onClick(View v) {
-        String tokenCompleto = etTokenSeguro.getText().toString().trim();
-        String token = extraerTokenDeUrl(tokenCompleto);
-        if (!token.isEmpty()) {
-            verContenido(token);
-        } else {
-            Toast.makeText(requireContext(), "Por favor, ingresa o pega un token/enlace válido.", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private String extraerTokenDeUrl(String tokenOUrl) {
-        if (tokenOUrl == null) return "";
-
-        if (tokenOUrl.contains("/api/enlaces/")) {
-            Uri uri = Uri.parse(tokenOUrl);
-            List<String> segments = uri.getPathSegments();
-            int index = segments.indexOf("validar");
-            if (index > 0) {
-                return segments.get(index - 1);
-            }
-        }
-
-        if (tokenOUrl.startsWith("fileshield://")) {
-            Uri uri = Uri.parse(tokenOUrl);
-            return uri.getQueryParameter("security_token");
-        }
-
-        return tokenOUrl;
     }
 
     private void verContenido(String token) {
@@ -159,8 +134,11 @@ public class VerClave extends Fragment implements View.OnClickListener {
                     CorreoDTO correo = response.body();
                     procesarCorreo(correo);
                 } else {
-                    tvContenidoDescifrado.setText("Error: Token inválido, expirado o acceso no autorizado.");
-                    Toast.makeText(requireContext(), "Error de API: Verifica tu token y sesión (HTTP " + response.code() + ").", Toast.LENGTH_LONG).show();
+                    if (response.code() == 404 || response.code() == 410) {
+                        tvContenidoDescifrado.setText("⚠️ Este mensaje ya ha sido descifrado anteriormente o el enlace ha expirado por seguridad.");
+                    } else {
+                        tvContenidoDescifrado.setText("Error: No se pudo acceder al contenido.");
+                    }
                 }
             }
 
@@ -198,18 +176,26 @@ public class VerClave extends Fragment implements View.OnClickListener {
     }
 
     private void listarAdjuntos(List<ArchivoCorreoDTO> adjuntos, String claveBase64) {
+        layoutAdjuntos.removeAllViews();
         if (adjuntos == null || adjuntos.isEmpty()) {
             layoutAdjuntos.addView(crearTextView("No hay archivos adjuntos."));
             return;
         }
 
         for (ArchivoCorreoDTO archivo : adjuntos) {
-            TextView tv = crearTextView("Archivo: " + archivo.getNombreOriginal() + " (Click para descargar)");
-            tv.setOnClickListener(v -> iniciarDescargaAdjunto(archivo, claveBase64));
-            tv.setBackgroundColor(getResources().getColor(R.color.degradado_azul_medio));
-            tv.setTextColor(getResources().getColor(android.R.color.white));
-            tv.setPadding(10, 10, 10, 10);
-            layoutAdjuntos.addView(tv);
+            Button btnArchivo = new Button(requireContext());
+
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(0, 10, 0, 10);
+            btnArchivo.setLayoutParams(params);
+
+            btnArchivo.setText("⬇️" + archivo.getNombreOriginal());
+            btnArchivo.setAllCaps(false);
+            btnArchivo.setOnClickListener(v -> iniciarDescargaAdjunto(archivo, claveBase64));
+
+            layoutAdjuntos.addView(btnArchivo);
         }
     }
 
@@ -223,34 +209,71 @@ public class VerClave extends Fragment implements View.OnClickListener {
     }
 
     private void iniciarDescargaAdjunto(ArchivoCorreoDTO archivo, String claveBase64) {
-        Toast.makeText(requireContext(), "Solicitando descarga y descifrado de: " + archivo.getNombreOriginal(), Toast.LENGTH_LONG).show();
-        pbDescargaAdjuntos.setVisibility(View.VISIBLE);
+        if (isDownloading) {
+            Toast.makeText(requireContext(), "Hay una descarga en curso...", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Confirmar descarga")
+                .setMessage("¿Deseas descargar y descifrar el archivo: \n\"" + archivo.getNombreOriginal() + "\"?")
+                .setPositiveButton("Descargar", (dialog, which) -> {
+                    ejecutarDescarga(archivo, claveBase64);
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void ejecutarDescarga(ArchivoCorreoDTO archivo, String claveBase64) {
+        isDownloading = true;
+        pbDescargaAdjuntos.setVisibility(View.VISIBLE);
         DescifradoRequest request = new DescifradoRequest(claveBase64);
 
         descargaAPI.descifrarAdjunto(archivo.getIdArchivoCorreo(), request).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 pbDescargaAdjuntos.setVisibility(View.GONE);
+                isDownloading = false;
+
                 if (response.isSuccessful() && response.body() != null) {
                     boolean guardado = guardarArchivoEnAlmacenamiento(response.body(), archivo.getNombreOriginal());
-
                     if (guardado) {
-                        Toast.makeText(requireContext(), "Descarga exitosa: " + archivo.getNombreOriginal(), Toast.LENGTH_LONG).show();
+                        mostrarNotificacionExito(archivo.getNombreOriginal());
+                        Toast.makeText(requireContext(), "Guardado en Descargas", Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(requireContext(), "Error al guardar el archivo. Verifica permisos.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(requireContext(), "Error al guardar el archivo.", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(requireContext(), "Error en el servidor al descifrar el adjunto (HTTP " + response.code() + ").", Toast.LENGTH_LONG).show();
+                    Toast.makeText(requireContext(), "Error al descifrar (HTTP " + response.code() + ")", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 pbDescargaAdjuntos.setVisibility(View.GONE);
-                Toast.makeText(requireContext(), "Error de red al descargar el adjunto: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                isDownloading = false;
+                Toast.makeText(requireContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void mostrarNotificacionExito(String nombreArchivo) {
+        String channelId = "descargas_channel";
+        NotificationManager notificationManager = (NotificationManager) requireContext().getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId, "Descargas FileShield", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(requireContext(), channelId)
+                .setSmallIcon(R.drawable.descarga)
+                .setContentTitle("Descarga completada")
+                .setContentText("Se ha guardado: " + nombreArchivo)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true);
+
+        notificationManager.notify((int) System.currentTimeMillis(), builder.build());
     }
 
     private boolean guardarArchivoEnAlmacenamiento(ResponseBody body, String fileName) {
