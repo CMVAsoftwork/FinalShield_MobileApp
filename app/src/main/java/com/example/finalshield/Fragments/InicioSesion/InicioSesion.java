@@ -31,7 +31,7 @@ import retrofit2.Response;
 public class InicioSesion extends Fragment implements View.OnClickListener {
     private AuthService authService;
     private EditText inputCorreo, inputContrasena;
-    private Button regre, inises, regis;
+    private Button regre, inises, regis, entil;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,11 +50,12 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
         regre = v.findViewById(R.id.regresar1);
         regis = v.findViewById(R.id.btnregis);
         inises = v.findViewById(R.id.btninises1);
+        entil = v.findViewById(R.id.btnnxd);
 
         regre.setOnClickListener(this);
         regis.setOnClickListener(this);
         inises.setOnClickListener(this);
-
+        entil.setOnClickListener(this);
         String correoGuardado = authService.obtenerCorreo();
 
         if(correoGuardado != null){
@@ -79,9 +80,9 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         int id = v.getId();
+        if(id == R.id.btnnxd)Navigation.findNavController(v).navigate(R.id.inicio);
         if (id == R.id.regresar1) {
             Navigation.findNavController(v).navigate(R.id.bienvenida);
-
         } else if (id == R.id.btninises1) {
             String correo = inputCorreo.getText().toString().trim();
             String pass = inputContrasena.getText().toString().trim();

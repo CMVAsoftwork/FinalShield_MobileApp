@@ -11,6 +11,7 @@ import androidx.navigation.Navigation;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 
@@ -28,6 +29,9 @@ public class Inicio extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
+        if (getActivity() != null) {
+            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        }
         ImageButton perfil,house, archivo,candadclose, carpeta, mail, candadopen;
         Button selecarpeta, correo;
         perfil = v.findViewById(R.id.btnperfil);
@@ -60,12 +64,9 @@ public class Inicio extends Fragment implements View.OnClickListener {
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
-            String token = null;
-            Bundle bundle = new Bundle();
-            bundle.putString("security_token", token);
-            Navigation.findNavController(v).navigate(R.id.action_inicio_to_verClave2, bundle);
+            Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
         } else if (v.getId() == R.id.btnseleccarpeta) {
-            Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
+            Navigation.findNavController(v).navigate(R.id.archivosCifrados);
         } else if (v.getId() == R.id.btnenvcorreo) {
             Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         }else if (v.getId() == R.id.mail) {
@@ -73,7 +74,7 @@ public class Inicio extends Fragment implements View.OnClickListener {
         }else if (v.getId() == R.id.archivo) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados);
         } else if (v.getId() == R.id.btnperfil) {
-
+            Navigation.findNavController(v).navigate(R.id.perfil);
         }
     }
 }

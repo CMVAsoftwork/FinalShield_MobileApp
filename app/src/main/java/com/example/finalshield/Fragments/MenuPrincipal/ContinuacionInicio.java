@@ -10,6 +10,7 @@ import androidx.navigation.Navigation;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 
 import com.example.finalshield.R;
@@ -24,6 +25,9 @@ public class ContinuacionInicio extends Fragment implements  View.OnClickListene
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
+        if (getActivity() != null) {
+            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        }
         ImageButton perfil,house, archivo,candadclose, carpeta, mail, candadopen;
         perfil = v.findViewById(R.id.btnperfil);
         house = v.findViewById(R.id.house);
@@ -50,13 +54,13 @@ public class ContinuacionInicio extends Fragment implements  View.OnClickListene
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+            Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
         }else if (v.getId() == R.id.mail) {
             Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         }else if (v.getId() == R.id.archivo) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados);
         } else if (v.getId() == R.id.btnperfil) {
-
+            Navigation.findNavController(v).navigate(R.id.perfil);
         }
     }
 }

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/degradado_negro_azul"
+    tools:context=".Fragments.EscanerCa.EscanerCaReordenar">
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp">
+
+        <Button
+            android:id="@+id/regresar1"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="←"
+            android:textSize="32sp"
+            android:textColor="@color/white"
+            android:backgroundTint="#10FFFFFF" />
+
+        <Button
+            android:id="@+id/guardar"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="Hecho"
+            android:textColor="@color/white"
+            android:backgroundTint="@android:color/transparent"
+            android:layout_marginStart="160dp" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
+        android:layout_marginTop="80dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="8dp" />
+</RelativeLayout>

@@ -15,6 +15,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"/>
+
+        <ImageButton
+            android:id="@+id/borrar"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:src="@drawable/basurita"
+            app:backgroundTint="@android:color/transparent" />
+
         <TextView
             android:id="@+id/textestatus"
             android:layout_width="wrap_content"
@@ -28,13 +37,7 @@
             android:src="@drawable/candadolist"
             app:backgroundTint="@android:color/transparent"
             android:layout_gravity="center"/>
-        <ImageButton
-            android:id="@+id/borrar"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/basurita"
-            app:backgroundTint="@android:color/transparent"
-            android:layout_gravity="center"/>
+
     </LinearLayout>
 
 </LinearLayout>

@@ -1,7 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="200dp"
-    android:layout_margin="8dp">
+    android:layout_height="180dp"
+    android:layout_margin="6dp"
+    android:clipToOutline="true">
 
     <ImageView
         android:id="@+id/img"
@@ -9,13 +11,25 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:background="@drawable/bg_image"
-        android:clipToOutline="true" />
+        android:clipToOutline="true"
+        android:adjustViewBounds="true" />
 
+    <!-- Overlay azul redondo -->
     <View
         android:id="@+id/overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#5000AEEF"
+        android:background="@drawable/overlay_circular"
+        android:clipToOutline="true"
+        android:visibility="gone" />
+
+    <!-- Check circular -->
+    <ImageView
+        android:id="@+id/checkIcon"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_check_circle"
         android:visibility="gone" />
 
 </FrameLayout>

@@ -3,95 +3,124 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/degradado_negro_azul"
-    tools:context=".Fragments.Escaner.Seleccion_imagenes">
+    tools:context=".Fragments.EscanerGa.EscanerCifradoGaleria">
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp">
+
         <Button
-            android:id="@+id/regresar1"
-            android:layout_width="69dp"
+            android:id="@+id/regresar3"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="30dp"
-            android:backgroundTint="#10FFFFFF"
-            android:gravity="center"
             android:text="←"
+            android:textSize="32sp"
             android:textColor="@color/white"
-            android:textAlignment="center"
-            android:textSize="40dp" />
+            android:backgroundTint="#10FFFFFF" />
+
         <Button
-            android:id="@+id/guardar"
+            android:id="@+id/guardar3"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
-            android:layout_marginStart="160dp"
-            android:layout_marginTop="30dp"
             android:text="Hecho"
             android:textColor="@color/white"
-            android:backgroundTint="@color/degradado_negro_azul"
-            android:textAlignment="center" />
+            android:backgroundTint="@android:color/transparent"
+            android:layout_marginStart="160dp" />
     </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
+    <LinearLayout
+        android:id="@+id/selectionBar"
         android:layout_width="match_parent"
-        android:layout_height="565dp"
-        android:layout_marginTop="100dp"
-        android:padding="8dp"
-        android:id="@+id/recycler2" />
+        android:layout_height="56dp"
+        android:layout_below="@id/topBar"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="#222"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/selectionCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 seleccionadas"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:layout_weight="1" />
+        <Button
+            android:id="@+id/guardarSeleccion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Añadir"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#60FF44"
+            android:layout_marginEnd="8dp"/>
+        <Button
+            android:id="@+id/clearSelection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancelar"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#444" />
+    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
+        android:layout_width="match_parent"
+        android:layout_height="600dp"
+        android:layout_below="@+id/selectionBar"
+        android:padding="8dp" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="670dp"
         android:background="@drawable/img">
     </LinearLayout>
-
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginTop="695dp"
-        android:layout_marginLeft="8dp">
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="15dp"
+        android:layout_marginLeft="-26dp">
 
         <ImageButton
-            android:id="@+id/archivo"
+            android:id="@+id/selecgaleria2"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/circlepicture"
             android:scaleType="fitCenter"
-            android:layout_marginStart="-10dp"
+            android:layout_marginStart="70dp"
             android:background="@android:color/transparent"/>
+
         <ImageButton
-            android:id="@+id/candadoclose"
+            android:id="@+id/recortar2"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginStart="35dp"
-            android:background="@android:color/transparent"
+            android:layout_marginStart="50dp"
+            android:src="@drawable/recortar"
             android:scaleType="fitCenter"
-            android:src="@drawable/hojitamas" />
+            android:background="@android:color/transparent"/>
+
         <ImageButton
-            android:id="@+id/carpeta"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginStart="35dp"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:src="@drawable/recortar" />
-        <ImageButton
-            android:id="@+id/mail"
+            android:id="@+id/edicion2"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/hojitas"
             android:scaleType="fitCenter"
-            android:layout_marginStart="35dp"
+            android:layout_marginStart="50dp"
             android:background="@android:color/transparent"/>
+
         <ImageButton
-            android:id="@+id/candadopen"
+            android:id="@+id/eliminar2"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:src="@drawable/basurita"
             android:scaleType="fitCenter"
-            android:layout_marginStart="35dp"
+            android:layout_marginStart="50dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
+
 </RelativeLayout>

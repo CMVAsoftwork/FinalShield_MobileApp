@@ -5,14 +5,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/degradado_negro_azul"
-    tools:context=".Fragments.Perfil">
+    tools:context=".Fragments.MenuPrincipal.Perfil">
     <Button
         android:layout_width="69dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
         android:layout_marginTop="37dp"
         android:backgroundTint="#10FFFFFF"
-        android:id="@+id/regresar3"
+        android:id="@+id/regresar5"
         android:text="←"
         android:textAlignment="center"
         android:textColor="@color/white"

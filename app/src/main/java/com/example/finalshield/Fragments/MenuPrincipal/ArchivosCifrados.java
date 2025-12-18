@@ -1,5 +1,6 @@
 package com.example.finalshield.Fragments.MenuPrincipal;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -10,6 +11,8 @@ import androidx.navigation.Navigation;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
@@ -25,6 +28,9 @@ public class ArchivosCifrados extends Fragment implements View.OnClickListener{
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
+        if (getActivity() != null) {
+            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        }
         ImageButton perfil,house, archivo,candadclose, carpeta, mail, candadopen;
         ListView listac;
         listac = v.findViewById(R.id.listacarp);
@@ -54,13 +60,13 @@ public class ArchivosCifrados extends Fragment implements View.OnClickListener{
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+            Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
         } else if (v.getId() == R.id.mail) {
             Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         }else if (v.getId() == R.id.archivo) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados);
         } else if (v.getId() == R.id.btnperfil) {
-
+            Navigation.findNavController(v).navigate(R.id.perfil);
         }
     }
 }

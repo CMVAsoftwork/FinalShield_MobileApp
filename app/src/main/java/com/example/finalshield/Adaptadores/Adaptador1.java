@@ -10,16 +10,18 @@ import android.widget.TextView;
 
 import com.example.finalshield.R;
 
+import java.util.List;
+
 public class Adaptador1 extends BaseAdapter {
     Context contexto;
-    String listadeportes[];
+    List<String> listadeportes[];
     String listacomentar[];
     int listaimagenes[];
     LayoutInflater inflater;
 
     public Adaptador1(Context context, String[] listadeportes, String[] listacomentar, int[] listaimagenes) {
         this.contexto = context;
-        this.listadeportes = listadeportes;
+        //this.listadeportes = listadeportes;
         this.listacomentar = listacomentar;
         this.listaimagenes = listaimagenes;
         this.inflater = LayoutInflater.from(contexto);

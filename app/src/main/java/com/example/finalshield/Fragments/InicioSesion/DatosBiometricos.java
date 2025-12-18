@@ -46,10 +46,8 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-
         authService = new AuthService(requireContext());
-        correoParaLogin = authService.obtenerCorreo();;
-
+        correoParaLogin = authService.obtenerCorreo();
         Button regre;
         Button regis;
         Button inic;
@@ -128,12 +126,35 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
     public void onClick(View v) {
         if (v.getId() == R.id.regresar3) {
             Navigation.findNavController(v).navigate(R.id.bienvenida);
-        } /*else if (v.getId() == R.id.btnregis) {
-            Navigation.findNavController(v).navigate(R.id.registroSesion);
-        } */else if (v.getId() == R.id.btninses2) {
+        } else if (v.getId() == R.id.btnregis) {
+            lanzarConfiguracionHuella(); // Llama al nuevo método
+        } else if (v.getId() == R.id.btninses2) {
             Navigation.findNavController(v).navigate(R.id.inicioSesion);
         }
     }
+
+    // Método para abrir la configuración de registro de huella
+    private void lanzarConfiguracionHuella() {
+        // Acción para ir directamente a la configuración de huella (o pantalla de bloqueo/seguridad)
+        Intent intent = new Intent(android.provider.Settings.ACTION_FINGERPRINT_ENROLL);
+
+        // Si la acción específica existe, la usamos.
+        if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            // Si no existe, vamos a la configuración de seguridad general.
+            intent = new Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS);
+            if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
+                startActivity(intent);
+            } else {
+                // Como último recurso, la configuración principal.
+                intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
+                startActivity(intent);
+            }
+        }
+    }
+    // Fin del nuevo método
+
     @Override
     public boolean onTouch(View v, MotionEvent motionEvent) {
         // La animación es puramente estética y se lanza inmediatamente
