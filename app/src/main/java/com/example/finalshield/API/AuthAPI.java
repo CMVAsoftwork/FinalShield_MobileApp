@@ -1,5 +1,6 @@
 package com.example.finalshield.API;
 
+import com.example.finalshield.DTO.Usuario.CambiarContraseñaRequest;
 import com.example.finalshield.DTO.Usuario.LoginBioRequest;
 import com.example.finalshield.DTO.Usuario.LoginRequest;
 import com.example.finalshield.DTO.Usuario.LoginResponse;
@@ -30,4 +31,6 @@ public interface AuthAPI {
     @GET("api/auth/biometrico-activo/{correo}")
     Call<Boolean> isBiometricoActivo(@Path("correo") String correo);
 
+    @POST("api/auth/cambiar-contrasena")
+    Call<CambiarContraseñaRequest> cambiarContraseña(@Body CambiarContraseñaRequest request);
 }

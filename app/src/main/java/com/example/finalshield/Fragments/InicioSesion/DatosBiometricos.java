@@ -189,7 +189,7 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
         if (v == null) return;
 
         if (pendingToken != null) {
-            prefs.edit().remove("PENDING_TOKEN").apply();
+            prefs.edit().remove("pending_token").apply();
 
             Bundle bundle = new Bundle();
             bundle.putString("security_token", pendingToken);

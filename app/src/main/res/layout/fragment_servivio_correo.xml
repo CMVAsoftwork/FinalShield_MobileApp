@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/degradado_azul_medio"
-    tools:context=".Fragments.ServivioCorreo">
+    tools:context=".Fragments.Correo.ServivioCorreo">
     <ImageButton
         android:id="@+id/btnperfil"
         android:layout_width="30dp"
@@ -108,7 +108,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp">
         <Button
-            android:id="@+id/sieliminar"
+            android:id="@+id/adjuntarArchivo"
             android:text="ADJUNTAR\n ARCHIVOS"
             android:backgroundTint="#1E90FF"
             android:layout_width="wrap_content"
@@ -116,7 +116,7 @@
             android:textColor="@color/white"
             android:layout_marginStart="50dp"/>
         <Button
-            android:id="@+id/noeliminar"
+            android:id="@+id/enviarCorreo"
             android:text="ENVIAR\n CORREO"
             android:backgroundTint="#1E90FF"
             android:layout_width="wrap_content"
@@ -178,7 +178,5 @@
             android:layout_marginStart="20dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
-
-
 
 </LinearLayout>

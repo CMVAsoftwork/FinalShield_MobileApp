@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.example.finalshield.API.AuthAPI;
+import com.example.finalshield.DTO.Usuario.CambiarContraseñaRequest;
 import com.example.finalshield.DTO.Usuario.LoginBioRequest;
 import com.example.finalshield.DTO.Usuario.LoginRequest;
 import com.example.finalshield.DTO.Usuario.LoginResponse;
@@ -151,5 +152,9 @@ public class AuthService {
 
     public void cerrarSesion() {
         prefs.edit().remove(TOKEN_KEY).commit();
+    }
+
+    public void cambiarContraseña(String contraseña, String correo, String nuevaContraseña, Callback<CambiarContraseñaRequest> callback) {
+
     }
 }

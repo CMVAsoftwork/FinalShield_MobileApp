@@ -11,6 +11,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
 import android.os.Environment;
@@ -92,13 +93,17 @@ public class VerClave extends Fragment implements View.OnClickListener {
                 if (authService.obtenerCorreo() == null) {
                     SharedPreferences prefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
                     prefs.edit().putString("pending_token", token).apply();
-                    Toast.makeText(requireContext(), "Inicia sesión para validar el token.", Toast.LENGTH_LONG).show();
 
-                    Navigation.findNavController(view).navigate(R.id.inicioSesion);
+                    Toast.makeText(requireContext(), "Sesión requerida para descifrar.", Toast.LENGTH_SHORT).show();
+
+                    NavOptions navOptions = new NavOptions.Builder()
+                            .setPopUpTo(R.id.verClave, true)
+                            .build();
+
+                    Navigation.findNavController(view).navigate(R.id.inicioSesion, null, navOptions);
                     return;
                 } else {
                     verContenido(token);
-
                 }
             }
         }
@@ -117,28 +122,22 @@ public class VerClave extends Fragment implements View.OnClickListener {
     }
 
     private String extraerTokenDeUrl(String tokenOUrl) {
-        // 1. Caso: El usuario pega la URL Deep Link fileshield://...
-        if (tokenOUrl.startsWith("fileshield://")) {
-            try {
-                Uri uri = Uri.parse(tokenOUrl);
-                String securityToken = uri.getQueryParameter("security_token");
-                if (securityToken != null) {
-                    return securityToken;
-                }
-            } catch (Exception e) {} // Ignorar errores de parseo
-        }
+        if (tokenOUrl == null) return "";
 
-        // 2. Caso: El usuario pega la URL HTTPS del correo: .../api/enlaces/{token}/validar
         if (tokenOUrl.contains("/api/enlaces/")) {
-            String[] segments = tokenOUrl.split("/");
-            for (int i = 0; i < segments.length; i++) {
-                if ("validar".equals(segments[i]) && i > 0) {
-                    return segments[i - 1]; // Devuelve el segmento del token
-                }
+            Uri uri = Uri.parse(tokenOUrl);
+            List<String> segments = uri.getPathSegments();
+            int index = segments.indexOf("validar");
+            if (index > 0) {
+                return segments.get(index - 1);
             }
         }
 
-        // 3. Caso: El usuario solo pegó el token
+        if (tokenOUrl.startsWith("fileshield://")) {
+            Uri uri = Uri.parse(tokenOUrl);
+            return uri.getQueryParameter("security_token");
+        }
+
         return tokenOUrl;
     }
 

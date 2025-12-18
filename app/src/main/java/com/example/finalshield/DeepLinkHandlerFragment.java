@@ -8,45 +8,66 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 public class DeepLinkHandlerFragment extends Fragment {
 
     @Override
     public void onResume() {
         super.onResume();
-        Uri data = requireActivity().getIntent().getData();
         String token = null;
 
-        if (data != null) {
-            token = data.getQueryParameter("security_token");
-        }
-        requireActivity().getIntent().setData(null);
-
-        NavController nav = NavHostFragment.findNavController(this);
-
-        if (token == null) {
-            nav.navigate(R.id.inicio);
-            return;
+        if (getArguments() != null) {
+            token = getArguments().getString("security_token");
         }
 
-        SharedPreferences prefsDL = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
-        prefsDL.edit().putString("pending_token", token).apply();
+        Uri data = requireActivity().getIntent().getData();
+        if (token == null && data != null) {
+            String path = data.getPath();
 
-        SharedPreferences prefsAuth = requireActivity().getSharedPreferences("auth", Context.MODE_PRIVATE);
-        boolean logged = prefsAuth.getBoolean("logged", false);
+            if (path != null && path.contains("/api/enlaces/")) {
+                List<String> segments = data.getPathSegments();
+                int index = segments.indexOf("validar");
+                if (index > 0) {
+                    token = segments.get(index - 1);
+                }
+            } else {
+                token = data.getQueryParameter("security_token");
+            }
 
-        Bundle args = new Bundle();
-        args.putString("security_token", token);
+            requireActivity().getIntent().setData(null);
+        }
 
-        if (!logged) {
-            nav.navigate(R.id.inicioSesion, args);
+        if (token != null) {
+            requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE)
+                    .edit().putString("pending_token", token).apply();
+
+            SharedPreferences prefsAuth = requireActivity().getSharedPreferences("auth", Context.MODE_PRIVATE);
+            boolean logged = prefsAuth.getBoolean("logged", false);
+
+            NavController nav = NavHostFragment.findNavController(this);
+
+            if (!logged) {
+                nav.navigate(R.id.inicioSesion);
+            } else {
+                Bundle args = new Bundle();
+                args.putString("security_token", token);
+
+                NavOptions options = new NavOptions.Builder()
+                        .setPopUpTo(R.id.deepLinkHandlerFragment, true)
+                        .build();
+
+                nav.navigate(R.id.verClave, args, options);
+            }
         } else {
-            nav.navigate(R.id.verClave, args);
+            NavHostFragment.findNavController(this).navigate(R.id.inicio);
         }
     }
 

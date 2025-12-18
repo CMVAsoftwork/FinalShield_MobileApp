@@ -142,10 +142,14 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
             Bundle args = new Bundle();
             args.putString("security_token", pendingToken);
 
-            NavHostFragment.findNavController(this).navigate(R.id.verClave, args);
-            return;
+            try {
+                Navigation.findNavController(view).navigate(R.id.action_inicioSesion_to_verClavePostLogin, args);
+            } catch (IllegalArgumentException e) {
+                Navigation.findNavController(view).navigate(R.id.verClave, args);
+            }
+        } else {
+            Navigation.findNavController(view).navigate(defaultDestination);
         }
-        Navigation.findNavController(view).navigate(defaultDestination);
 
     }
 

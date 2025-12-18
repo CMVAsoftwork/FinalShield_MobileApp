@@ -58,6 +58,12 @@
         <action
             android:id="@+id/action_inicioSesion_to_inicio"
             app:destination="@id/inicio" />
+        <action
+            android:id="@+id/action_inicioSesion_to_verClavePostLogin"
+            app:destination="@id/verClave"
+            app:popUpTo="@id/naviegador"
+            app:popUpToInclusive="true" />
+
     </fragment>
     <fragment
         android:id="@+id/inicio"
@@ -286,7 +292,7 @@
     </fragment>
     <fragment
         android:id="@+id/servivioCorreo"
-        android:name="com.example.finalshield.Fragments.ServivioCorreo"
+        android:name="com.example.finalshield.Fragments.Correo.ServivioCorreo"
         android:label="fragment_servivio_correo"
         tools:layout="@layout/fragment_servivio_correo" >
         <action
@@ -449,13 +455,27 @@
         android:name="com.example.finalshield.Fragments.Correo.VerClave"
         android:label="fragment_ver_clave"
         tools:layout="@layout/fragment_ver_clave" >
+        <argument
+            android:name="security_token"
+            app:argType="string"
+            app:nullable="true" />
         <action
             android:id="@+id/action_verClave_to_datosBiometricos"
             app:destination="@id/datosBiometricos" />
     </fragment>
     <fragment
-        android:id="@+id/verClave"
-        android:name="com.example.finalshield.Fragments.Correo.VerClave"
-        android:label="fragment_ver_clave"
-        tools:layout="@layout/fragment_ver_clave" />
+        android:id="@+id/deepLinkHandlerFragment"
+        android:name="com.example.finalshield.DeepLinkHandlerFragment"
+        android:label="fragment_deep_link_handler"
+        tools:layout="@layout/fragment_deep_link_handler">
+        <deepLink
+            app:uri="https://aydan-nonrepresentational-womanishly.ngrok-free.dev/api/enlaces/{security_token}/validar" />
+
+        <deepLink
+            app:uri="fileshield://verclave?security_token={security_token}" />
+
+        <argument
+            android:name="security_token"
+            app:argType="string" />
+    </fragment>
 </navigation>

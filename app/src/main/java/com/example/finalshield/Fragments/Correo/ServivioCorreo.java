@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,8 +64,8 @@ public class ServivioCorreo extends Fragment implements View.OnClickListener {
         etDestinatario = v.findViewById(R.id.paracontend);
         etAsunto = v.findViewById(R.id.asuntocontend);
         etMensaje = v.findViewById(R.id.mensajecontent);
-        btnAdjuntar = v.findViewById(R.id.sieliminar);
-        btnEnviar = v.findViewById(R.id.noeliminar);
+        btnAdjuntar = v.findViewById(R.id.adjuntarArchivo);
+        btnEnviar = v.findViewById(R.id.enviarCorreo);
 
         btnAdjuntar.setOnClickListener(v1 -> seleccionarArchivos());
         btnEnviar.setOnClickListener(v1 -> enviarCorreoCifrado());
