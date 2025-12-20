@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Fragments.CambiarContrasena"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@color/degradado_negro_azul"
+    android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <Button
+            android:layout_width="69dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#10FFFFFF"
+            android:id="@+id/regresarC"
+            android:text="←"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="40dp"
+            android:layout_marginBottom="15dp"/>
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="220dp"
+        android:layout_height="250dp"
+        android:layout_marginBottom="20dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"> <ImageView
+        android:id="@+id/robotCuerpo"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerInside"
+        android:src="@drawable/cuerpo" />
+
+        <ImageView
+            android:id="@+id/manoIzquierda"
+            android:layout_width="80dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:rotation="45"
+            android:scaleX="-1"
+            android:src="@drawable/brazor"
+            android:translationX="-55dp"
+            android:translationY="0dp"
+            android:visibility="invisible" />
+
+        <ImageView
+            android:id="@+id/manoDerecha"
+            android:layout_width="80dp"
+            android:layout_height="120dp"
+            android:layout_gravity="center"
+            android:scaleX="-1"
+            android:src="@drawable/brazod"
+            android:translationX="40dp"
+            android:translationY="0dp"
+            android:visibility="invisible" />
+    </FrameLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Actualizar contraseña"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp" />
+
+    <EditText
+        android:id="@+id/etPassActual"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="Contraseña Actual"
+        android:inputType="textPassword"
+        android:textColor="@color/white"
+        android:textColorHint="#80FFFFFF"
+        android:backgroundTint="#1E90FF" />
+
+    <EditText
+        android:id="@+id/etPassNueva"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="12dp"
+        android:hint="Nueva Contraseña"
+        android:inputType="textPassword"
+        android:textColor="@color/white"
+        android:textColorHint="#80FFFFFF"
+        android:backgroundTint="#1E90FF" />
+
+    <Button
+        android:id="@+id/btnActualizarC"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Actualizar"
+        android:layout_gravity="center"
+        android:backgroundTint="#1E90FF"
+        android:layout_marginTop="30dp"/>
+</LinearLayout>

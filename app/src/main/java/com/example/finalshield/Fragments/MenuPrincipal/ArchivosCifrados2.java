@@ -75,7 +75,7 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener{
         }else if (v.getId() == R.id.archivo) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados);
         } else if (v.getId() == R.id.btnperfil) {
-            Navigation.findNavController(v).navigate(R.id.perfil);
+            Navigation.findNavController(v).navigate(R.id.perfil2);
         }else if (v.getId() == R.id.btnescanycifrar){
             filePickerLauncher.launch("*/*");
         }

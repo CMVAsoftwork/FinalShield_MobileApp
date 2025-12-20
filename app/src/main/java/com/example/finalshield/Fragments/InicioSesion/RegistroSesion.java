@@ -44,7 +44,7 @@ public class RegistroSesion extends Fragment implements View.OnClickListener {
         inputPaterno = v.findViewById(R.id.paterno);
         inputMaterno = v.findViewById(R.id.materno);
         inputCorreo = v.findViewById(R.id.correo);
-        inputContrasena = v.findViewById(R.id.contraseña);
+        inputContrasena = v.findViewById(R.id.nuevaContrasena);
         inputConfContrasena = v.findViewById(R.id.confcontra);
 
         radioBiometrico = v.findViewById(R.id.btlRadio);

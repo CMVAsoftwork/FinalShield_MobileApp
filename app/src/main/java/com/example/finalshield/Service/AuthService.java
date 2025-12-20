@@ -2,6 +2,7 @@ package com.example.finalshield.Service;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.example.finalshield.API.AuthAPI;
 import com.example.finalshield.DTO.Usuario.CambiarContraseñaRequest;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -27,24 +29,34 @@ public class AuthService {
     private static final String PREF_NAME = "finalshield_prefs";
     private static final String TOKEN_KEY = "jwt_token";
     private static final String CORREO_KEY = "correo_usuario";
+    private static final String NOMBRE_KEY = "nombre_usuario";
     private final AuthAPI api;
     private final SharedPreferences prefs;
 
     public AuthService(Context context) {
+        prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .addInterceptor(logging)
+                .addInterceptor(chain -> {
+                    String token = obtenerToken();
+                    Request.Builder builder = chain.request().newBuilder();
+                    if (token != null) {
+                        builder.addHeader("Authorization", "Bearer " + token);
+                    }
+                    return chain.proceed(builder.build());
+                })
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
+                .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         api = retrofit.create(AuthAPI.class);
-        prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
     public void login(String correo, String contrasena, Callback<LoginResponse> callback) {
@@ -54,8 +66,12 @@ public class AuthService {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    Log.d("DEBUG_AUTH", "Token recibido: " + response.body().getToken());
+                    Log.d("DEBUG_AUTH", "Nombre recibido del server: " + response.body().getNombre());
+                    Log.d("DEBUG_AUTH", "Correo recibido del server: " + response.body().getCorreo());
                     guardarToken(response.body().getToken());
-                    guardarCorreo(correo);
+                    guardarCorreo(response.body().getCorreo());
+                    guardarNombre(response.body().getNombre());
                 }
                 callback.onResponse(call, response);
             }
@@ -76,7 +92,8 @@ public class AuthService {
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     guardarToken(response.body().getToken());
-                    guardarCorreo(correo);
+                    guardarCorreo(response.body().getCorreo());
+                    guardarNombre(response.body().getNombre());
                 }
                 callback.onResponse(call, response);
             }
@@ -119,6 +136,7 @@ public class AuthService {
                 if (response.isSuccessful() && response.body() != null) {
                     guardarToken(response.body().getToken());
                     guardarCorreo(correo);
+                    guardarNombre(response.body().getNombre());
                 }
                 callback.onResponse(call, response);
             }
@@ -150,11 +168,25 @@ public class AuthService {
         return prefs.getString(CORREO_KEY, null);
     }
 
+    public void guardarNombre(String nombre) {
+        prefs.edit().putString(NOMBRE_KEY, nombre).apply();
+    }
+
+    public String obtenerNombre() {
+        return prefs.getString(NOMBRE_KEY, "Usuario");
+    }
+
+    public boolean isLoggedIn() {
+        return obtenerToken() != null;
+    }
+
     public void cerrarSesion() {
         prefs.edit().remove(TOKEN_KEY).commit();
     }
 
-    public void cambiarContraseña(String contraseña, String correo, String nuevaContraseña, Callback<CambiarContraseñaRequest> callback) {
+    public void cambiarContraseña(String contrasenaActual, String nuevaContrasena, Callback<ResponseBody> callback) {
+        CambiarContraseñaRequest req = new CambiarContraseñaRequest(contrasenaActual, nuevaContrasena);
 
+        api.cambiarContraseña(req).enqueue(callback);
     }
 }

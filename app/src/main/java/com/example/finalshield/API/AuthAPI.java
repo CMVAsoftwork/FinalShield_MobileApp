@@ -32,5 +32,5 @@ public interface AuthAPI {
     Call<Boolean> isBiometricoActivo(@Path("correo") String correo);
 
     @POST("api/auth/cambiar-contrasena")
-    Call<CambiarContraseñaRequest> cambiarContraseña(@Body CambiarContraseñaRequest request);
+    Call<ResponseBody> cambiarContraseña(@Body CambiarContraseñaRequest request);
 }

@@ -105,7 +105,7 @@
             app:destination="@id/archivosDesifrados" />
         <action
             android:id="@+id/action_inicio_to_perfil"
-            app:destination="@id/perfil" />
+            app:destination="@id/perfil2" />
     </fragment>
     <fragment
         android:id="@+id/continuacionInicio"
@@ -132,7 +132,7 @@
             app:destination="@id/archivosDesifrados" />
         <action
             android:id="@+id/action_continuacionInicio_to_perfil"
-            app:destination="@id/perfil" />
+            app:destination="@id/perfil2" />
     </fragment>
     <fragment
         android:id="@+id/archivosCifrados"
@@ -159,7 +159,7 @@
             app:destination="@id/archivosDesifrados" />
         <action
             android:id="@+id/action_archivosCifrados_to_perfil"
-            app:destination="@id/perfil" />
+            app:destination="@id/perfil2" />
     </fragment>
     <fragment
         android:id="@+id/datosBiometricos"
@@ -204,7 +204,7 @@
             app:destination="@id/archivosDesifrados" />
         <action
             android:id="@+id/action_archivosCifrados2_to_perfil"
-            app:destination="@id/perfil" />
+            app:destination="@id/perfil2" />
     </fragment>
     <fragment
         android:id="@+id/cifradoEscaneo2"
@@ -237,7 +237,7 @@
             app:destination="@id/archivosDesifrados" />
         <action
             android:id="@+id/action_cifradoEscaneo2_to_perfil"
-            app:destination="@id/perfil" />
+            app:destination="@id/perfil2" />
     </fragment>
     <fragment
         android:id="@+id/seleccion_imagenes"
@@ -318,7 +318,7 @@
             app:destination="@id/archivosDesifrados" />
         <action
             android:id="@+id/action_servivioCorreo_to_perfil"
-            app:destination="@id/perfil" />
+            app:destination="@id/perfil2" />
     </fragment>
     <fragment
         android:id="@+id/visualizacionYReordenamiento"
@@ -390,7 +390,7 @@
             app:destination="@id/escanerCifradoCamara3" />
         <action
             android:id="@+id/action_opcionCifrado2_to_perfil"
-            app:destination="@id/perfil" />
+            app:destination="@id/perfil2" />
     </fragment>
     <fragment
         android:id="@+id/archivosDesifrados"
@@ -435,7 +435,7 @@
             app:destination="@id/servivioCorreo" />
         <action
             android:id="@+id/action_archivosDesifrados_to_perfil"
-            app:destination="@id/perfil" />
+            app:destination="@id/perfil2" />
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoMixto"
@@ -570,38 +570,7 @@
             android:id="@+id/action_escanerGaVisualizacionYReordenamiento_to_escanerCifradoGaleria2"
             app:destination="@id/escanerCifradoGaleria2" />
     </fragment>
-    <fragment
-        android:id="@+id/perfil"
-        android:name="com.example.finalshield.Fragments.MenuPrincipal.Perfil"
-        android:label="Perfil" >
-        <action
-            android:id="@+id/action_perfil_to_opcionCifrado2"
-            app:destination="@id/opcionCifrado2" />
-        <action
-            android:id="@+id/action_perfil_to_cifradoEscaneo2"
-            app:destination="@id/cifradoEscaneo2" />
-        <action
-            android:id="@+id/action_perfil_to_inicio"
-            app:destination="@id/inicio" />
-        <action
-            android:id="@+id/action_perfil_to_continuacionInicio"
-            app:destination="@id/continuacionInicio" />
-        <action
-            android:id="@+id/action_perfil_to_archivosCifrados2"
-            app:destination="@id/archivosCifrados2" />
-        <action
-            android:id="@+id/action_perfil_to_archivosDesifrados"
-            app:destination="@id/archivosDesifrados" />
-        <action
-            android:id="@+id/action_perfil_to_archivosCifrados"
-            app:destination="@id/archivosCifrados" />
-        <action
-            android:id="@+id/action_perfil_to_servivioCorreo"
-            app:destination="@id/servivioCorreo" />
-        <action
-            android:id="@+id/action_perfil_to_cifradoEscaneo22"
-            app:destination="@id/cifradoEscaneo2" />
-    </fragment>
+
     <fragment
         android:id="@+id/verFotosTomadas"
         android:name="com.example.finalshield.Fragments.Escaner.VerFotosTomadas"
@@ -655,5 +624,50 @@
         <argument
             android:name="security_token"
             app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/perfil2"
+        android:name="com.example.finalshield.Fragments.Perfil"
+        android:label="Perfil" >
+        <action
+            android:id="@+id/action_perfil2_to_cambiarContrasena"
+            app:destination="@id/cambiarContrasena" />
+        <action
+            android:id="@+id/action_perfil_to_opcionCifrado2"
+            app:destination="@id/opcionCifrado2" />
+        <action
+            android:id="@+id/action_perfil_to_cifradoEscaneo2"
+            app:destination="@id/cifradoEscaneo2" />
+        <action
+            android:id="@+id/action_perfil_to_inicio"
+            app:destination="@id/inicio" />
+        <action
+            android:id="@+id/action_perfil_to_continuacionInicio"
+            app:destination="@id/continuacionInicio" />
+        <action
+            android:id="@+id/action_perfil_to_archivosCifrados2"
+            app:destination="@id/archivosCifrados2" />
+        <action
+            android:id="@+id/action_perfil_to_archivosDesifrados"
+            app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_perfil_to_archivosCifrados"
+            app:destination="@id/archivosCifrados" />
+        <action
+            android:id="@+id/action_perfil_to_servivioCorreo"
+            app:destination="@id/servivioCorreo" />
+        <action
+            android:id="@+id/action_perfil_to_cifradoEscaneo22"
+            app:destination="@id/cifradoEscaneo2" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/cambiarContrasena"
+        android:name="com.example.finalshield.Fragments.CambiarContrasena"
+        android:label="fragment_cambiar_contrasena"
+        tools:layout="@layout/fragment_cambiar_contrasena" >
+        <action
+            android:id="@+id/action_cambiarContrasena_to_perfil2"
+            app:destination="@id/perfil2" />
     </fragment>
 </navigation>

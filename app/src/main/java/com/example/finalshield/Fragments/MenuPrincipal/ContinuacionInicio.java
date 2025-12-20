@@ -60,7 +60,7 @@ public class ContinuacionInicio extends Fragment implements  View.OnClickListene
         }else if (v.getId() == R.id.archivo) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados);
         } else if (v.getId() == R.id.btnperfil) {
-            Navigation.findNavController(v).navigate(R.id.perfil);
+            Navigation.findNavController(v).navigate(R.id.perfil2);
         }
     }
 }

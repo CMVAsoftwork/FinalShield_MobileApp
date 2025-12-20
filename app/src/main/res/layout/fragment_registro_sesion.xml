@@ -89,7 +89,7 @@
         android:textColor="@color/white"
         android:textSize="20dp" />
     <EditText
-        android:id="@+id/contraseña"
+        android:id="@+id/nuevaContrasena"
         android:layout_width="347dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
@@ -110,7 +110,7 @@
         android:background="@drawable/edittextshape"
         android:gravity="center_vertical"
         android:paddingStart="80dp"
-        android:hint="Confirmar contraseña"
+        android:hint="Confirmar nuevaContrasena"
         android:textColorHint="@color/white"
         android:textColor="@color/white"
         android:textSize="20dp" />

@@ -1,37 +1,26 @@
 package com.example.finalshield.DTO.Usuario;
 
 public class CambiarContraseñaRequest {
-    String contraseña;
-    String correo;
-    String contraseñaActual;
+    String contrasenaActual;
+    String nuevaContrasena;
 
-    public CambiarContraseñaRequest(String contraseña, String correo, String contraseñaActual) {
-        this.contraseña = contraseña;
-        this.correo = correo;
-        this.contraseñaActual = contraseñaActual;
+    public CambiarContraseñaRequest(String contrasenaActual, String nuevaContrasena) {
+        this.contrasenaActual = contrasenaActual;
+        this.nuevaContrasena = nuevaContrasena;
     }
 
-    public String getContraseña() {
-        return contraseña;
+    public String getNuevaContrasena() {
+        return nuevaContrasena;
     }
 
-    public void setContraseña(String contraseña) {
-        this.contraseña = contraseña;
+    public void setNuevaContrasena(String nuevaContrasena) {
+        this.nuevaContrasena = nuevaContrasena;
+    }
+    public String getContrasenaActual() {
+        return contrasenaActual;
     }
 
-    public String getCorreo() {
-        return correo;
-    }
-
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
-
-    public String getContraseñaActual() {
-        return contraseñaActual;
-    }
-
-    public void setContraseñaActual(String contraseñaActual) {
-        this.contraseñaActual = contraseñaActual;
+    public void setContrasenaActual(String contrasenaActual) {
+        this.contrasenaActual = contrasenaActual;
     }
 }
