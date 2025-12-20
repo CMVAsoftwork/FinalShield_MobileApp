@@ -1,6 +1,5 @@
 package com.example.finalshield.Fragments.MenuPrincipal;
 
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
