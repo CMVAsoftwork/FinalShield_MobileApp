@@ -1,5 +1,6 @@
 package com.example.finalshield.Fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,9 +13,11 @@ import androidx.navigation.fragment.NavHostFragment;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -39,6 +42,8 @@ public class CambiarContrasena extends Fragment {
     private Button btnActualizar, btnRegresar;
     private AuthService authService;
     private boolean brazosArriba = false;
+    private boolean mostrarActual = false;
+    private boolean mostrarNueva = false;
     private ImageView robotCuerpo;
     private int BRAZOS_REPOSO_Y;
     private int BRAZOS_OJOS_Y;
@@ -74,6 +79,9 @@ public class CambiarContrasena extends Fragment {
             manoDerecha.setPivotX(100);
             manoDerecha.setPivotY(0);
         });
+
+        configurarOjito(etActual, true);
+        configurarOjito(etNueva, false);
 
         TextWatcher watcher = new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -135,28 +143,11 @@ public class CambiarContrasena extends Fragment {
                 .translationY(BRAZOS_REPOSO_Y)
                 .setDuration(400)
                 .withEndAction(() -> {
-                    manoIzquierda.setVisibility(View.INVISIBLE);
-                    manoDerecha.setVisibility(View.INVISIBLE);
+                    if (!brazosArriba) {
+                        manoIzquierda.setVisibility(View.INVISIBLE);
+                        manoDerecha.setVisibility(View.INVISIBLE);
+                    }
                 })
-                .start();
-    }
-
-    private void brazosRectos() {
-        brazosArriba = false;
-
-        manoIzquierda.setVisibility(View.VISIBLE);
-        manoDerecha.setVisibility(View.VISIBLE);
-
-        manoIzquierda.animate()
-                .translationX(dpToPx(-55))
-                .translationY(0)
-                .setDuration(300)
-                .start();
-
-        manoDerecha.animate()
-                .translationX(dpToPx(50))
-                .translationY(0)
-                .setDuration(300)
                 .start();
     }
 
@@ -201,6 +192,23 @@ public class CambiarContrasena extends Fragment {
                 .setInterpolator(new AccelerateDecelerateInterpolator())
                 .withEndAction(onFinish)
                 .start();
+    }
+
+
+    private void togglePassword(EditText editText, boolean mostrar) {
+        if (mostrar) {
+            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            editText.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ojoabierto, 0);
+
+            bajarBrazos();
+        } else {
+            editText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            editText.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ojocerrado, 0);
+
+            subirBrazos();
+        }
+
+        editText.setSelection(editText.getText().length());
     }
 
     private void ejecutarCambio() {
@@ -261,6 +269,29 @@ public class CambiarContrasena extends Fragment {
             }
         });
     }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void configurarOjito(EditText editText, boolean esActual) {
+        editText.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (editText.getCompoundDrawables()[2] != null) {
+                    int iconWidth = editText.getCompoundDrawables()[2].getBounds().width();
+                    if (event.getRawX() >= (editText.getRight() - iconWidth - 50)) {
+                        if (esActual) {
+                            mostrarActual = !mostrarActual;
+                            togglePassword(editText, mostrarActual);
+                        } else {
+                            mostrarNueva = !mostrarNueva;
+                            togglePassword(editText, mostrarNueva);
+                        }
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+    }
+
 
     private int dpToPx(int dp) {
         if (getContext() == null) return dp * 3;

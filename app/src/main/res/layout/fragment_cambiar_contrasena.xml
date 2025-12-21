@@ -78,7 +78,9 @@
         android:inputType="textPassword"
         android:textColor="@color/white"
         android:textColorHint="#80FFFFFF"
-        android:backgroundTint="#1E90FF" />
+        android:backgroundTint="#1E90FF"
+        android:drawableEnd="@drawable/ojocerrado"
+        android:drawablePadding="12dp"/>
 
     <EditText
         android:id="@+id/etPassNueva"
@@ -89,7 +91,9 @@
         android:inputType="textPassword"
         android:textColor="@color/white"
         android:textColorHint="#80FFFFFF"
-        android:backgroundTint="#1E90FF" />
+        android:backgroundTint="#1E90FF"
+        android:drawableEnd="@drawable/ojocerrado"
+        android:drawablePadding="12dp"/>
 
     <Button
         android:id="@+id/btnActualizarC"
