@@ -1,6 +1,7 @@
 package com.example.finalshield.Service;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.example.finalshield.API.ArchivoAPI;
 import com.google.gson.Gson;
@@ -9,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -29,10 +31,9 @@ public class ArchivoService {
                 .addInterceptor(logging)
                 .addInterceptor(chain -> {
                     String token = authService.obtenerToken();
-
-                    if (token != null) {
-                        okhttp3.Request newRequest = chain.request().newBuilder()
-                                .header("Authorization", "Bearer " + token)
+                    if (token != null && !token.isEmpty()) {
+                        Request newRequest = chain.request().newBuilder()
+                                .header("Authorization", "Bearer " + token)  // ← Exacto así, "Bearer " + token
                                 .build();
                         return chain.proceed(newRequest);
                     }
@@ -41,7 +42,6 @@ public class ArchivoService {
                 .connectTimeout(60, TimeUnit.SECONDS)
                 .readTimeout(60, TimeUnit.SECONDS)
                 .build();
-
         this.gson = new GsonBuilder()
                 .setLenient()
                 .create();

@@ -44,23 +44,12 @@
         android:layout_marginTop="30dp"/>
 
     <ListView
+        android:id="@+id/listadesc"
         android:layout_width="349dp"
-        android:layout_height="361dp"
+        android:layout_height="410dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginStart="40dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="30dp" />
-    <Button
-        android:id="@+id/btndescif"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:text="DESCIFRAR ARCHIVO"
-        android:textColor="@color/white"
-        android:backgroundTint="#1E90FF"
-        android:textSize="15dp"
-        android:textStyle="bold">
-    </Button>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

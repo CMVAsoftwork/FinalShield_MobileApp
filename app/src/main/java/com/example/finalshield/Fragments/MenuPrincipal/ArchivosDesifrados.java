@@ -12,12 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.ListView;
 
+import com.example.finalshield.Adaptadores.AdaptadorArchivos;
 import com.example.finalshield.R;
 
 public class ArchivosDesifrados extends Fragment implements View.OnClickListener {
-
-
+    private ListView listaViewDescifrados;
+    private AdaptadorArchivos adaptador;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

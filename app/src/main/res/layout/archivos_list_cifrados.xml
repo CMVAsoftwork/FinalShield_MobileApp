@@ -3,40 +3,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    android:orientation="horizontal">
     <LinearLayout
-        android:layout_width="300dp"
-        android:layout_height="90dp"
-        android:layout_gravity="center"
-        android:orientation="horizontal"
-        android:layout_marginStart="60dp">
+        android:layout_width="match_parent"
+        android:layout_marginRight="10dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
         <TextView
             android:id="@+id/textdescrip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="175dp"
+            android:layout_height="match_parent"
             android:layout_gravity="center"/>
-
-        <ImageButton
-            android:id="@+id/borrar"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center"
-            android:src="@drawable/basurita"
-            app:backgroundTint="@android:color/transparent" />
-
         <TextView
             android:id="@+id/textestatus"
-            android:layout_width="wrap_content"
+            android:layout_width="75dp"
+            android:layout_marginStart="3dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
             android:layout_gravity="center"/>
         <ImageButton
-            android:id="@+id/play"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:id="@+id/descifrar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:src="@drawable/candadolist"
+            android:scaleType="centerCrop"
             app:backgroundTint="@android:color/transparent"
             android:layout_gravity="center"/>
+        <ImageButton
+            android:id="@+id/borrar"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:src="@drawable/basurita"
+            app:backgroundTint="@android:color/transparent" />
 
     </LinearLayout>
 

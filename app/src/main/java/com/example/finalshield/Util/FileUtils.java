@@ -17,26 +17,20 @@ public class FileUtils {
     public static MultipartBody.Part prepareFilePart(Context context, Uri fileUri) {
         String fileName = getFileName(context, fileUri);
         String mimeType = context.getContentResolver().getType(fileUri);
-
         if (mimeType == null) {
             mimeType = "application/octet-stream";
         }
-
         RequestBody fileBody = new InputStreamRequestBody(context, fileUri, MediaType.parse(mimeType));
-
         return MultipartBody.Part.createFormData("adjuntos", fileName, fileBody);
     }
 
     public static MultipartBody.Part prepareFilePartArchivo(Context context, Uri fileUri) {
         String fileName = getFileName(context, fileUri);
         String mimeType = context.getContentResolver().getType(fileUri);
-
         if (mimeType == null) {
             mimeType = "application/octet-stream";
         }
-
         RequestBody fileBody = new InputStreamRequestBody(context, fileUri, MediaType.parse(mimeType));
-
         return MultipartBody.Part.createFormData("archivo", fileName, fileBody);
     }
 
@@ -80,10 +74,8 @@ public class FileUtils {
                 if (inputStream == null) {
                     throw new IOException("No se pudo abrir el InputStream: " + uri);
                 }
-
                 byte[] buffer = new byte[8192];
                 int bytesRead;
-
                 while ((bytesRead = inputStream.read(buffer)) != -1) {
                     sink.write(buffer, 0, bytesRead);
                 }
