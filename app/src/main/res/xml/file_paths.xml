@@ -3,4 +3,9 @@
     <cache-path name="camera_photos" path="."/>
     <external-files-path name="external_files" path="."/>
     <cache-path name="my_cache_images" path="/" />
+    <files-path name="mis_archivos" path="." />
+    <files-path name="descifrados" path="descifrados/" />
+    <files-path name="encrypted" path="encrypted/" />
+    <files-path name="my_files" path="descifrados/" />
+    <files-path name="internal_files" path="." />
 </paths>

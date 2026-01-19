@@ -41,7 +41,7 @@ public class EscanerGaCortarRotar extends Fragment implements View.OnClickListen
 
     // Variables declaradas:
     ImageButton selecimg2, recortar2, edicion2, eliminar2;
-    private Button regresar, guardar, deg90, deg180, cutt; // IDs del XML: regresar3, guardar, deg90, deg180, cutt
+    private Button regresar, deg90, deg180, cutt; // IDs del XML: regresar3, guardar, deg90, deg180, cutt
 
     private RecyclerView recycler;
     private SharedImageViewModel sharedViewModel;
@@ -69,7 +69,6 @@ public class EscanerGaCortarRotar extends Fragment implements View.OnClickListen
 
         // --- 1. Inicialización de Views ---
         regresar = v.findViewById(R.id.regresar3);
-        guardar = v.findViewById(R.id.guardar);
 
         deg90 = v.findViewById(R.id.deg90);
         deg180 = v.findViewById(R.id.deg180);
@@ -90,7 +89,6 @@ public class EscanerGaCortarRotar extends Fragment implements View.OnClickListen
         eliminar2.setOnClickListener(this);
 
         regresar.setOnClickListener(this);
-        guardar.setOnClickListener(view -> guardarYSalir());
 
         deg90.setOnClickListener(view -> rotarImagen(90));
         deg180.setOnClickListener(view -> rotarImagen(180));

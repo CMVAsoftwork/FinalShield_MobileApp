@@ -8,33 +8,36 @@
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="80dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="16dp"
+        android:layout_marginTop="28dp">
 
         <Button
             android:id="@+id/regresar1"
-            android:layout_width="60dp"
+            android:layout_width="69dp"
             android:layout_height="wrap_content"
             android:text="←"
-            android:textSize="32sp"
+            android:textSize="40dp"
+            android:layout_marginStart="4dp"
             android:textColor="@color/white"
             android:backgroundTint="#10FFFFFF" />
 
         <Button
             android:id="@+id/guardar"
             android:layout_width="wrap_content"
+            android:layout_marginTop="5dp"
             android:layout_height="36dp"
-            android:text="Hecho"
+            android:text="HECHO"
             android:textColor="@color/white"
             android:backgroundTint="@android:color/transparent"
-            android:layout_marginStart="160dp" />
+            android:layout_marginStart="155dp" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="105dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="8dp" />

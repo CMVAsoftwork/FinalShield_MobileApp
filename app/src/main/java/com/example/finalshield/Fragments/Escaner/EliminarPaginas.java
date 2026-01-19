@@ -42,7 +42,6 @@ public class EliminarPaginas extends Fragment implements View.OnClickListener, I
     private Button siEliminarBtn;
     private Button noEliminarBtn;
     private Button regresar;
-    private Button guardarHecho; // Botón "Hecho"
 
     // Data Management
     private SharedImageViewModel sharedViewModel;
@@ -75,7 +74,6 @@ public class EliminarPaginas extends Fragment implements View.OnClickListener, I
         recycler.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         regresar = v.findViewById(R.id.regresar3);
-        guardarHecho = v.findViewById(R.id.guardar);
         galeria = v.findViewById(R.id.selecgaleria);
         edicion = v.findViewById(R.id.edicion);
         recortar = v.findViewById(R.id.recortar);
@@ -92,7 +90,6 @@ public class EliminarPaginas extends Fragment implements View.OnClickListener, I
 
         // 2. Listeners de la UI (Se mantiene igual, solo se actualiza 'siEliminarBtn')
         regresar.setOnClickListener(this);
-        guardarHecho.setOnClickListener(this);
         galeria.setOnClickListener(this);
         edicion.setOnClickListener(this);
         recortar.setOnClickListener(this);

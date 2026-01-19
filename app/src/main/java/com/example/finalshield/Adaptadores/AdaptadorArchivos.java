@@ -14,17 +14,31 @@ import com.example.finalshield.R;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import androidx.core.content.ContextCompat;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Locale;
+
 public class AdaptadorArchivos extends BaseAdapter {
+
     private final Context contexto;
     private final List<ArchivoMetadata> listaArchivos;
     private final LayoutInflater inflater;
     private final AdaptadorListener listener;
+    private int lastPosition = -1;
 
     public interface AdaptadorListener {
         void onBorrarClick(int position);
         void onCambiarEstadoClick(int position);
         void onItemClick(int position);
-        void onDescifrarClick(int position);  // Nuevo para descifrar
+        void onDescifrarClick(int position);
     }
 
     public AdaptadorArchivos(Context contexto, List<ArchivoMetadata> listaArchivos, AdaptadorListener listener) {
@@ -65,26 +79,55 @@ public class AdaptadorArchivos extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        final ArchivoMetadata archivo = listaArchivos.get(position);
+        ArchivoMetadata archivo = listaArchivos.get(position);
 
+        // 1. Formatear Fecha (Sigue igual, está bien)
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-        String fechaStr = archivo.getFechaSeleccion() != null ? sdf.format(archivo.getFechaSeleccion()) : "";
+        String fechaStr = archivo.getFechaSeleccion() != null ? sdf.format(archivo.getFechaSeleccion()) : "N/A";
 
-        String descripcion = archivo.getNombre() + "\n(" + archivo.getTamanioFormateado() + ") - " + fechaStr;
-        holder.textDescrip.setText(descripcion);
-        holder.textEstatus.setText(archivo.getEstadoTexto());
+        // 2. Determinar Ruta INTELIGENTE
+        // Priorizamos la ruta de descifrado si el archivo ya no está cifrado
+        String rutaAMostrar = "Pendiente...";
 
-        // Ícono candado cerrado
-        holder.btnCifradoMark.setImageResource(R.drawable.candadolist);  // Tu ícono original
+        if (!archivo.isEstaCifrado() && archivo.getRutaLocalDescifrado() != null) {
+            rutaAMostrar = archivo.getRutaLocalDescifrado();
+        } else if (archivo.getRutaLocalEncriptada() != null) {
+            rutaAMostrar = archivo.getRutaLocalEncriptada();
+        } else if (archivo.getRutaServidor() != null) {
+            rutaAMostrar = archivo.getRutaServidor();
+        }
 
-        // Clic en candado → descifrar
+        // 3. Construir String Multilínea
+        // Usamos getTamanioFormateado() que ya tienes en el modelo
+        String infoCompleta = "Archivo: " + archivo.getNombre() + "\n"
+                + "Tamaño: " + archivo.getTamanioFormateado() + "\n"
+                + "Fecha: " + fechaStr + "\n"
+                + "Ruta: " + rutaAMostrar;
+
+        holder.textDescrip.setText(infoCompleta);
+
+        // --- ESTADO Y BOTONES ---
+        if (archivo.isEstaCifrado()) {
+            holder.textEstatus.setText("Cifrado");
+            holder.textEstatus.setTextColor(ContextCompat.getColor(contexto, android.R.color.holo_red_dark));
+            holder.btnCifradoMark.setImageResource(R.drawable.candadolist);
+        } else {
+            holder.textEstatus.setText("Descifrado");
+            holder.textEstatus.setTextColor(ContextCompat.getColor(contexto, android.R.color.holo_green_dark));
+            holder.btnCifradoMark.setImageResource(R.drawable.candadoopen);
+        }
+
         holder.btnCifradoMark.setOnClickListener(v -> listener.onDescifrarClick(position));
-
-        // Clic en item completo → abrir cifrado
+        holder.btnBorrar.setOnClickListener(v -> listener.onBorrarClick(position));
         convertView.setOnClickListener(v -> listener.onItemClick(position));
 
-        // Borrar
-        holder.btnBorrar.setOnClickListener(v -> listener.onBorrarClick(position));
+        // Animación (Sin cambios)
+        if (position > lastPosition) {
+            convertView.setTranslationY(100f);
+            convertView.setAlpha(0f);
+            convertView.animate().translationY(0f).alpha(1f).setDuration(500).setStartDelay(position * 20L).start();
+            lastPosition = position;
+        }
 
         return convertView;
     }

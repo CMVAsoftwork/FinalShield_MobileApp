@@ -17,7 +17,8 @@
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="-25">
 
         <TextView
             android:layout_width="wrap_content"
@@ -135,59 +136,66 @@
         android:layout_height="130dp"
         android:layout_marginTop="480dp"
         android:layout_centerHorizontal="true" />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="710dp"
-        android:layout_marginLeft="-15dp">
+        android:layout_marginLeft="-15dp"
+        android:layout_marginTop="708dp">
+
         <ImageButton
             android:id="@+id/house"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="29dp"
-            android:src="@drawable/house"
+            android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:background="@android:color/transparent"/>
+            android:src="@drawable/house" />
+
         <ImageButton
             android:id="@+id/archivo"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/archivo"
-            android:scaleType="fitCenter"
             android:layout_marginStart="20dp"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/archivo" />
+
         <ImageButton
             android:id="@+id/candadoclose"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/candadoclose"
-            android:scaleType="fitCenter"
             android:layout_marginStart="20dp"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/candadoclose" />
+
         <ImageButton
             android:id="@+id/carpeta"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/carpeta"
-            android:scaleType="fitCenter"
             android:layout_marginStart="20dp"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/carpeta" />
+
         <ImageButton
             android:id="@+id/mail"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/mail"
-            android:scaleType="fitCenter"
             android:layout_marginStart="20dp"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mail" />
+
         <ImageButton
             android:id="@+id/candadopen"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/candadopen"
-            android:scaleType="fitCenter"
             android:layout_marginStart="20dp"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/candadopen" />
     </LinearLayout>
 
 </RelativeLayout>

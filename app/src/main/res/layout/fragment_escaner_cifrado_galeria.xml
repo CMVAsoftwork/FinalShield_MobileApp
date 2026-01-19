@@ -8,28 +8,31 @@
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="80dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:layout_marginTop="28dp"
         android:paddingHorizontal="16dp">
 
         <Button
             android:id="@+id/regresar3"
-            android:layout_width="60dp"
+            android:layout_width="69dp"
             android:layout_height="wrap_content"
             android:text="←"
-            android:textSize="32sp"
+            android:textSize="40dp"
             android:textColor="@color/white"
+            android:layout_marginStart="4dp"
             android:backgroundTint="#10FFFFFF" />
 
         <Button
             android:id="@+id/guardar3"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
-            android:text="Hecho"
+            android:text="CIFRAR TODO"
             android:textColor="@color/white"
+            android:layout_marginTop="7dp"
             android:backgroundTint="@android:color/transparent"
-            android:layout_marginStart="160dp" />
+            android:layout_marginStart="110dp" />
     </LinearLayout>
     <LinearLayout
         android:id="@+id/selectionBar"
@@ -39,7 +42,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingHorizontal="16dp"
-        android:background="#222"
+        android:background="@drawable/bg_selection_bar"
         android:visibility="gone">
 
         <TextView
@@ -47,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0 seleccionadas"
-            android:textSize="18sp"
+            android:textSize="12dp"
             android:textColor="@android:color/white"
             android:layout_weight="1" />
         <Button
@@ -56,7 +59,7 @@
             android:layout_height="wrap_content"
             android:text="Añadir"
             android:textColor="@android:color/white"
-            android:backgroundTint="#60FF44"
+            android:backgroundTint="#1E90FF"
             android:layout_marginEnd="8dp"/>
         <Button
             android:id="@+id/clearSelection"
@@ -64,41 +67,41 @@
             android:layout_height="wrap_content"
             android:text="Cancelar"
             android:textColor="@android:color/white"
-            android:backgroundTint="#444" />
+            android:backgroundTint="#33FFFFFF" />
     </LinearLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
         android:layout_height="600dp"
         android:layout_below="@+id/selectionBar"
-        android:padding="8dp" />
+        android:layout_marginBottom="40dp"
+        android:padding="4dp" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="670dp"
+        android:layout_marginTop="700dp"
         android:background="@drawable/img">
     </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="15dp"
-        android:layout_marginLeft="-26dp">
+        android:layout_marginTop="710dp"
+        android:layout_marginLeft="-36dp">
 
         <ImageButton
             android:id="@+id/selecgaleria2"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
             android:src="@drawable/circlepicture"
             android:scaleType="fitCenter"
-            android:layout_marginStart="70dp"
+            android:layout_marginStart="62dp"
             android:background="@android:color/transparent"/>
 
         <ImageButton
             android:id="@+id/recortar2"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_marginStart="50dp"
             android:src="@drawable/recortar"
             android:scaleType="fitCenter"
@@ -106,8 +109,8 @@
 
         <ImageButton
             android:id="@+id/edicion2"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:src="@drawable/hojitas"
             android:scaleType="fitCenter"
             android:layout_marginStart="50dp"
@@ -115,8 +118,8 @@
 
         <ImageButton
             android:id="@+id/eliminar2"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:src="@drawable/basurita"
             android:scaleType="fitCenter"
             android:layout_marginStart="50dp"

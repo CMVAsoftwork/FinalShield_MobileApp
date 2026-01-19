@@ -9,17 +9,19 @@
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="80dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:layout_marginTop="28dp"
         android:paddingHorizontal="16dp">
 
         <Button
             android:id="@+id/regresar"
-            android:layout_width="60dp"
+            android:layout_width="69dp"
             android:layout_height="wrap_content"
             android:text="←"
-            android:textSize="32sp"
+            android:textSize="40dp"
+            android:layout_marginStart="4dp"
             android:textColor="@color/white"
             android:backgroundTint="#10FFFFFF" />
 
@@ -27,10 +29,11 @@
             android:id="@+id/guardar"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
-            android:text="Cifrar Todo"
+            android:text="CIFRAR TODO"
             android:textColor="@color/white"
+            android:layout_marginTop="5dp"
             android:backgroundTint="@android:color/transparent"
-            android:layout_marginStart="160dp" />
+            android:layout_marginStart="105dp" />
     </LinearLayout>
 
 
@@ -43,7 +46,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingHorizontal="16dp"
-        android:background="#222"
+        android:background="@drawable/bg_selection_bar"
         android:visibility="gone">
 
         <TextView
@@ -60,7 +63,7 @@
             android:layout_height="wrap_content"
             android:text="Añadir"
             android:textColor="@android:color/white"
-            android:backgroundTint="#60FF44"
+            android:backgroundTint="#00BFFF"
             android:layout_marginEnd="8dp"/>
         <Button
             android:id="@+id/clearSelection"
@@ -83,7 +86,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="670dp"
+        android:layout_marginTop="700dp"
         android:background="@drawable/img">
     </LinearLayout>
 
@@ -91,7 +94,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginTop="695dp"
+        android:layout_marginTop="710dp"
         android:layout_marginLeft="-26dp">
         <ImageButton
             android:id="@+id/scann"
@@ -99,7 +102,7 @@
             android:layout_height="30dp"
             android:src="@drawable/scann"
             android:scaleType="fitCenter"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="51dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/selecgaleria"
@@ -107,7 +110,7 @@
             android:layout_height="50dp"
             android:src="@drawable/circlepicture"
             android:scaleType="fitCenter"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="35dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/recortar"
@@ -123,7 +126,7 @@
             android:layout_height="30dp"
             android:src="@drawable/hojitas"
             android:scaleType="fitCenter"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="40dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/eliminar"
@@ -131,7 +134,7 @@
             android:layout_height="30dp"
             android:src="@drawable/basurita"
             android:scaleType="fitCenter"
-            android:layout_marginStart="30dp"
+            android:layout_marginStart="40dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
 

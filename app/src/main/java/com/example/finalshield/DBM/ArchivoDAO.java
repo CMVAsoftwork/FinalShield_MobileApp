@@ -24,6 +24,18 @@ public interface ArchivoDAO {
     @Query("SELECT * FROM archivos_cifrados_metadata")
     List<ArchivoMetadata> getAll();
 
-    @Query("SELECT * FROM archivo_metadata WHERE estaCifrado = 0")
+    // Filtro para la lista de DESCIFRADOS (Esta no cambia)
+    @Query("SELECT * FROM archivos_cifrados_metadata WHERE estaCifrado = 0")
     List<ArchivoMetadata> getAllDescifrados();
+
+    // --- NUEVAS CONSULTAS PARA EVITAR ERRORES ---
+
+    // Mantenemos esta por si alguna otra parte de tu código la usa (Compatibilidad)
+    @Query("SELECT * FROM archivos_cifrados_metadata WHERE estaCifrado = 1")
+    List<ArchivoMetadata> getAllCifrados();
+    @Query("SELECT * FROM archivos_cifrados_metadata WHERE estaCifrado = 1 AND origen = 'ARCHIVOS'")
+    List<ArchivoMetadata> getAllCifradosPrincipales();
+
+    @Query("SELECT * FROM archivos_cifrados_metadata WHERE estaCifrado = 1 AND origen = 'ESCANEO'")
+    List<ArchivoMetadata> getAllCifradosEscaneo();
 }

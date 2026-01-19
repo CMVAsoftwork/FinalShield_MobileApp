@@ -29,11 +29,10 @@ public class ArchivoMetadata implements Serializable {
     private String rutaServidor;
     private String rutaLocalEncriptada;
     private String rutaLocalDescifrado;
+    private String origen;
 
-    // Constructor vacío OBLIGATORIO para Room
     public ArchivoMetadata() {}
 
-    // Constructor para selección inicial (ignorado por Room)
     @Ignore
     public ArchivoMetadata(String nombre, Uri uri, long tamanioBytes, Date fechaSeleccion, boolean estaCifrado) {
         this.nombre = nombre;
@@ -43,60 +42,57 @@ public class ArchivoMetadata implements Serializable {
         this.estaCifrado = estaCifrado;
     }
 
-    // Constructor desde backend (ignorado por Room)
     @Ignore
     public ArchivoMetadata(Archivo archivo) {
-        this.idArchivoServidor = archivo.getIdArchivo();
-        this.nombre = archivo.getNombreArchivo();
-        this.tamanioBytes = archivo.getTamano();
-        this.estaCifrado = "Cifrado".equals(archivo.getEstado());
-        this.tipoArchivo = archivo.getTipoArchivo();
-        this.rutaServidor = archivo.getRutaArchivo();
+        if (archivo != null) {
+            // Asegúrate que estos métodos en tu clase 'Archivo' coincidan
+            this.idArchivoServidor = archivo.getIdArchivo();
+            this.nombre = archivo.getNombreArchivo();
+
+            // Si el servidor no manda el tamaño, intentamos obtenerlo de donde sea
+            // para que no sea 0B y Drive no falle.
+            Long s = archivo.getTamano();
+            this.tamanioBytes = (s != null) ? s : 0;
+
+            this.estaCifrado = true;
+            this.tipoArchivo = archivo.getTipoArchivo();
+            this.rutaServidor = archivo.getRutaArchivo();
+            this.fechaSeleccion = new Date();
+        }
     }
 
-    // Getters y Setters (todos)
+    // --- GETTERS Y SETTERS ---
     public long getIdLocal() { return idLocal; }
     public void setIdLocal(long idLocal) { this.idLocal = idLocal; }
-
     public Integer getIdArchivoServidor() { return idArchivoServidor; }
     public void setIdArchivoServidor(Integer idArchivoServidor) { this.idArchivoServidor = idArchivoServidor; }
-
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
-
     public Uri getUriOriginal() { return uriOriginal; }
     public void setUriOriginal(Uri uriOriginal) { this.uriOriginal = uriOriginal; }
-
     public long getTamanioBytes() { return tamanioBytes; }
     public void setTamanioBytes(long tamanioBytes) { this.tamanioBytes = tamanioBytes; }
-
     public Date getFechaSeleccion() { return fechaSeleccion; }
     public void setFechaSeleccion(Date fechaSeleccion) { this.fechaSeleccion = fechaSeleccion; }
-
     public boolean isEstaCifrado() { return estaCifrado; }
     public void setEstaCifrado(boolean estaCifrado) { this.estaCifrado = estaCifrado; }
-
     public String getTipoArchivo() { return tipoArchivo; }
     public void setTipoArchivo(String tipoArchivo) { this.tipoArchivo = tipoArchivo; }
-
     public String getRutaServidor() { return rutaServidor; }
     public void setRutaServidor(String rutaServidor) { this.rutaServidor = rutaServidor; }
-
     public String getRutaLocalEncriptada() { return rutaLocalEncriptada; }
     public void setRutaLocalEncriptada(String rutaLocalEncriptada) { this.rutaLocalEncriptada = rutaLocalEncriptada; }
-
     public String getRutaLocalDescifrado() { return rutaLocalDescifrado; }
     public void setRutaLocalDescifrado(String rutaLocalDescifrado) { this.rutaLocalDescifrado = rutaLocalDescifrado; }
+    public String getOrigen() { return origen; }
+    public void setOrigen(String origen) { this.origen = origen; }
 
     public String getTamanioFormateado() {
-        long size = tamanioBytes;
-        if (size <= 0) return "0 B";
-        final String[] units = new String[] { "B", "kB", "MB", "GB", "TB" };
-        int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
-        return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
+        if (tamanioBytes <= 0) return "0 B";
+        final String[] units = new String[] { "B", "kB", "MB", "GB" };
+        int digitGroups = (int) (Math.log10(tamanioBytes) / Math.log10(1024));
+        return new DecimalFormat("#,##0.#").format(tamanioBytes / Math.pow(1024, digitGroups)) + " " + units[digitGroups];
     }
 
-    public String getEstadoTexto() {
-        return estaCifrado ? "Cifrado" : "Descifrado";
-    }
+    public String getEstadoTexto() { return estaCifrado ? "Cifrado" : "Descifrado"; }
 }

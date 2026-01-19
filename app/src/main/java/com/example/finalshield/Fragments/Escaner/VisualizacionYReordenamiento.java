@@ -44,7 +44,6 @@ public class VisualizacionYReordenamiento extends Fragment implements View.OnCli
     private SharedImageViewModel sharedViewModel;
     private List<Uri> listaFotosCamara = new ArrayList<>();
     private View regresar;
-    private View guardar;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,7 +65,6 @@ public class VisualizacionYReordenamiento extends Fragment implements View.OnCli
         recycler.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         regresar = v.findViewById(R.id.regresar3);
-        guardar = v.findViewById(R.id.guardar);
 
         camara = v.findViewById(R.id.scancam);
         galeria = v.findViewById(R.id.selecgaleria);
@@ -74,7 +72,6 @@ public class VisualizacionYReordenamiento extends Fragment implements View.OnCli
         eliminar = v.findViewById(R.id.eliminar);
 
         regresar.setOnClickListener(this);
-        guardar.setOnClickListener(this);
 
         if (camara != null) camara.setOnClickListener(this);
         if (galeria != null) galeria.setOnClickListener(this);

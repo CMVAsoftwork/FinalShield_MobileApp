@@ -41,7 +41,7 @@ public class CortarRotar extends Fragment implements View.OnClickListener, Image
     private static final int DESTINO_CAMARA_ID = R.id.escanerCifradoMixto;
 
     ImageButton galeria, camara, edicion, eliminar;
-    private Button regresar, guardar, deg90, deg180, cutt;
+    private Button regresar, deg90, deg180, cutt;
     private RecyclerView recycler;
     private SharedImageViewModel sharedViewModel;
     private CropImageView imageToEdit;
@@ -68,7 +68,6 @@ public class CortarRotar extends Fragment implements View.OnClickListener, Image
 
         // --- 1. Inicialización de Views ---
         regresar = v.findViewById(R.id.regresar1);
-        guardar = v.findViewById(R.id.guardar);
 
         deg90 = v.findViewById(R.id.deg90);
         deg180 = v.findViewById(R.id.deg180);
@@ -89,7 +88,6 @@ public class CortarRotar extends Fragment implements View.OnClickListener, Image
         eliminar.setOnClickListener(this);
 
         regresar.setOnClickListener(this);
-        guardar.setOnClickListener(view -> guardarYSalir());
 
         deg90.setOnClickListener(view -> rotarImagen(90));
         deg180.setOnClickListener(view -> rotarImagen(180));

@@ -42,7 +42,6 @@ public class EscanerGaEliminarPaginas extends Fragment implements View.OnClickLi
     private Button siEliminarBtn;
     private Button noEliminarBtn;
     private Button regresar;
-    private Button guardarHecho; // Asumo este ID para el botón "Hecho"
 
     // Data Management
     private SharedImageViewModel sharedViewModel;
@@ -76,12 +75,11 @@ public class EscanerGaEliminarPaginas extends Fragment implements View.OnClickLi
         recycler.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         regresar = v.findViewById(R.id.regresar3);
-        guardarHecho = v.findViewById(R.id.guardar); // Botón "Hecho"
         selecimg2 = v.findViewById(R.id.selecgaleria2);
         edicion2 = v.findViewById(R.id.edicion2);
         recortar2 = v.findViewById(R.id.recortar2);
 
-        selectionBar = v.findViewById(R.id.selectionBar);
+        selectionBar = v.findViewById(R.id.selectionBarDelete);
         selectionCount = v.findViewById(R.id.selectionCount);
         clearSelection = v.findViewById(R.id.clearSelection);
         eliminarSeleccion = v.findViewById(R.id.eliminarSeleccion);
@@ -92,7 +90,6 @@ public class EscanerGaEliminarPaginas extends Fragment implements View.OnClickLi
 
         // 2. Listeners de la UI
         regresar.setOnClickListener(this);
-        guardarHecho.setOnClickListener(this);
         selecimg2.setOnClickListener(this);
         edicion2.setOnClickListener(this);
         recortar2.setOnClickListener(this);
