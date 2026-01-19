@@ -39,8 +39,9 @@
         android:layout_width="349dp"
         android:layout_height="427dp"
         android:layout_marginTop="30dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginStart="40dp"/>
+        android:layout_gravity="center"
+        android:divider="@null"
+        android:layout_centerHorizontal="true"/>
     <Button
         android:id="@+id/scan"
         android:layout_width="wrap_content"
@@ -54,7 +55,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="27dp"
+        android:layout_marginTop="25dp"
         android:layout_marginLeft="-6dp">
         <ImageButton
             android:id="@+id/house"

@@ -21,16 +21,6 @@
             android:textColor="@color/white"
             android:textAlignment="center"
             android:textSize="40dp" />
-        <Button
-            android:id="@+id/guardar"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:textColor="@color/white"
-            android:layout_marginStart="170dp"
-            android:layout_marginTop="30dp"
-            android:text="Hecho"
-            android:backgroundTint="@color/degradado_negro_azul"
-            android:textAlignment="center" />
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -42,6 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="25dp"
             android:id="@+id/deg90"
+            android:backgroundTint="#1E90FF"
             android:textColor="@color/white"
             android:text="90°" />
         <Button
@@ -49,6 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="25dp"
             android:id="@+id/deg180"
+            android:backgroundTint="#1E90FF"
             android:textColor="@color/white"
             android:text="180°"/>
         <Button
@@ -56,6 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="25dp"
             android:id="@+id/cutt"
+            android:backgroundTint="#1E90FF"
             android:textColor="@color/white"
             android:text="cortar"/>
     </LinearLayout>
@@ -64,7 +57,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="150dp"
-        android:layout_marginBottom="180dp"
+        android:layout_marginBottom="160dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         app:cropShowCropOverlay="true"
@@ -72,7 +65,7 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="110dp"
         android:layout_marginTop="585dp"
         android:layout_marginRight="10dp"
         android:layout_marginLeft="10dp"
@@ -80,14 +73,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="670dp"
+        android:layout_marginTop="700dp"
         android:background="@drawable/img">
     </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginTop="695dp"
+        android:layout_marginTop="710dp"
         android:layout_marginLeft="-22dp">
        <ImageButton
            android:id="@+id/scancam"
@@ -95,7 +88,7 @@
            android:layout_height="30dp"
            android:src="@drawable/scann"
            android:scaleType="fitCenter"
-           android:layout_marginStart="37dp"
+           android:layout_marginStart="47dp"
            android:background="@android:color/transparent"/>
        <ImageButton
            android:id="@+id/selecgaleria"
@@ -103,12 +96,12 @@
            android:layout_height="30dp"
            android:src="@drawable/picture"
            android:scaleType="fitCenter"
-           android:layout_marginStart="29dp"
+           android:layout_marginStart="45dp"
            android:background="@android:color/transparent"/>
        <ImageButton
            android:layout_width="50dp"
            android:layout_height="50dp"
-           android:layout_marginStart="20dp"
+           android:layout_marginStart="30dp"
            android:background="@android:color/transparent"
            android:scaleType="fitCenter"
            android:src="@drawable/circlecut" />
@@ -118,7 +111,7 @@
            android:layout_height="30dp"
            android:src="@drawable/hojitas"
            android:scaleType="fitCenter"
-           android:layout_marginStart="20dp"
+           android:layout_marginStart="30dp"
            android:background="@android:color/transparent"/>
        <ImageButton
            android:id="@+id/eliminar"
@@ -126,7 +119,7 @@
            android:layout_height="30dp"
            android:src="@drawable/basurita"
            android:scaleType="fitCenter"
-           android:layout_marginStart="30dp"
+           android:layout_marginStart="40dp"
            android:background="@android:color/transparent"/>
    </LinearLayout>
 

@@ -46,14 +46,15 @@
     <ListView
         android:id="@+id/listadesc"
         android:layout_width="349dp"
-        android:layout_height="410dp"
+        android:layout_height="420dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginStart="10dp"
+        android:layout_gravity="center"
+        android:divider="@null"
         android:layout_marginTop="30dp" />
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="35dp"
         android:layout_marginLeft="-6dp">
         <ImageButton
             android:id="@+id/house"
@@ -79,7 +80,7 @@
             android:layout_marginStart="20dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
-            android:src="@drawable/candadopen" />
+            android:src="@drawable/candadoclose" />
         <ImageButton
             android:id="@+id/carpeta"
             android:layout_width="40dp"
@@ -100,7 +101,7 @@
             android:id="@+id/candadopen"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/candadoblan"
+            android:src="@drawable/candadoopen"
             android:scaleType="fitCenter"
             android:layout_marginStart="20dp"
             android:backgroundTint="@color/white"

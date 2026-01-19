@@ -80,7 +80,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="670dp"
+        android:layout_marginTop="700dp"
         android:background="@drawable/img">
     </LinearLayout>
 
@@ -88,29 +88,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginTop="695dp"
+        android:layout_marginTop="710dp"
         android:layout_marginLeft="0dp">
         <ImageButton
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:src="@drawable/circle"
             android:scaleType="fitCenter"
-            android:layout_marginRight="50dp"
+            android:layout_marginRight="60dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/recortar1"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:background="@android:color/transparent"
             android:scaleType="fitCenter"
             android:src="@drawable/recortar" />
         <ImageButton
             android:id="@+id/eliminar1"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:src="@drawable/basurita"
             android:scaleType="fitCenter"
-            android:layout_marginStart="40dp"
+            android:layout_marginStart="70dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
 

@@ -319,6 +319,15 @@
         <action
             android:id="@+id/action_servivioCorreo_to_perfil"
             app:destination="@id/perfil2" />
+        <action
+            android:id="@+id/action_servivioCorreo_to_archivosDesifrados3"
+            app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_servivioCorreo_to_archivosDesifrados4"
+            app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_servivioCorreo_to_archivosDesifrados5"
+            app:destination="@id/archivosDesifrados" />
     </fragment>
     <fragment
         android:id="@+id/visualizacionYReordenamiento"
@@ -436,6 +445,9 @@
         <action
             android:id="@+id/action_archivosDesifrados_to_perfil"
             app:destination="@id/perfil2" />
+        <action
+            android:id="@+id/action_archivosDesifrados_to_servivioCorreo3"
+            app:destination="@id/servivioCorreo" />
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoMixto"

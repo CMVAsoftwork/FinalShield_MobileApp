@@ -170,7 +170,7 @@ public class ServivioCorreo extends Fragment implements View.OnClickListener {
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+            Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
         } else if (v.getId() == R.id.mail) {
             Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         } else if (v.getId() == R.id.archivo) {

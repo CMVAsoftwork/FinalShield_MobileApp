@@ -35,7 +35,7 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
 
     // ... (Variables de instancia como las tenías)
     ImageButton cam1, eliminar1;
-    private Button regresarBtn, guardarBtn;
+    private Button regresarBtn;
     private Button cortarBtn, girar90Btn, girar180Btn;
 
     private CropImageView imageToEdit;
@@ -60,7 +60,6 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
 
         // Inicialización de Vistas
         regresarBtn = v.findViewById(R.id.regresar4);
-        guardarBtn = v.findViewById(R.id.guardar);
         girar90Btn = v.findViewById(R.id.deg90);
         girar180Btn = v.findViewById(R.id.deg180);
         cortarBtn = v.findViewById(R.id.cutt);
@@ -80,7 +79,6 @@ public class EscanerCaCortarRotar extends Fragment implements View.OnClickListen
 
         // Listeners
         regresarBtn.setOnClickListener(this);
-        guardarBtn.setOnClickListener(this);
         cam1.setOnClickListener(this);
         eliminar1.setOnClickListener(this);
         girar90Btn.setOnClickListener(this);

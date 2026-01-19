@@ -5,13 +5,14 @@
     android:layout_height="match_parent"
     tools:context=".Fragments.CambiarContrasena"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="8dp"
     android:background="@color/degradado_negro_azul"
     android:gravity="center">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="-100dp"
         android:orientation="vertical">
         <Button
             android:layout_width="69dp"
@@ -21,8 +22,7 @@
             android:text="←"
             android:textAlignment="center"
             android:textColor="@color/white"
-            android:textSize="40dp"
-            android:layout_marginBottom="15dp"/>
+            android:textSize="40dp"/>
     </LinearLayout>
 
     <FrameLayout
@@ -70,32 +70,49 @@
         android:textStyle="bold"
         android:layout_marginBottom="20dp" />
 
-    <EditText
-        android:id="@+id/etPassActual"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:hint="Contraseña Actual"
-        android:inputType="textPassword"
-        android:textColor="@color/white"
-        android:textColorHint="#80FFFFFF"
-        android:backgroundTint="#1E90FF"
-        android:drawableEnd="@drawable/ojocerrado"
-        android:drawablePadding="12dp"/>
+        android:layout_height="56dp"
+        android:background="@drawable/bg_card_perfil"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical">
 
-    <EditText
-        android:id="@+id/etPassNueva"
+        <EditText
+            android:id="@+id/etPassActual"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="Contraseña Actual"
+            android:inputType="textPassword"
+            android:background="@null"
+            android:textColor="@color/white"
+            android:textColorHint="#80FFFFFF"
+            android:drawableEnd="@drawable/ojocerrado"
+            android:drawablePadding="12dp"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="56dp"
         android:layout_marginTop="12dp"
-        android:hint="Nueva Contraseña"
-        android:inputType="textPassword"
-        android:textColor="@color/white"
-        android:textColorHint="#80FFFFFF"
-        android:backgroundTint="#1E90FF"
-        android:drawableEnd="@drawable/ojocerrado"
-        android:drawablePadding="12dp"/>
+        android:background="@drawable/bg_card_perfil"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical">
+
+        <EditText
+            android:id="@+id/etPassNueva"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:hint="Nueva Contraseña"
+            android:inputType="textPassword"
+            android:background="@null"
+            android:textColor="@color/white"
+            android:textColorHint="#80FFFFFF"
+            android:drawableEnd="@drawable/ojocerrado"
+            android:drawablePadding="12dp"/>
+    </LinearLayout>
 
     <Button
+        android:textColor="@color/white"
         android:id="@+id/btnActualizarC"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

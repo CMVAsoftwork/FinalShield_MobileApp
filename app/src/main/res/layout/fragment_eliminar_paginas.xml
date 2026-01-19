@@ -6,6 +6,7 @@
     android:background="@color/degradado_negro_azul"
     tools:context=".Fragments.Escaner.EliminarPaginas">
     <LinearLayout
+        android:id="@+id/topbar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
         <Button
@@ -19,28 +20,17 @@
             android:text="←"
             android:textAlignment="center"
             android:textSize="40dp" />
-        <Button
-            android:id="@+id/guardar"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:layout_marginStart="170dp"
-            android:layout_marginTop="30dp"
-            android:textColor="@color/white"
-            android:text="Hecho"
-            android:backgroundTint="@color/degradado_negro_azul"
-            android:textAlignment="center" />
     </LinearLayout>
     <LinearLayout
         android:id="@+id/selectionBar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_below="@id/topBar"
+        android:layout_below="@id/topbar"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingHorizontal="16dp"
-        android:background="#222"
-        android:visibility="gone"
-        tools:ignore="NotSibling">
+        android:background="@drawable/bg_selection_bar"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/selectionCount"
@@ -122,15 +112,14 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler"
         android:layout_width="match_parent"
-        android:layout_height="565dp"
+        android:layout_height="590dp"
         android:layout_below="@+id/selectionBar"
-        android:padding="8dp"
-        android:layout_marginTop="110dp"/>
+        android:padding="8dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="670dp"
+        android:layout_marginTop="700dp"
         android:background="@drawable/img">
     </LinearLayout>
 
@@ -138,7 +127,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginTop="695dp"
+        android:layout_marginTop="710dp"
         android:layout_marginLeft="-22dp">
         <ImageButton
             android:id="@+id/scancam"
@@ -146,7 +135,7 @@
             android:layout_height="30dp"
             android:src="@drawable/scann"
             android:scaleType="fitCenter"
-            android:layout_marginStart="70dp"
+            android:layout_marginStart="47dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/selecgaleria"
@@ -154,7 +143,7 @@
             android:layout_height="30dp"
             android:src="@drawable/picture"
             android:scaleType="fitCenter"
-            android:layout_marginStart="40dp"
+            android:layout_marginStart="45dp"
             android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/recortar"
@@ -178,7 +167,7 @@
             android:layout_height="50dp"
             android:src="@drawable/basuritacicle"
             android:scaleType="fitCenter"
-            android:layout_marginStart="40dp"
+            android:layout_marginStart="29dp"
             android:background="@android:color/transparent"/>
     </LinearLayout>
 </RelativeLayout>

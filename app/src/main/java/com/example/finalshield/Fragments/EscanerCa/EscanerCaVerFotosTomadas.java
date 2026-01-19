@@ -48,7 +48,6 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
     private Button clearSelection;
     private Button descartarSeleccion;
     private Button regresar;
-    private Button guardar;
 
     private LinearLayout dialogContainer;
     private Button siEliminarBtn;
@@ -69,7 +68,6 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
         regresar = v.findViewById(R.id.regresar1);
         cam1 = v.findViewById(R.id.scancam1);
         cortar1 = v.findViewById(R.id.recortar1);
-        guardar = v.findViewById(R.id.guardar);
 
         selectionBar = v.findViewById(R.id.selectionBar);
         selectionCount = v.findViewById(R.id.selectionCount);
@@ -81,7 +79,6 @@ public class EscanerCaVerFotosTomadas extends Fragment implements View.OnClickLi
         noEliminarBtn = v.findViewById(R.id.noeliminar);
 
         regresar.setOnClickListener(this);
-        guardar.setOnClickListener(this);
         cam1.setOnClickListener(this);
         cortar1.setOnClickListener(this);
 

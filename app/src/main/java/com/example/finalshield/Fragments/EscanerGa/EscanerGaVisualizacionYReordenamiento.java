@@ -35,7 +35,7 @@ public class EscanerGaVisualizacionYReordenamiento extends Fragment implements V
 
     // UI Elements
     ImageButton selecimg2, eliminar2, recortar2, edicion2;
-    private Button regresar, guardarHecho;
+    private Button regresar;
     private RecyclerView recycler;
 
     // Data Management
@@ -71,7 +71,6 @@ public class EscanerGaVisualizacionYReordenamiento extends Fragment implements V
         recycler.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
         regresar = v.findViewById(R.id.regresar3);
-        guardarHecho = v.findViewById(R.id.guardar);
         selecimg2 = v.findViewById(R.id.selecgaleria2);
         eliminar2 = v.findViewById(R.id.eliminar2);
         recortar2 = v.findViewById(R.id.recortar2);
@@ -82,7 +81,6 @@ public class EscanerGaVisualizacionYReordenamiento extends Fragment implements V
         eliminar2.setOnClickListener(this);
         recortar2.setOnClickListener(this);
         regresar.setOnClickListener(this);
-        guardarHecho.setOnClickListener(this);
         edicion2.setOnClickListener(this);
 
         // 3. Cargar datos y configurar RecyclerView
