@@ -1,9 +1,12 @@
 package com.example.finalshield.Fragments.MenuPrincipal;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
@@ -13,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.finalshield.Adaptadores.FaqAdapter;
 import com.example.finalshield.Model.Faq;
@@ -100,7 +104,7 @@ public class ArchivosCifrados extends Fragment implements View.OnClickListener{
 
         faqs.add(new Faq(
                 "¿Dónde puedo obtener más ayuda?",
-                "Puedes consultar esta sección o contactar al soporte desde la opción Ayuda en la app.",
+                "Puedes consultar esta sección o contactar al soporte por Whatsapp o llenando un formulario.",
                 R.drawable.infoicon));
 
 
@@ -120,10 +124,43 @@ public class ArchivosCifrados extends Fragment implements View.OnClickListener{
         carpeta.setOnClickListener(this);
         mail.setOnClickListener(this);
         candadopen.setOnClickListener(this);
+        // Dentro de onViewCreated
+        v.findViewById(R.id.btnWhatsappIcon).setOnClickListener(view -> abrirWhatsApp());
+        v.findViewById(R.id.btnFormulario).setOnClickListener(view -> abrirFormulario());
+        CardView btnForm = v.findViewById(R.id.btnFormulario);
 
         FaqAdapter adapter = new FaqAdapter(requireContext(), faqs);
         listac.setAdapter(adapter);
 
+    }
+
+    private void abrirWhatsApp() {
+        try {
+            String numero = "525533539810";
+            String mensaje = "Hola FinalShield, necesito soporte técnico.";
+            String url = "https://api.whatsapp.com/send?phone=" + numero + "&text=" + Uri.encode(mensaje);
+
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setData(Uri.parse(url));
+            // Opcional: i.setPackage("com.whatsapp"); // Esto fuerza a abrir la app de WA
+            startActivity(i);
+        } catch (Exception e) {
+            // Por si el usuario no tiene WhatsApp, lo mandamos al navegador
+            Toast.makeText(getContext(), "No se pudo abrir WhatsApp", Toast.LENGTH_SHORT).show();
+        }
+    }
+    // Método para abrir el Formulario de Google
+    private void abrirFormulario() {
+        String urlForm = "https://forms.gle/PWXtt7Eszxjmryj7A";
+        try {
+            Uri uri = Uri.parse(urlForm);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            // Esto ayuda a que el navegador lo abra como una pestaña nueva y limpia
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Error al abrir el formulario", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
