@@ -71,23 +71,14 @@
         android:label="fragment_inicio"
         tools:layout="@layout/fragment_inicio" >
         <action
-            android:id="@+id/action_inicio_to_continuacionInicio"
-            app:destination="@id/continuacionInicio" />
-        <action
             android:id="@+id/action_inicio_to_archivosCifrados"
             app:destination="@id/archivosCifrados" />
-        <action
-            android:id="@+id/action_inicio_to_continuacionInicio2"
-            app:destination="@id/continuacionInicio" />
         <action
             android:id="@+id/action_inicio_to_archivosCifrados2"
             app:destination="@id/archivosCifrados2" />
         <action
             android:id="@+id/action_inicio_to_cifradoEscaneo2"
             app:destination="@id/cifradoEscaneo2" />
-        <action
-            android:id="@+id/action_inicio_to_continuacionInicio3"
-            app:destination="@id/continuacionInicio" />
         <action
             android:id="@+id/action_inicio_to_servivioCorreo"
             app:destination="@id/servivioCorreo" />
@@ -107,33 +98,7 @@
             android:id="@+id/action_inicio_to_perfil"
             app:destination="@id/perfil2" />
     </fragment>
-    <fragment
-        android:id="@+id/continuacionInicio"
-        android:name="com.example.finalshield.Fragments.MenuPrincipal.ContinuacionInicio"
-        android:label="fragment_continuacion_inicio"
-        tools:layout="@layout/fragment_continuacion_inicio" >
-        <action
-            android:id="@+id/action_continuacionInicio_to_inicio"
-            app:destination="@id/inicio" />
-        <action
-            android:id="@+id/action_continuacionInicio_to_archivosCifrados"
-            app:destination="@id/archivosCifrados" />
-        <action
-            android:id="@+id/action_continuacionInicio_to_cifradoEscaneo2"
-            app:destination="@id/cifradoEscaneo2" />
-        <action
-            android:id="@+id/action_continuacionInicio_to_archivosDesifrados"
-            app:destination="@id/archivosDesifrados" />
-        <action
-            android:id="@+id/action_continuacionInicio_to_archivosDesifrados2"
-            app:destination="@id/archivosDesifrados" />
-        <action
-            android:id="@+id/action_continuacionInicio_to_archivosDesifrados3"
-            app:destination="@id/archivosDesifrados" />
-        <action
-            android:id="@+id/action_continuacionInicio_to_perfil"
-            app:destination="@id/perfil2" />
-    </fragment>
+
     <fragment
         android:id="@+id/archivosCifrados"
         android:name="com.example.finalshield.Fragments.MenuPrincipal.ArchivosCifrados"
@@ -422,14 +387,8 @@
             android:id="@+id/action_archivosDesifrados_to_servivioCorreo"
             app:destination="@id/servivioCorreo" />
         <action
-            android:id="@+id/action_archivosDesifrados_to_continuacionInicio2"
-            app:destination="@id/continuacionInicio" />
-        <action
             android:id="@+id/action_archivosDesifrados_to_inicio2"
             app:destination="@id/inicio" />
-        <action
-            android:id="@+id/action_archivosDesifrados_to_continuacionInicio"
-            app:destination="@id/continuacionInicio" />
         <action
             android:id="@+id/action_archivosDesifrados_to_archivosCifrados22"
             app:destination="@id/archivosCifrados2" />
@@ -653,9 +612,6 @@
         <action
             android:id="@+id/action_perfil_to_inicio"
             app:destination="@id/inicio" />
-        <action
-            android:id="@+id/action_perfil_to_continuacionInicio"
-            app:destination="@id/continuacionInicio" />
         <action
             android:id="@+id/action_perfil_to_archivosCifrados2"
             app:destination="@id/archivosCifrados2" />

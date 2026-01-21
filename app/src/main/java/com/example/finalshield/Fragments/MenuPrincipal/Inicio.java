@@ -106,7 +106,6 @@ public class Inicio extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.carpeta) Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
-        else if (id == R.id.house) Navigation.findNavController(v).navigate(R.id.continuacionInicio);
         else if (id == R.id.candadoclose) Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         else if (id == R.id.candadopen) Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
         else if (id == R.id.btnseleccarpeta || id == R.id.archivo) Navigation.findNavController(v).navigate(R.id.archivosCifrados);

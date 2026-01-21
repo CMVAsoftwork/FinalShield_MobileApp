@@ -14,9 +14,15 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import com.example.finalshield.Adaptadores.FaqAdapter;
+import com.example.finalshield.Model.Faq;
 import com.example.finalshield.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ArchivosCifrados extends Fragment implements View.OnClickListener{
+    ListView listac;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -29,8 +35,76 @@ public class ArchivosCifrados extends Fragment implements View.OnClickListener{
         if (getActivity() != null) {
             getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         }
+
+        List<Faq> faqs = new ArrayList<>();
+
+// 🔐 Seguridad y cifrado
+        faqs.add(new Faq(
+                "¿Qué es FinalShield?",
+                "FinalShield es una aplicación móvil que protege tus archivos y mensajes mediante cifrado, asegurando que solo las personas autorizadas puedan acceder a ellos.",
+                R.drawable.escudo));
+
+        faqs.add(new Faq(
+                "¿Qué significa que un archivo esté cifrado?",
+                "Significa que el archivo está protegido con una clave especial y no puede leerse sin autorización, incluso si alguien más lo obtiene.",
+                R.drawable.candadoblan));
+
+        faqs.add(new Faq(
+                "¿Mis archivos están seguros en FinalShield?",
+                "Sí. FinalShield utiliza métodos de cifrado seguros para proteger tu información y evitar accesos no autorizados.",
+                R.drawable.archivoseguro));
+
+// 📂 Archivos
+        faqs.add(new Faq(
+                "¿Cómo cifro un archivo desde la app?",
+                "Solo selecciona el archivo desde la aplicación y elige la opción Cifrar. El proceso es rápido y automático.",
+                R.drawable.carpetiux));
+
+        faqs.add(new Faq(
+                "¿Puedo descifrar un archivo en cualquier momento?",
+                "Sí, siempre que estés autenticado y tengas permiso, puedes descifrar tus archivos cuando lo necesites.",
+                R.drawable.candadoopen));
+
+        faqs.add(new Faq(
+                "¿Qué tipos de archivos puedo proteger?",
+                "Puedes cifrar documentos, imágenes y otros archivos compatibles con tu dispositivo móvil.",
+                R.drawable.circlepicture));
+
+// 🔗 Enlaces seguros
+        faqs.add(new Faq(
+                "¿Qué es un enlace seguro?",
+                "Es un enlace especial que permite compartir un archivo o mensaje cifrado de forma segura.",
+                R.drawable.enlace));
+
+        faqs.add(new Faq(
+                "¿El enlace seguro tiene caducidad?",
+                "Sí, los enlaces tienen una duración de 1 hora para mayor seguridad.",
+                R.drawable.tiempo));
+
+        faqs.add(new Faq(
+                "¿Necesito una cuenta para abrir un enlace seguro?",
+                "Sí, el destinatario debe autenticarse para poder acceder al contenido protegido.",
+                R.drawable.person));
+
+// 👤 Cuenta y acceso
+        faqs.add(new Faq(
+                "¿Necesito crear una cuenta para usar FinalShield?",
+                "Sí, crear una cuenta permite proteger tu información y controlar el acceso a tus archivos.",
+                R.drawable.cuenta2));
+
+// ⚙️ Ayuda general
+        faqs.add(new Faq(
+                "¿La app consume muchos recursos del teléfono?",
+                "No, FinalShield está optimizada para funcionar de manera eficiente en dispositivos móviles.",
+                R.drawable.grafica));
+
+        faqs.add(new Faq(
+                "¿Dónde puedo obtener más ayuda?",
+                "Puedes consultar esta sección o contactar al soporte desde la opción Ayuda en la app.",
+                R.drawable.infoicon));
+
+
         ImageButton perfil,house, archivo,candadclose, carpeta, mail, candadopen;
-        ListView listac;
         listac = v.findViewById(R.id.listacarp);
         perfil = v.findViewById(R.id.btnperfil);
         house = v.findViewById(R.id.house);
@@ -46,6 +120,9 @@ public class ArchivosCifrados extends Fragment implements View.OnClickListener{
         carpeta.setOnClickListener(this);
         mail.setOnClickListener(this);
         candadopen.setOnClickListener(this);
+
+        FaqAdapter adapter = new FaqAdapter(requireContext(), faqs);
+        listac.setAdapter(adapter);
 
     }
 

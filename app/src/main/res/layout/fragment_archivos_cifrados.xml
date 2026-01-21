@@ -45,7 +45,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Monitoreo de carpetas"
+            android:text="Cónoce como funciona tu app"
             android:textColor="@color/white"
             android:textSize="20dp"
             android:textStyle="bold"
@@ -54,18 +54,22 @@
     </LinearLayout>
 
     <ListView
-        android:layout_width="349dp"
-        android:layout_height="390dp"
-        android:layout_marginTop="30dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginStart="40dp"
-        android:id="@+id/listacarp"/>
+        android:id="@+id/listacarp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="20dp"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="10dp"
+        android:scrollbars="none"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="55dp"
-        android:layout_marginLeft="-15dp">
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="-15dp"
+        android:layout_marginBottom="120dp">
         <ImageButton
             android:id="@+id/house"
             android:layout_width="40dp"
@@ -78,7 +82,7 @@
             android:id="@+id/archivo"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/carpetablanc"
+            android:src="@drawable/infoicon"
             android:scaleType="fitCenter"
             android:layout_marginStart="20dp"
             android:background="@android:color/transparent"/>
