@@ -8,11 +8,9 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
-import android.os.Handler;
-import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -121,12 +119,6 @@ public class ServivioCorreo extends Fragment implements View.OnClickListener {
             return;
         }
 
-        // --- 1. CAPTURAR NAVCONTROLLER Y IR A CARGA ---
-        final NavController navController = Navigation.findNavController(requireView());
-        btnEnviar.setEnabled(false); // Evitar clics dobles
-        navController.navigate(R.id.cargaProcesos);
-        // ----------------------------------------------
-
         CorreoRequest correoRequest = new CorreoRequest(asunto, mensaje, destinatario);
 
         RequestBody correoJsonPart = RequestBody.create(
@@ -146,58 +138,44 @@ public class ServivioCorreo extends Fragment implements View.OnClickListener {
         correoService.getAPI().enviarCorreo(correoJsonPart,adjuntosPart).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                // --- 2. REGRESAR AL HILO PRINCIPAL PARA UI Y NAVEGACIÓN ---
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    if (response.isSuccessful()) {
-                        etAsunto.setText("");
-                        etMensaje.setText("");
-                        etDestinatario.setText("");
-                        adjuntosUri.clear();
-                        Toast.makeText(requireContext(), "Correo cifrado enviado con éxito.", Toast.LENGTH_LONG).show();
-                    } else {
-                        try {
-                            String errorBody = response.errorBody().string();
-                            Toast.makeText(requireContext(), "Error al enviar: " + errorBody, Toast.LENGTH_LONG).show();
-                        } catch (IOException e) {
-                            Toast.makeText(requireContext(), "Error HTTP " + response.code(), Toast.LENGTH_LONG).show();
-                        }
+                if (response.isSuccessful()) {
+                    etAsunto.setText("");
+                    etMensaje.setText("");
+                    etDestinatario.setText("");
+                    adjuntosUri.clear();
+                    Toast.makeText(requireContext(), "Correo cifrado enviado con éxito.", Toast.LENGTH_LONG).show();
+                } else {
+                    try {
+                        String errorBody = response.errorBody().string();
+                        Toast.makeText(requireContext(), "Error al enviar: " + errorBody, Toast.LENGTH_LONG).show();
+                    } catch (IOException e) {
+                        Toast.makeText(requireContext(), "Error HTTP " + response.code(), Toast.LENGTH_LONG).show();
                     }
-
-                    // --- 3. QUITAR CARGA Y VOLVER AL FORMULARIO ---
-                    btnEnviar.setEnabled(true);
-                    navController.popBackStack(R.id.servivioCorreo, false);
-                });
+                }
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    btnEnviar.setEnabled(true);
-                    Toast.makeText(requireContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
-
-                    // Volver incluso si falla para no dejar la pantalla de carga pegada
-                    navController.popBackStack(R.id.servivioCorreo, false);
-                });
+                Toast.makeText(requireContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
 
     @Override
     public void onClick(View v) {
-        int id = v.getId(); // Usamos variable para limpieza
-        if (id == R.id.carpeta) {
+        if (v.getId() == R.id.carpeta) {
             Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
-        } else if (id == R.id.house) {
-            Navigation.findNavController(v).navigate(R.id.inicio);
-        } else if (id == R.id.candadoclose) {
+        } else if (v.getId() == R.id.house) {
+            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+        } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
-        } else if (id == R.id.candadopen) {
+        } else if (v.getId() == R.id.candadopen) {
             Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
-        } else if (id == R.id.mail) {
+        } else if (v.getId() == R.id.mail) {
             Navigation.findNavController(v).navigate(R.id.servivioCorreo);
-        } else if (id == R.id.archivo) {
+        } else if (v.getId() == R.id.archivo) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados);
-        } else if (id == R.id.btnperfil) {
+        } else if (v.getId() == R.id.btnperfil) {
             Navigation.findNavController(v).navigate(R.id.perfil2);
         }
     }
