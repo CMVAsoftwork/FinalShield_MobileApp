@@ -24,6 +24,9 @@
         <action
             android:id="@+id/action_bienvenida_to_datosBiometricos"
             app:destination="@id/datosBiometricos" />
+        <action
+            android:id="@+id/action_bienvenida_to_cargaProcesos"
+            app:destination="@id/cargaProcesos" />
     </fragment>
     <fragment
         android:id="@+id/registroSesion"
@@ -205,6 +208,9 @@
         <action
             android:id="@+id/action_archivosCifrados2_to_perfil"
             app:destination="@id/perfil2" />
+        <action
+            android:id="@+id/action_archivosCifrados2_to_cargaProcesos"
+            app:destination="@id/cargaProcesos" />
     </fragment>
     <fragment
         android:id="@+id/cifradoEscaneo2"
@@ -238,6 +244,9 @@
         <action
             android:id="@+id/action_cifradoEscaneo2_to_perfil"
             app:destination="@id/perfil2" />
+        <action
+            android:id="@+id/action_cifradoEscaneo2_to_cargaProcesos"
+            app:destination="@id/cargaProcesos" />
     </fragment>
     <fragment
         android:id="@+id/seleccion_imagenes"
@@ -328,6 +337,9 @@
         <action
             android:id="@+id/action_servivioCorreo_to_archivosDesifrados5"
             app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_servivioCorreo_to_cargaProcesos"
+            app:destination="@id/cargaProcesos" />
     </fragment>
     <fragment
         android:id="@+id/visualizacionYReordenamiento"
@@ -448,6 +460,9 @@
         <action
             android:id="@+id/action_archivosDesifrados_to_servivioCorreo3"
             app:destination="@id/servivioCorreo" />
+        <action
+            android:id="@+id/action_archivosDesifrados_to_cargaProcesos"
+            app:destination="@id/cargaProcesos" />
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoMixto"
@@ -478,6 +493,9 @@
         <action
             android:id="@+id/action_escanerCifradoMixto_to_escanerReordenarFotosTomadas"
             app:destination="@id/escanerReordenarFotosTomadas" />
+        <action
+            android:id="@+id/action_escanerCifradoMixto_to_cargaProcesos"
+            app:destination="@id/cargaProcesos" />
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoCamara3"
@@ -495,6 +513,9 @@
         <action
             android:id="@+id/action_escanerCifradoCamara3_to_escanerCaReordenar"
             app:destination="@id/escanerCaReordenar" />
+        <action
+            android:id="@+id/action_escanerCifradoCamara3_to_cargaProcesos"
+            app:destination="@id/cargaProcesos" />
     </fragment>
     <fragment
         android:id="@+id/escanerCifradoGaleria2"
@@ -512,6 +533,9 @@
         <action
             android:id="@+id/action_escanerCifradoGaleria2_to_escanerGaVisualizacionYReordenamiento"
             app:destination="@id/escanerGaVisualizacionYReordenamiento" />
+        <action
+            android:id="@+id/action_escanerCifradoGaleria2_to_cargaProcesos"
+            app:destination="@id/cargaProcesos" />
     </fragment>
     <fragment
         android:id="@+id/verClave"
@@ -681,5 +705,32 @@
         <action
             android:id="@+id/action_cambiarContrasena_to_perfil2"
             app:destination="@id/perfil2" />
+    </fragment>
+    <fragment
+        android:id="@+id/cargaProcesos"
+        android:name="com.example.finalshield.Fragments.CargaProcesos"
+        android:label="fragment_carga_procesos"
+        tools:layout="@layout/fragment_carga_procesos" >
+        <action
+            android:id="@+id/action_cargaProcesos_to_cifradoEscaneo2"
+            app:destination="@id/cifradoEscaneo2" />
+        <action
+            android:id="@+id/action_cargaProcesos_to_archivosDesifrados"
+            app:destination="@id/archivosDesifrados" />
+        <action
+            android:id="@+id/action_cargaProcesos_to_archivosCifrados2"
+            app:destination="@id/archivosCifrados2" />
+        <action
+            android:id="@+id/action_cargaProcesos_to_servivioCorreo"
+            app:destination="@id/servivioCorreo" />
+        <action
+            android:id="@+id/action_cargaProcesos_to_datosBiometricos"
+            app:destination="@id/datosBiometricos" />
+        <action
+            android:id="@+id/action_cargaProcesos_to_inicioSesion"
+            app:destination="@id/inicioSesion" />
+        <action
+            android:id="@+id/action_cargaProcesos_to_datosBiometricos2"
+            app:destination="@id/datosBiometricos" />
     </fragment>
 </navigation>
