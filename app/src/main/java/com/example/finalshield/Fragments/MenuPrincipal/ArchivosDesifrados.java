@@ -1,25 +1,21 @@
 package com.example.finalshield.Fragments.MenuPrincipal;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-import androidx.room.Room;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.webkit.MimeTypeMap;
-import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import com.example.finalshield.Adaptadores.AdaptadorArchivos;
 import com.example.finalshield.DBM.AppDatabase;
@@ -39,6 +35,10 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
     private final List<ArchivoMetadata> listaMetadata = new ArrayList<>();
     private ArchivoDAO archivoDAO;
 
+    private LinearLayout dialogContainerCifrar;
+    private LinearLayout dialogContainerEliminar;
+    private int posicionSeleccionada = -1;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_archivos_desifrados, container, false);
@@ -49,12 +49,20 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
         super.onViewCreated(v, savedInstanceState);
 
         archivoDAO = AppDatabase.getInstance(requireContext()).archivoDAO();
-
         listView = v.findViewById(R.id.listadesc);
+        dialogContainerCifrar = v.findViewById(R.id.dialogContainer);
+        dialogContainerEliminar = v.findViewById(R.id.dialogContainer2);
+
         adaptador = new AdaptadorArchivos(getContext(), listaMetadata, this);
         listView.setAdapter(adaptador);
 
-        // Listeners de navegación originales
+        // Listeners de botones de diálogo
+        v.findViewById(R.id.sicifrar).setOnClickListener(view -> ejecutarAccionCifrar());
+        v.findViewById(R.id.nocifrar).setOnClickListener(view -> ocultarDialogos());
+        v.findViewById(R.id.sieliminar2).setOnClickListener(view -> ejecutarAccionEliminar());
+        v.findViewById(R.id.noeliminar2).setOnClickListener(view -> ocultarDialogos());
+
+        // Navegación barra inferior
         v.findViewById(R.id.house).setOnClickListener(this);
         v.findViewById(R.id.candadoclose).setOnClickListener(this);
         v.findViewById(R.id.carpeta).setOnClickListener(this);
@@ -78,52 +86,36 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
         });
     }
 
-    @Override
-    public void onItemClick(int position) {
-        ArchivoMetadata archivo = listaMetadata.get(position);
-        if (archivo.getRutaLocalDescifrado() == null) return;
-
-        File file = new File(archivo.getRutaLocalDescifrado());
-        if (!file.exists()) {
-            Toast.makeText(getContext(), "El archivo no existe", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        try {
-            Uri contentUri = FileProvider.getUriForFile(requireContext(),
-                    requireContext().getPackageName() + ".fileprovider", file);
-
-            // Obtener MimeType real basado en la extensión física del archivo
-            String extension = MimeTypeMap.getFileExtensionFromUrl(contentUri.toString());
-            if (extension == null || extension.isEmpty()) {
-                extension = file.getName().substring(file.getName().lastIndexOf(".") + 1);
-            }
-
-            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
-            if (mimeType == null) mimeType = "*/*"; // Genérico si no se reconoce
-
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(contentUri, mimeType);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            startActivity(Intent.createChooser(intent, "Abrir archivo con:"));
-
-        } catch (Exception e) {
-            Toast.makeText(getContext(), "No hay aplicaciones para abrir este archivo", Toast.LENGTH_SHORT).show();
-        }
+    private void ocultarDialogos() {
+        dialogContainerCifrar.setVisibility(View.GONE);
+        dialogContainerEliminar.setVisibility(View.GONE);
+        posicionSeleccionada = -1;
     }
 
     @Override
     public void onDescifrarClick(int position) {
-        // ACCIÓN: RE-CIFRAR (Regresar a la bóveda)
-        ArchivoMetadata archivo = listaMetadata.get(position);
-        archivo.setEstaCifrado(true);
+        this.posicionSeleccionada = position;
+        dialogContainerCifrar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onBorrarClick(int position) {
+        this.posicionSeleccionada = position;
+        dialogContainerEliminar.setVisibility(View.VISIBLE);
+    }
+
+    // --- LOGICA DE RE-CIFRADO CON PASO INTERMEDIO ---
+    private void ejecutarAccionCifrar() {
+        if (posicionSeleccionada == -1) return;
+
+        ArchivoMetadata archivo = listaMetadata.get(posicionSeleccionada);
+        ocultarDialogos();
 
         Executors.newSingleThreadExecutor().execute(() -> {
+            // 1. Proceso de actualización de seguridad
+            archivo.setEstaCifrado(true);
             archivoDAO.update(archivo);
 
-            // Borrar el archivo físico para no dejar rastro (Seguridad)
             if (archivo.getRutaLocalDescifrado() != null) {
                 File f = new File(archivo.getRutaLocalDescifrado());
                 if (f.exists()) f.delete();
@@ -131,22 +123,29 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
 
             if (isAdded()) {
                 requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(getContext(), "Regresado a la bóveda", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Preparando re-cifrado...", Toast.LENGTH_SHORT).show();
 
-                    // Navegar según el origen
-                    if ("ESCANEO".equals(archivo.getOrigen())) {
-                        Navigation.findNavController(requireView()).navigate(R.id.cifradoEscaneo2);
-                    } else {
-                        Navigation.findNavController(requireView()).navigate(R.id.archivosCifrados2);
-                    }
+                    // 2. Definir el destino final después de la carga
+                    int destinoFinalId = "ESCANEO".equals(archivo.getOrigen())
+                            ? R.id.cifradoEscaneo2
+                            : R.id.archivosCifrados2;
+
+                    // 3. Crear Bundle para pasar el ID del fragmento destino a 'cargarprocesos'
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("destino_final", destinoFinalId);
+
+                    // 4. Navegar primero a Cargar Procesos
+                    Navigation.findNavController(requireView()).navigate(R.id.cargaProcesos, bundle);
                 });
             }
         });
     }
 
-    @Override
-    public void onBorrarClick(int position) {
-        ArchivoMetadata archivo = listaMetadata.get(position);
+    private void ejecutarAccionEliminar() {
+        if (posicionSeleccionada == -1) return;
+        ArchivoMetadata archivo = listaMetadata.get(posicionSeleccionada);
+        ocultarDialogos();
+
         Executors.newSingleThreadExecutor().execute(() -> {
             archivoDAO.delete(archivo);
             if (archivo.getRutaLocalDescifrado() != null) {
@@ -155,12 +154,34 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
             }
             if (isAdded()) {
                 requireActivity().runOnUiThread(() -> {
-                    listaMetadata.remove(position);
+                    listaMetadata.remove(archivo);
                     adaptador.notifyDataSetChanged();
                     Toast.makeText(getContext(), "Eliminado", Toast.LENGTH_SHORT).show();
                 });
             }
         });
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        ArchivoMetadata archivo = listaMetadata.get(position);
+        if (archivo.getRutaLocalDescifrado() == null) return;
+        File file = new File(archivo.getRutaLocalDescifrado());
+        if (!file.exists()) return;
+
+        try {
+            Uri contentUri = FileProvider.getUriForFile(requireContext(),
+                    requireContext().getPackageName() + ".fileprovider", file);
+            String extension = MimeTypeMap.getFileExtensionFromUrl(contentUri.toString());
+            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(contentUri, mimeType != null ? mimeType : "*/*");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, "Abrir con:"));
+        } catch (Exception e) {
+            Toast.makeText(getContext(), "Error al abrir", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

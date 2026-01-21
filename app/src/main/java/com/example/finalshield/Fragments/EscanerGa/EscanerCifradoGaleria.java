@@ -161,12 +161,40 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
             Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
         } else if (id == R.id.guardar3) {
             if (!listaSeleccionadaParaGuardar.isEmpty()) {
+                // Bloqueamos el botón para evitar clics dobles
                 v.setEnabled(false);
-                Toast.makeText(getContext(), "Generando archivo cifrado...", Toast.LENGTH_LONG).show();
 
+                // 1. Capturamos el NavController antes de salir de este fragmento
+                final androidx.navigation.NavController navController = Navigation.findNavController(v);
+
+                // 2. Navegamos inmediatamente a la pantalla de carga
+                navController.navigate(R.id.cargaProcesos);
+
+                // 3. Iniciamos el proceso pesado (Generar PDF y Enviar)
                 EscanerProcesador.generarPdfYEnviar(requireContext(), listaSeleccionadaParaGuardar, archivoService, archivoDAO, () -> {
-                    limpiarCacheLocalTotal();
-                    Navigation.findNavController(requireView()).navigate(R.id.cifradoEscaneo2);
+
+                    // 4. El proceso terminó. Volvemos al hilo principal para la navegación final
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        try {
+                            // Limpiamos la caché antes de movernos
+                            limpiarCacheLocalTotal();
+
+                    /* 5. NAVEGACIÓN FINAL
+                       Usamos el ID de la ACCIÓN que definiste en tu XML.
+                       Esto es mucho más seguro que usar el ID del fragmento directamente.
+                    */
+                            navController.navigate(R.id.action_cargaProcesos_to_cifradoEscaneo2);
+
+                        } catch (Exception e) {
+                            android.util.Log.e("NAV_ERROR", "Error al navegar desde carga: " + e.getMessage());
+                            // Si la acción falla, intentamos un respaldo directo al destino
+                            try {
+                                navController.navigate(R.id.cifradoEscaneo2);
+                            } catch (Exception ex) {
+                                android.util.Log.e("NAV_ERROR", "Fallo total de navegación: " + ex.getMessage());
+                            }
+                        }
+                    });
                 });
             } else {
                 Toast.makeText(getContext(), "Debe añadir fotos antes de guardar.", Toast.LENGTH_SHORT).show();

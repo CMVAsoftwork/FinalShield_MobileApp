@@ -16,4 +16,5 @@
         tools:ignore="FragmentTagUsage"
         android:id="@+id/contenedorp">
     </androidx.fragment.app.FragmentContainerView>
+
 </LinearLayout>

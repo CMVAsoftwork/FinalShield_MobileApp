@@ -6,17 +6,20 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -48,6 +51,10 @@ public class CifradoEscaneo2 extends Fragment implements View.OnClickListener, A
     private ArchivoDAO archivoDAO;
     private ArchivoService archivoService;
 
+    // Referencias a los diálogos del Layout
+    private LinearLayout dialogDescifrar, dialogEliminar;
+    private int posicionSeleccionada = -1;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_cifrado_escaneo2, container, false);
@@ -65,7 +72,26 @@ public class CifradoEscaneo2 extends Fragment implements View.OnClickListener, A
         adaptador = new AdaptadorArchivos(getContext(), listaArchivos, this);
         listView.setAdapter(adaptador);
 
-        // Listeners de botones
+        // --- Inicialización de Diálogos ---
+        dialogDescifrar = v.findViewById(R.id.dialogContainer);
+        dialogEliminar = v.findViewById(R.id.dialogContainer2);
+
+        // Botones de Confirmación Descifrar
+        v.findViewById(R.id.sieliminar).setOnClickListener(view -> { // ID 'sieliminar' en tu XML para descifrar
+            dialogDescifrar.setVisibility(View.GONE);
+            ejecutarDescifrado(posicionSeleccionada);
+        });
+        v.findViewById(R.id.noeliminar).setOnClickListener(view -> dialogDescifrar.setVisibility(View.GONE));
+
+        // Botones de Confirmación Eliminar
+        v.findViewById(R.id.sieliminar2).setOnClickListener(view -> {
+            dialogEliminar.setVisibility(View.GONE);
+            ejecutarEliminacion(posicionSeleccionada);
+        });
+        v.findViewById(R.id.noeliminar2).setOnClickListener(view -> dialogEliminar.setVisibility(View.GONE));
+        // ----------------------------------
+
+        // Listeners de botones de navegación
         v.findViewById(R.id.scan).setOnClickListener(this);
         v.findViewById(R.id.btnperfil).setOnClickListener(this);
         v.findViewById(R.id.house).setOnClickListener(this);
@@ -80,10 +106,7 @@ public class CifradoEscaneo2 extends Fragment implements View.OnClickListener, A
 
     private void cargarDatosDesdeBD() {
         Executors.newSingleThreadExecutor().execute(() -> {
-            // Obtenemos de la base de datos
             List<ArchivoMetadata> archivosBD = archivoDAO.getAllCifradosEscaneo();
-
-            // Forzamos datos básicos si vienen nulos de la subida para evitar N/A y 0B en esta pantalla
             for (ArchivoMetadata m : archivosBD) {
                 if (m.getFechaSeleccion() == null) m.setFechaSeleccion(new Date());
                 if (m.getOrigen() == null) m.setOrigen("ESCANEO");
@@ -101,10 +124,17 @@ public class CifradoEscaneo2 extends Fragment implements View.OnClickListener, A
 
     @Override
     public void onDescifrarClick(int position) {
+        this.posicionSeleccionada = position;
+        dialogDescifrar.setVisibility(View.VISIBLE);
+    }
+
+    private void ejecutarDescifrado(int position) {
+        if (position < 0) return;
         ArchivoMetadata meta = listaArchivos.get(position);
         if (meta.getIdArchivoServidor() == null) return;
 
-        Toast.makeText(getContext(), "Descifrando...", Toast.LENGTH_SHORT).show();
+        final NavController navController = Navigation.findNavController(requireView());
+        navController.navigate(R.id.cargaProcesos);
 
         archivoService.getAPI().descifrarArchivo(meta.getIdArchivoServidor()).enqueue(new Callback<ResponseBody>() {
             @Override
@@ -118,7 +148,6 @@ public class CifradoEscaneo2 extends Fragment implements View.OnClickListener, A
                             String nombreLimpio = meta.getNombre().replaceAll("[^a-zA-Z0-9.-]", "_") + ".pdf";
                             File localFile = new File(dir, nombreLimpio);
 
-                            // Descarga y escritura real
                             try (InputStream is = response.body().byteStream();
                                  FileOutputStream fos = new FileOutputStream(localFile)) {
                                 byte[] buffer = new byte[8192];
@@ -127,27 +156,62 @@ public class CifradoEscaneo2 extends Fragment implements View.OnClickListener, A
                                 fos.flush();
                             }
 
-                            // ACTUALIZACIÓN CRÍTICA: Aquí es donde los datos se vuelven reales
                             meta.setEstaCifrado(false);
-                            meta.setTamanioBytes(localFile.length()); // Aquí se quita el 0B definitivamente
+                            meta.setTamanioBytes(localFile.length());
                             meta.setRutaLocalDescifrado(localFile.getAbsolutePath());
                             meta.setFechaSeleccion(new Date());
                             meta.setOrigen("ESCANEO");
 
                             archivoDAO.update(meta);
 
-                            requireActivity().runOnUiThread(() -> {
-                                Navigation.findNavController(requireView()).navigate(R.id.archivosDesifrados);
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                NavOptions navOptions = new NavOptions.Builder()
+                                        .setPopUpTo(R.id.cargaProcesos, true)
+                                        .build();
+                                navController.navigate(R.id.archivosDesifrados, null, navOptions);
                             });
 
                         } catch (Exception e) {
-                            Log.e("ERROR", "Error al procesar archivo: " + e.getMessage());
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                navController.popBackStack();
+                                Toast.makeText(getContext(), "Error al guardar archivo", Toast.LENGTH_SHORT).show();
+                            });
                         }
                     });
+                } else {
+                    new Handler(Looper.getMainLooper()).post(() -> navController.popBackStack());
                 }
             }
-            @Override public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(getContext(), "Fallo de conexión", Toast.LENGTH_SHORT).show();
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                new Handler(Looper.getMainLooper()).post(() -> navController.popBackStack());
+            }
+        });
+    }
+
+    @Override public void onBorrarClick(int position) {
+        this.posicionSeleccionada = position;
+        dialogEliminar.setVisibility(View.VISIBLE);
+    }
+
+    private void ejecutarEliminacion(int position) {
+        if (position < 0) return;
+        ArchivoMetadata archivo = listaArchivos.get(position);
+        archivoService.getAPI().borrarArchivo(archivo.getIdArchivoServidor()).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Executors.newSingleThreadExecutor().execute(() -> {
+                    archivoDAO.delete(archivo);
+                    requireActivity().runOnUiThread(() -> {
+                        listaArchivos.remove(position);
+                        adaptador.notifyDataSetChanged();
+                        Toast.makeText(getContext(), "Eliminado", Toast.LENGTH_SHORT).show();
+                    });
+                });
+            }
+            @Override public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(getContext(), "Error al conectar", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -163,23 +227,6 @@ public class CifradoEscaneo2 extends Fragment implements View.OnClickListener, A
         else if (id == R.id.btnperfil) Navigation.findNavController(v).navigate(R.id.perfil2);
         else if (id == R.id.mail) Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         else if (id == R.id.carpeta) cargarDatosDesdeBD();
-    }
-
-    @Override public void onBorrarClick(int position) {
-        ArchivoMetadata archivo = listaArchivos.get(position);
-        archivoService.getAPI().borrarArchivo(archivo.getIdArchivoServidor()).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                Executors.newSingleThreadExecutor().execute(() -> {
-                    archivoDAO.delete(archivo);
-                    requireActivity().runOnUiThread(() -> {
-                        listaArchivos.remove(position);
-                        adaptador.notifyDataSetChanged();
-                    });
-                });
-            }
-            @Override public void onFailure(Call<Void> call, Throwable t) {}
-        });
     }
 
     @Override public void onItemClick(int position) {

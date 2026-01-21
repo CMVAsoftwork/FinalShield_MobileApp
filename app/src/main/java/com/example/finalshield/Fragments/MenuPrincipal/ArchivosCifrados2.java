@@ -1,9 +1,6 @@
 package com.example.finalshield.Fragments.MenuPrincipal;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -11,21 +8,18 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
-import androidx.room.Room;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.OpenableColumns;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -40,10 +34,8 @@ import com.example.finalshield.Util.FileUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -61,6 +53,10 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     private ArchivoService archivoService;
     private ArchivoDAO archivoDAO;
 
+    // Diálogos personalizados
+    private LinearLayout dialogDescifrar, dialogEliminar;
+    private int posicionSeleccionada = -1;
+
     private final ActivityResultLauncher<String> filePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.GetMultipleContents(), uris -> {
                 if (uris != null && !uris.isEmpty()) {
@@ -76,7 +72,6 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
 
         archivoService = new ArchivoService(requireContext());
         archivoDAO = AppDatabase.getInstance(requireContext()).archivoDAO();
@@ -85,7 +80,25 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         adaptador = new AdaptadorArchivos(getContext(), archivosSeleccionados, this);
         listViewArchivos.setAdapter(adaptador);
 
-        // Botones de navegación y acción
+        // --- Inicializar Diálogos del XML ---
+        dialogDescifrar = v.findViewById(R.id.dialogContainerDescifrar);
+        dialogEliminar = v.findViewById(R.id.dialogContainerEliminar);
+
+        // Botones Diálogo Descifrar
+        v.findViewById(R.id.sidescifrar).setOnClickListener(view -> {
+            dialogDescifrar.setVisibility(View.GONE);
+            ejecutarDescifrado(posicionSeleccionada);
+        });
+        v.findViewById(R.id.nodescifrar).setOnClickListener(view -> dialogDescifrar.setVisibility(View.GONE));
+
+        // Botones Diálogo Eliminar
+        v.findViewById(R.id.sieliminar).setOnClickListener(view -> {
+            dialogEliminar.setVisibility(View.GONE);
+            ejecutarEliminacion(posicionSeleccionada);
+        });
+        v.findViewById(R.id.noeliminar).setOnClickListener(view -> dialogEliminar.setVisibility(View.GONE));
+
+        // Botones de navegación
         v.findViewById(R.id.btnescanycifrar).setOnClickListener(this);
         v.findViewById(R.id.candadoclose).setOnClickListener(this);
         v.findViewById(R.id.candadopen).setOnClickListener(this);
@@ -100,7 +113,6 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
 
     private void cargarDatosDesdeBD() {
         Executors.newSingleThreadExecutor().execute(() -> {
-            // Filtra solo los que pertenecen a esta pantalla y están cifrados
             List<ArchivoMetadata> archivosBD = archivoDAO.getAllCifradosPrincipales();
             if (isAdded()) {
                 requireActivity().runOnUiThread(() -> {
@@ -113,7 +125,9 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     }
 
     private void enviarAlServidor(List<Uri> uris) {
-        Toast.makeText(getContext(), "Cifrando y subiendo...", Toast.LENGTH_SHORT).show();
+        final NavController navController = Navigation.findNavController(requireView());
+        navController.navigate(R.id.cargaProcesos);
+
         Executors.newSingleThreadExecutor().execute(() -> {
             List<MultipartBody.Part> parts = new ArrayList<>();
             for (Uri u : uris) {
@@ -125,39 +139,48 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                 archivoService.getAPI().cifrarArchivos(parts).enqueue(new Callback<List<Archivo>>() {
                     @Override
                     public void onResponse(Call<List<Archivo>> call, Response<List<Archivo>> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            Executors.newSingleThreadExecutor().execute(() -> {
-                                for (Archivo a : response.body()) {
-                                    // Creamos la metadata con los datos que el servidor nos devuelve (ID y Tamaño)
-                                    ArchivoMetadata meta = new ArchivoMetadata(a);
-                                    meta.setOrigen("ARCHIVOS");
-                                    archivoDAO.insert(meta);
-                                }
-                                requireActivity().runOnUiThread(() -> cargarDatosDesdeBD());
-                            });
-                        }
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Executors.newSingleThreadExecutor().execute(() -> {
+                                    for (Archivo a : response.body()) {
+                                        ArchivoMetadata meta = new ArchivoMetadata(a);
+                                        meta.setOrigen("ARCHIVOS");
+                                        archivoDAO.insert(meta);
+                                    }
+                                    requireActivity().runOnUiThread(() -> {
+                                        cargarDatosDesdeBD();
+                                        navController.popBackStack(R.id.archivosCifrados2, false);
+                                    });
+                                });
+                            } else {
+                                navController.popBackStack();
+                            }
+                        });
                     }
                     @Override public void onFailure(Call<List<Archivo>> call, Throwable t) {
-                        requireActivity().runOnUiThread(() -> Toast.makeText(getContext(), "Error de red", Toast.LENGTH_SHORT).show());
+                        new Handler(Looper.getMainLooper()).post(() -> navController.popBackStack());
                     }
                 });
+            } else {
+                new Handler(Looper.getMainLooper()).post(() -> navController.popBackStack());
             }
         });
     }
 
     @Override
     public void onDescifrarClick(int position) {
+        this.posicionSeleccionada = position;
+        dialogDescifrar.setVisibility(View.VISIBLE);
+    }
+
+    private void ejecutarDescifrado(int position) {
         if (position < 0 || position >= archivosSeleccionados.size()) return;
         ArchivoMetadata meta = archivosSeleccionados.get(position);
-        if (meta == null) return;
 
         final Context appContext = requireContext().getApplicationContext();
-        final View currentView = getView();
-        if (currentView == null) return;
+        final NavController navController = Navigation.findNavController(requireView());
 
-        final androidx.navigation.NavController navController = Navigation.findNavController(currentView);
-
-        Toast.makeText(appContext, "Descifrando...", Toast.LENGTH_SHORT).show();
+        navController.navigate(R.id.cargaProcesos);
 
         archivoService.getAPI().descifrarArchivo(meta.getIdArchivoServidor()).enqueue(new Callback<ResponseBody>() {
             @Override
@@ -168,54 +191,69 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                             File dir = new File(appContext.getFilesDir(), "descifrados");
                             if (!dir.exists()) dir.mkdirs();
 
-                            // --- CORRECCIÓN AQUÍ: Limpiar la barra '/' del tipoArchivo ---
                             String mimeType = (meta.getTipoArchivo() != null) ? meta.getTipoArchivo() : "application/pdf";
-                            String extension;
+                            String extension = mimeType.contains("/") ? mimeType.substring(mimeType.lastIndexOf("/") + 1) : mimeType;
 
-                            if (mimeType.contains("/")) {
-                                // De "image/jpeg" extraemos solo "jpeg"
-                                extension = mimeType.substring(mimeType.lastIndexOf("/") + 1);
-                            } else {
-                                extension = mimeType;
-                            }
-
-                            // Nombre de archivo seguro sin caracteres prohibidos
                             String nombreFinal = "file_" + System.currentTimeMillis() + "." + extension;
                             File localFile = new File(dir, nombreFinal);
 
-                            // Escritura
                             InputStream is = response.body().byteStream();
                             FileOutputStream fos = new FileOutputStream(localFile);
                             byte[] buffer = new byte[8192];
                             int read;
-                            while ((read = is.read(buffer)) != -1) {
-                                fos.write(buffer, 0, read);
-                            }
-                            fos.flush();
-                            fos.close();
-                            is.close();
+                            while ((read = is.read(buffer)) != -1) fos.write(buffer, 0, read);
+                            fos.flush(); fos.close(); is.close();
 
-                            // Actualización DB
                             meta.setEstaCifrado(false);
                             meta.setRutaLocalDescifrado(localFile.getAbsolutePath());
                             meta.setTamanioBytes(localFile.length());
                             archivoDAO.update(meta);
 
-                            // NAVEGACIÓN
                             new Handler(Looper.getMainLooper()).post(() -> {
-                                navController.navigate(R.id.archivosDesifrados);
+                                NavOptions navOptions = new NavOptions.Builder()
+                                        .setPopUpTo(R.id.cargaProcesos, true)
+                                        .build();
+                                navController.navigate(R.id.archivosDesifrados, null, navOptions);
                             });
 
                         } catch (Exception e) {
-                            Log.e("DESCIFRADO_ERROR", "Error: " + e.getMessage());
-                            new Handler(Looper.getMainLooper()).post(() ->
-                                    Toast.makeText(appContext, "Error al guardar: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                            new Handler(Looper.getMainLooper()).post(() -> navController.popBackStack());
                         }
                     });
+                } else {
+                    new Handler(Looper.getMainLooper()).post(() -> navController.popBackStack());
                 }
             }
             @Override public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(appContext, "Fallo de red", Toast.LENGTH_SHORT).show();
+                new Handler(Looper.getMainLooper()).post(() -> navController.popBackStack());
+            }
+        });
+    }
+
+    @Override
+    public void onBorrarClick(int position) {
+        this.posicionSeleccionada = position;
+        dialogEliminar.setVisibility(View.VISIBLE);
+    }
+
+    private void ejecutarEliminacion(int position) {
+        if (position < 0 || position >= archivosSeleccionados.size()) return;
+        ArchivoMetadata archivo = archivosSeleccionados.get(position);
+
+        archivoService.getAPI().borrarArchivo(archivo.getIdArchivoServidor()).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Executors.newSingleThreadExecutor().execute(() -> {
+                    archivoDAO.delete(archivo);
+                    requireActivity().runOnUiThread(() -> {
+                        archivosSeleccionados.remove(position);
+                        adaptador.notifyDataSetChanged();
+                        Toast.makeText(getContext(), "Eliminado correctamente", Toast.LENGTH_SHORT).show();
+                    });
+                });
+            }
+            @Override public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(getContext(), "Error al borrar", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -226,29 +264,11 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         if (id == R.id.btnescanycifrar) filePickerLauncher.launch("*/*");
         else if (id == R.id.candadopen) Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
         else if (id == R.id.carpeta) Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
-        else if (id == R.id.house) Navigation.findNavController(v).navigate(R.id.inicio);
         else if (id == R.id.candadoclose) cargarDatosDesdeBD();
         else if (id == R.id.btnperfil) Navigation.findNavController(v).navigate(R.id.perfil2);
         else if (id == R.id.mail) Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         else if (id == R.id.archivo) Navigation.findNavController(v).navigate(R.id.archivosCifrados);
-    }
-
-    @Override
-    public void onBorrarClick(int position) {
-        ArchivoMetadata archivo = archivosSeleccionados.get(position);
-        archivoService.getAPI().borrarArchivo(archivo.getIdArchivoServidor()).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                Executors.newSingleThreadExecutor().execute(() -> {
-                    archivoDAO.delete(archivo);
-                    requireActivity().runOnUiThread(() -> {
-                        archivosSeleccionados.remove(position);
-                        adaptador.notifyDataSetChanged();
-                    });
-                });
-            }
-            @Override public void onFailure(Call<Void> call, Throwable t) {}
-        });
+        else if (id == R.id.house) Navigation.findNavController(v).navigate(R.id.inicio);
     }
 
     @Override public void onItemClick(int position) {

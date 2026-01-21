@@ -16,6 +16,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.finalshield.R;
+import com.example.finalshield.Service.AuthService;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Bienvenida extends Fragment implements View.OnClickListener {
     ImageView ivrotation;
@@ -42,11 +47,38 @@ public class Bienvenida extends Fragment implements View.OnClickListener {
     }
     @Override
     public void onClick(View v) {
-        if(iniHu == 1){
-            Navigation.findNavController(v).navigate(R.id.datosBiometricos);
-        } else if (iniHu != 1) {
-            Navigation.findNavController(v).navigate(R.id.inicioSesion);
-            iniHu = 1;
+        AuthService authService = new AuthService(requireContext());
+        String correoGuardado = authService.obtenerCorreo();
+
+        if (correoGuardado != null) {
+            // Consultamos al servidor si este correo tiene el biométrico activo
+            authService.isBiometricoActivo(correoGuardado, new Callback<Boolean>() {
+                @Override
+                public void onResponse(Call<Boolean> call, Response<Boolean> response) {
+                    Bundle bundle = new Bundle();
+                    if (response.isSuccessful() && Boolean.TRUE.equals(response.body())) {
+                        // SI tiene huella: Ir a Biométricos pasando por carga
+                        bundle.putInt("destino_final", R.id.datosBiometricos);
+                    } else {
+                        // NO tiene huella: Ir a Inicio Sesión pasando por carga
+                        bundle.putInt("destino_final", R.id.inicioSesion);
+                    }
+                    Navigation.findNavController(v).navigate(R.id.cargaProcesos, bundle);
+                }
+
+                @Override
+                public void onFailure(Call<Boolean> call, Throwable t) {
+                    // Si falla el servidor, por seguridad vamos a Inicio Sesión manual
+                    Bundle bundle = new Bundle();
+                    bundle.putInt("destino_final", R.id.inicioSesion);
+                    Navigation.findNavController(v).navigate(R.id.cargaProcesos, bundle);
+                }
+            });
+        } else {
+            // Usuario nuevo: Ir a Inicio Sesión
+            Bundle bundle = new Bundle();
+            bundle.putInt("destino_final", R.id.inicioSesion);
+            Navigation.findNavController(v).navigate(R.id.cargaProcesos, bundle);
         }
     }
 }

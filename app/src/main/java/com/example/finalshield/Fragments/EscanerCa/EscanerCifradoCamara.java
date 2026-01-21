@@ -20,6 +20,8 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -196,21 +198,25 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
             }
         } else if (id == R.id.guardar) {
             if (!fotosTomadas.isEmpty()) {
-                v.setEnabled(false);
-                Toast.makeText(getContext(), "Cifrando y enviando documento...", Toast.LENGTH_LONG).show();
-
+                final androidx.navigation.NavController navController = Navigation.findNavController(v);
+                // 1. Navegamos a la pantalla que acabamos de crear (CargaProcesos)
+                navController.navigate(R.id.cargaProcesos);
                 List<Uri> urisParaCifrar = new ArrayList<>();
                 for (File f : fotosTomadas) {
                     urisParaCifrar.add(FileProvider.getUriForFile(requireContext(),
                             requireContext().getPackageName() + ".fileprovider", f));
                 }
 
+                // 2. El procesador hace su magia
                 EscanerProcesador.generarPdfYEnviar(requireContext(), urisParaCifrar, archivoService, archivoDAO, () -> {
-                    limpiarArchivosDeSesionAnterior();
-                    Navigation.findNavController(requireView()).navigate(R.id.cifradoEscaneo2);
+
+                    // 3. Cuando el callback responde, mandamos la orden de navegar
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        limpiarArchivosDeSesionAnterior();
+                        // Navegamos al destino final desde donde estemos (que es CargaProcesos)
+                        navController.navigate(R.id.cifradoEscaneo2);
+                    });
                 });
-            } else {
-                Toast.makeText(requireContext(), "Tome fotos antes de intentar cifrar.", Toast.LENGTH_SHORT).show();
             }
         }
     }

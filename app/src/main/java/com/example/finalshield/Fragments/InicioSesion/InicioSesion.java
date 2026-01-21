@@ -42,7 +42,6 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-
         authService = new AuthService(requireContext());
 
         inputCorreo = v.findViewById(R.id.editcorreo);
@@ -56,124 +55,81 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
         regis.setOnClickListener(this);
         inises.setOnClickListener(this);
         entil.setOnClickListener(this);
-        String correoGuardado = authService.obtenerCorreo();
 
-        if(correoGuardado != null){
-            authService.isBiometricoActivo(correoGuardado, new Callback<Boolean>() {
-                @Override
-                public void onResponse(Call<Boolean> call, Response<Boolean> response) {
-                    if(response.isSuccessful() && Boolean.TRUE.equals(response.body())) {
-                        Bundle bundle = new Bundle();
-                        bundle.putString("correo_biometrico", correoGuardado);
-
-                        handlePostLoginNavigation(v, R.id.datosBiometricos);
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Boolean> call, Throwable t) {
-                }
-            });
-        }
+        // --- SE ELIMINÓ EL AUTO-SALTO A BIOMÉTRICOS AQUÍ ---
+        // Para que el usuario pueda escribir su correo/pass sin que lo saquen de la pantalla.
     }
 
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        if(id == R.id.btnnxd)Navigation.findNavController(v).navigate(R.id.inicio);
+        if (id == R.id.btnnxd) Navigation.findNavController(v).navigate(R.id.inicio);
+
         if (id == R.id.regresar1) {
             Navigation.findNavController(v).navigate(R.id.bienvenida);
         } else if (id == R.id.btninises1) {
-            String correo = inputCorreo.getText().toString().trim();
-            String pass = inputContrasena.getText().toString().trim();
-
-            if (correo.isEmpty() || pass.isEmpty()) {
-                Toast.makeText(getContext(), "Ingresa correo y contraseña", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            authService.login(correo, pass, new Callback<LoginResponse>() {
-                @Override
-                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        authService.guardarCorreo(correo);
-                        authService.guardarToken(response.body().getToken());
-
-                        authService.isBiometricoActivo(correo, new Callback<Boolean>() {
-                            @Override
-                            public void onResponse(Call<Boolean> call, Response<Boolean> resp) {
-                                if (resp.isSuccessful() && Boolean.TRUE.equals(resp.body())) {
-                                    Bundle bundle = new Bundle();
-                                    bundle.putString("correo_biometrico", correo);
-                                    handlePostLoginNavigation(v, R.id.datosBiometricos);
-                                } else {
-                                    handlePostLoginNavigation(v, R.id.inicio);
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<Boolean> call, Throwable t) {
-                                handlePostLoginNavigation(v, R.id.inicio);
-                            }
-                        });
-                    } else {
-                        Toast.makeText(getContext(), "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<LoginResponse> call, Throwable t) {
-                    Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
-                }
-            });
-
+            hacerLoginManual(v);
         } else if (id == R.id.btnregis) {
             Navigation.findNavController(v).navigate(R.id.registroSesion);
         }
     }
 
+    private void hacerLoginManual(View v) {
+        String correo = inputCorreo.getText().toString().trim();
+        String pass = inputContrasena.getText().toString().trim();
+
+        if (correo.isEmpty() || pass.isEmpty()) {
+            Toast.makeText(getContext(), "Ingresa correo y contraseña", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        authService.login(correo, pass, new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    authService.guardarCorreo(correo);
+                    authService.guardarToken(response.body().getToken());
+
+                    // SI YA SE LOGUEÓ MANUALMENTE, MANDAR DIRECTO AL INICIO
+                    // No tiene sentido mandarlo a biométricos si ya puso la contraseña
+                    handlePostLoginNavigation(v, R.id.inicio);
+                } else {
+                    Toast.makeText(getContext(), "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void handlePostLoginNavigation(View view, int defaultDestination) {
+        if (!isAdded()) return;
+
         SharedPreferences prefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
         String pendingToken = prefs.getString("pending_token", null);
 
         if (pendingToken != null) {
-
             prefs.edit().remove("pending_token").apply();
-
             Bundle args = new Bundle();
             args.putString("security_token", pendingToken);
-
             try {
                 Navigation.findNavController(view).navigate(R.id.action_inicioSesion_to_verClavePostLogin, args);
-            } catch (IllegalArgumentException e) {
+            } catch (Exception e) {
                 Navigation.findNavController(view).navigate(R.id.verClave, args);
             }
         } else {
-            Navigation.findNavController(view).navigate(defaultDestination);
-        }
-
-    }
-
-    private String extraerTokenDeUrl(String tokenOUrl) {
-        if (tokenOUrl.contains("/api/enlaces/")) {
-            String[] segments = tokenOUrl.split("/");
-            for (int i = 0; i < segments.length; i++) {
-                if ("validar".equals(segments[i]) && i > 0) {
-                    return segments[i - 1];
+            // Aseguramos que la navegación ocurra en el hilo principal
+            requireActivity().runOnUiThread(() -> {
+                try {
+                    Navigation.findNavController(view).navigate(defaultDestination);
+                } catch (Exception e) {
+                    // Fallback por si la vista se descolgó
+                    NavHostFragment.findNavController(InicioSesion.this).navigate(defaultDestination);
                 }
-            }
+            });
         }
-
-        if (tokenOUrl.startsWith("fileshield://")) {
-            try {
-                Uri uri = Uri.parse(tokenOUrl);
-                String securityToken = uri.getQueryParameter("security_token");
-                if (securityToken != null) {
-                    return securityToken;
-                }
-            } catch (Exception e) {
-            }
-        }
-        return tokenOUrl;
     }
 }

@@ -68,4 +68,5 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.12.0")
     implementation ("com.squareup.okio:okio:3.9.0")
     implementation ("androidx.appcompat:appcompat:1.6.1")
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

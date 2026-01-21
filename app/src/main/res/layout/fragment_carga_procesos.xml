@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/fondo1"
+    tools:context=".Fragments.CargaProcesos">
+
+    <ImageView
+        android:id="@+id/icono_proceso"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/logo"
+        android:alpha="1"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/texto_carga"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="75dp"
+        android:layout_marginTop="600dp"
+        android:text="Procesando peticion, por favor espere..."
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <ProgressBar
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="310dp"
+        android:layout_gravity="center"
+        android:indeterminateTint="#FFF" />
+</FrameLayout>

@@ -29,7 +29,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Inicia sesión en tu cuenta para volver\ a tu espacio seguro"
+        android:text="Para iniciar sesion presiona el icono de huella digital y verificate."
         android:textColor="@color/white"
         android:textSize="17dp"
         android:layout_marginStart="30dp"

@@ -144,25 +144,46 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
         else if (id == R.id.guardar) {
             if (listaActual.isEmpty()) {
                 Toast.makeText(requireContext(), "No hay fotos para cifrar.", Toast.LENGTH_SHORT).show();
-                return;
+            } else {
+                // 1. Deshabilitar botón para evitar múltiples clics
+                v.setEnabled(false);
+
+                // 2. Capturamos el NavController antes de que cambie la vista
+                final androidx.navigation.NavController navController = Navigation.findNavController(v);
+
+                // 3. Navegamos inmediatamente al fragmento de CARGA
+                navController.navigate(R.id.cargaProcesos);
+
+                // 4. Ejecutamos el proceso pesado
+                EscanerProcesador.generarPdfYEnviar(
+                        requireContext(),
+                        listaActual,
+                        archivoService,
+                        archivoDAO,
+                        () -> {
+                            // 5. El callback responde: Regresamos al hilo principal para navegar
+                            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                                try {
+                                    // Limpiamos los archivos temporales de sesión
+                                    limpiarArchivosDeSesionAnterior();
+
+                                    // 6. Navegamos al destino final usando la acción definida en tu XML
+                                    // (Asegurándonos de que cargaProcesos sea el origen en ese momento)
+                                    navController.navigate(R.id.action_cargaProcesos_to_cifradoEscaneo2);
+
+                                } catch (Exception e) {
+                                    android.util.Log.e("NAV_ERROR", "Error al salir de carga: " + e.getMessage());
+                                    // Plan B en caso de que la acción falle
+                                    try {
+                                        navController.navigate(R.id.cifradoEscaneo2);
+                                    } catch (Exception ex) {
+                                        android.util.Log.e("NAV_ERROR", "Fallo crítico: " + ex.getMessage());
+                                    }
+                                }
+                            });
+                        }
+                );
             }
-
-            // Deshabilitar botón para evitar múltiples clics
-            v.setEnabled(false);
-            Toast.makeText(getContext(), "Cifrando documento...", Toast.LENGTH_LONG).show();
-
-            // Usamos la lista de SharedViewModel que ya contiene todo (Cámara + Galería + Ediciones)
-            EscanerProcesador.generarPdfYEnviar(
-                    requireContext(),
-                    listaActual,
-                    archivoService,
-                    archivoDAO,
-                    () -> {
-                        // Acción al finalizar éxito: Limpiar y Navegar al listado
-                        limpiarArchivosDeSesionAnterior();
-                        Navigation.findNavController(requireView()).navigate(R.id.cifradoEscaneo2);
-                    }
-            );
         }
     }
 
