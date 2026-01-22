@@ -28,7 +28,7 @@ public class OpcionCifrado extends Fragment implements View.OnClickListener {
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
         if (getActivity() != null) {
-            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            //getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         }
         Button cam,gal,mixt;
         ImageButton perfil,house, archivo,candadclose, carpeta, mail, candadopen;

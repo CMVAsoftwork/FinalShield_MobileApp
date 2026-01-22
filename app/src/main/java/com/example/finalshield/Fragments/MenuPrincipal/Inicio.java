@@ -51,7 +51,7 @@ public class Inicio extends Fragment implements View.OnClickListener {
         super.onViewCreated(v, savedInstanceState);
 
         if (getActivity() != null) {
-            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            //getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         }
 
         archivoService = new ArchivoService(getContext());

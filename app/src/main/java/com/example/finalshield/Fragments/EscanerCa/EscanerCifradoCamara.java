@@ -50,8 +50,6 @@ import java.util.List;
 public class EscanerCifradoCamara extends Fragment implements View.OnClickListener {
 
     private static final String FOTO_PREFIX = "CAMARA_TEMP_";
-
-    // ✅ 1. REGISTRO DE PERMISOS (Activa la cámara inmediatamente al aceptar)
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {

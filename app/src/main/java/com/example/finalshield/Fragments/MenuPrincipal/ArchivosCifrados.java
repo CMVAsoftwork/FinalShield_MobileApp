@@ -37,7 +37,7 @@ public class ArchivosCifrados extends Fragment implements View.OnClickListener{
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
         if (getActivity() != null) {
-            getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            //getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         }
 
         List<Faq> faqs = new ArrayList<>();

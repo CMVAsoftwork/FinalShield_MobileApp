@@ -58,7 +58,6 @@ public class ArchivosCifrados2 extends Fragment
     private LinearLayout dialogDescifrar, dialogEliminar;
     private int posicionSeleccionada = -1;
 
-    // ✅ CORREGIDO: Usamos OpenMultipleDocuments para obtener permisos de ELIMINACIÓN
     private final ActivityResultLauncher<String[]> filePickerLauncher =
             registerForActivityResult(
                     new ActivityResultContracts.OpenMultipleDocuments(),

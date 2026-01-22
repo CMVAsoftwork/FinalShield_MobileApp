@@ -63,7 +63,7 @@ public class CifradoEscaneo2 extends Fragment implements View.OnClickListener, A
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        //getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
 
         archivoService = new ArchivoService(requireContext());
         archivoDAO = AppDatabase.getInstance(requireContext()).archivoDAO();
