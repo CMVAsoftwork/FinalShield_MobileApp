@@ -108,7 +108,7 @@ public class Inicio extends Fragment implements View.OnClickListener {
         if (id == R.id.carpeta) Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
         else if (id == R.id.candadoclose) Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         else if (id == R.id.candadopen) Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
-        else if (id == R.id.btnseleccarpeta || id == R.id.archivo) Navigation.findNavController(v).navigate(R.id.archivosCifrados);
+        else if (id == R.id.btnseleccarpeta || id == R.id.archivo) Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         else if (id == R.id.btnenvcorreo || id == R.id.mail) Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         else if (id == R.id.btnperfil) Navigation.findNavController(v).navigate(R.id.perfil2);
     }

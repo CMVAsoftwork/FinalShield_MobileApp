@@ -139,11 +139,20 @@
             android:src="@drawable/flower" />
     </LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Archivos Escaneados"
+        android:textColor="@color/white"
+        android:textSize="17dp"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center"
+        android:textStyle="bold"/>
     <ListView
         android:id="@+id/listaescan"
         android:layout_width="349dp"
-        android:layout_height="427dp"
-        android:layout_marginTop="30dp"
+        android:layout_height="401dp"
+        android:layout_marginTop="13dp"
         android:layout_gravity="center"
         android:divider="@null"
         android:layout_centerHorizontal="true"/>

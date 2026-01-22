@@ -45,7 +45,7 @@
             android:layout_marginStart="50dp"
             android:backgroundTint="#1E90FF"
             android:textColor="@color/white"
-            android:text="SELECCIONAR\nCARPETA"
+            android:text="CIFRAR\nARCHIVOS"
             android:textSize="11dp"
             android:textStyle="bold"/>
         <Button
