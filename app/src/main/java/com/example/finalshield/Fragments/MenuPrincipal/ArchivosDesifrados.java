@@ -104,7 +104,7 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
         dialogContainerEliminar.setVisibility(View.VISIBLE);
     }
 
-    // --- LOGICA DE RE-CIFRADO CON PASO INTERMEDIO ---
+    // --- LOGICA DE RE-CIFRADO CON BORRADO TOTAL ---
     private void ejecutarAccionCifrar() {
         if (posicionSeleccionada == -1) return;
 
@@ -112,29 +112,38 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
         ocultarDialogos();
 
         Executors.newSingleThreadExecutor().execute(() -> {
-            // 1. Proceso de actualización de seguridad
-            archivo.setEstaCifrado(true);
-            archivoDAO.update(archivo);
-
+            // 1. ELIMINACIÓN FÍSICA DEL ARCHIVO DESCIFRADO
             if (archivo.getRutaLocalDescifrado() != null) {
                 File f = new File(archivo.getRutaLocalDescifrado());
-                if (f.exists()) f.delete();
+                if (f.exists()) {
+                    boolean borrado = f.delete();
+                    // Notificar al sistema para limpiar rastros en galería/Files
+                    if (borrado) {
+                        try {
+                            requireContext().getContentResolver().delete(
+                                    Uri.fromFile(f), null, null);
+                        } catch (Exception ignored) {}
+                    }
+                }
             }
+
+            // 2. ACTUALIZACIÓN DE BASE DE DATOS
+            archivo.setEstaCifrado(true);
+            archivo.setRutaLocalDescifrado(null); // Eliminamos la ruta para que no existan huellas
+            archivoDAO.update(archivo);
 
             if (isAdded()) {
                 requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(getContext(), "Preparando re-cifrado...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Archivo original destruido. Re-cifrando...", Toast.LENGTH_SHORT).show();
 
-                    // 2. Definir el destino final después de la carga
+                    // Definir el destino final según el origen
                     int destinoFinalId = "ESCANEO".equals(archivo.getOrigen())
                             ? R.id.cifradoEscaneo2
                             : R.id.archivosCifrados2;
 
-                    // 3. Crear Bundle para pasar el ID del fragmento destino a 'cargarprocesos'
                     Bundle bundle = new Bundle();
                     bundle.putInt("destino_final", destinoFinalId);
 
-                    // 4. Navegar primero a Cargar Procesos
                     Navigation.findNavController(requireView()).navigate(R.id.cargaProcesos, bundle);
                 });
             }
@@ -147,16 +156,26 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
         ocultarDialogos();
 
         Executors.newSingleThreadExecutor().execute(() -> {
-            archivoDAO.delete(archivo);
+            // Borrado físico
             if (archivo.getRutaLocalDescifrado() != null) {
                 File f = new File(archivo.getRutaLocalDescifrado());
-                if (f.exists()) f.delete();
+                if (f.exists()) {
+                    f.delete();
+                    try {
+                        requireContext().getContentResolver().delete(
+                                Uri.fromFile(f), null, null);
+                    } catch (Exception ignored) {}
+                }
             }
+
+            // Borrado de base de datos
+            archivoDAO.delete(archivo);
+
             if (isAdded()) {
                 requireActivity().runOnUiThread(() -> {
                     listaMetadata.remove(archivo);
                     adaptador.notifyDataSetChanged();
-                    Toast.makeText(getContext(), "Eliminado", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Eliminado permanentemente", Toast.LENGTH_SHORT).show();
                 });
             }
         });
@@ -165,9 +184,15 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
     @Override
     public void onItemClick(int position) {
         ArchivoMetadata archivo = listaMetadata.get(position);
-        if (archivo.getRutaLocalDescifrado() == null) return;
+        if (archivo.getRutaLocalDescifrado() == null) {
+            Toast.makeText(getContext(), "El archivo ya no existe localmente", Toast.LENGTH_SHORT).show();
+            return;
+        }
         File file = new File(archivo.getRutaLocalDescifrado());
-        if (!file.exists()) return;
+        if (!file.exists()) {
+            Toast.makeText(getContext(), "Archivo no encontrado", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         try {
             Uri contentUri = FileProvider.getUriForFile(requireContext(),
@@ -183,7 +208,6 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
             Toast.makeText(getContext(), "Error al abrir", Toast.LENGTH_SHORT).show();
         }
     }
-
     @Override
     public void onClick(View v) {
         int id = v.getId();

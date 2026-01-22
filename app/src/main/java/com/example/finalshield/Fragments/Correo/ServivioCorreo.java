@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import android.util.Log;
@@ -67,7 +68,10 @@ public class ServivioCorreo extends Fragment implements View.OnClickListener {
         btnEnviar = v.findViewById(R.id.enviarCorreo);
 
         btnAdjuntar.setOnClickListener(v1 -> seleccionarArchivos());
-        btnEnviar.setOnClickListener(v1 -> enviarCorreoCifrado());
+
+        // Pasamos la vista v1 para que el NavController pueda encontrar el grafo desde el botón
+        btnEnviar.setOnClickListener(v1 -> enviarCorreoCifrado(v1));
+
         configurarFilePicker();
 
         ImageButton perfil, house, archivo, candadclose, carpeta, mail, candadopen;
@@ -109,7 +113,7 @@ public class ServivioCorreo extends Fragment implements View.OnClickListener {
         filePickerLauncher.launch(new String[]{"*/*"});
     }
 
-    private void enviarCorreoCifrado() {
+    private void enviarCorreoCifrado(View view) {
         String destinatario = etDestinatario.getText().toString().trim();
         String asunto = etAsunto.getText().toString().trim();
         String mensaje = etMensaje.getText().toString().trim();
@@ -118,6 +122,11 @@ public class ServivioCorreo extends Fragment implements View.OnClickListener {
             Toast.makeText(requireContext(), "Todos los campos deben estar completos.", Toast.LENGTH_LONG).show();
             return;
         }
+
+        // --- INICIO DE NAVEGACIÓN A CARGA ---
+        final NavController navController = Navigation.findNavController(view);
+        navController.navigate(R.id.cargaProcesos);
+        // ------------------------------------
 
         CorreoRequest correoRequest = new CorreoRequest(asunto, mensaje, destinatario);
 
@@ -135,7 +144,7 @@ public class ServivioCorreo extends Fragment implements View.OnClickListener {
             }
         }
 
-        correoService.getAPI().enviarCorreo(correoJsonPart,adjuntosPart).enqueue(new Callback<ResponseBody>() {
+        correoService.getAPI().enviarCorreo(correoJsonPart, adjuntosPart).enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
@@ -144,7 +153,12 @@ public class ServivioCorreo extends Fragment implements View.OnClickListener {
                     etDestinatario.setText("");
                     adjuntosUri.clear();
                     Toast.makeText(requireContext(), "Correo cifrado enviado con éxito.", Toast.LENGTH_LONG).show();
+
+                    // --- REGRESO AUTOMÁTICO AL ÉXITO ---
+                    navController.popBackStack(); // Regresa de cargaProcesos a ServivioCorreo
                 } else {
+                    // Si hay error, regresamos de la pantalla de carga para que el usuario vea el error
+                    navController.popBackStack();
                     try {
                         String errorBody = response.errorBody().string();
                         Toast.makeText(requireContext(), "Error al enviar: " + errorBody, Toast.LENGTH_LONG).show();
@@ -156,6 +170,8 @@ public class ServivioCorreo extends Fragment implements View.OnClickListener {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                // Si falla la red, también debemos regresar para que no se quede trabado en carga
+                navController.popBackStack();
                 Toast.makeText(requireContext(), "Error de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
@@ -166,7 +182,7 @@ public class ServivioCorreo extends Fragment implements View.OnClickListener {
         if (v.getId() == R.id.carpeta) {
             Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
         } else if (v.getId() == R.id.house) {
-            Navigation.findNavController(v).navigate(R.id.continuacionInicio);
+            Navigation.findNavController(v).navigate(R.id.inicio);
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {

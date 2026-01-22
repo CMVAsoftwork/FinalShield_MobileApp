@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.NavOptions;
@@ -15,10 +16,10 @@ import androidx.navigation.Navigation;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -45,7 +46,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ArchivosCifrados2 extends Fragment implements View.OnClickListener, AdaptadorArchivos.AdaptadorListener {
+public class ArchivosCifrados2 extends Fragment
+        implements View.OnClickListener, AdaptadorArchivos.AdaptadorListener {
 
     private final List<ArchivoMetadata> archivosSeleccionados = new ArrayList<>();
     private ListView listViewArchivos;
@@ -53,19 +55,23 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     private ArchivoService archivoService;
     private ArchivoDAO archivoDAO;
 
-    // Diálogos personalizados
     private LinearLayout dialogDescifrar, dialogEliminar;
     private int posicionSeleccionada = -1;
 
-    private final ActivityResultLauncher<String> filePickerLauncher =
-            registerForActivityResult(new ActivityResultContracts.GetMultipleContents(), uris -> {
-                if (uris != null && !uris.isEmpty()) {
-                    enviarAlServidor(uris);
-                }
-            });
+    // ✅ CORREGIDO: Usamos OpenMultipleDocuments para obtener permisos de ELIMINACIÓN
+    private final ActivityResultLauncher<String[]> filePickerLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.OpenMultipleDocuments(),
+                    uris -> {
+                        if (uris != null && !uris.isEmpty()) {
+                            enviarAlServidor(uris);
+                        }
+                    }
+            );
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_archivos_cifrados2, container, false);
     }
 
@@ -80,25 +86,23 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         adaptador = new AdaptadorArchivos(getContext(), archivosSeleccionados, this);
         listViewArchivos.setAdapter(adaptador);
 
-        // --- Inicializar Diálogos del XML ---
         dialogDescifrar = v.findViewById(R.id.dialogContainerDescifrar);
         dialogEliminar = v.findViewById(R.id.dialogContainerEliminar);
 
-        // Botones Diálogo Descifrar
         v.findViewById(R.id.sidescifrar).setOnClickListener(view -> {
             dialogDescifrar.setVisibility(View.GONE);
             ejecutarDescifrado(posicionSeleccionada);
         });
-        v.findViewById(R.id.nodescifrar).setOnClickListener(view -> dialogDescifrar.setVisibility(View.GONE));
+        v.findViewById(R.id.nodescifrar)
+                .setOnClickListener(view -> dialogDescifrar.setVisibility(View.GONE));
 
-        // Botones Diálogo Eliminar
         v.findViewById(R.id.sieliminar).setOnClickListener(view -> {
             dialogEliminar.setVisibility(View.GONE);
             ejecutarEliminacion(posicionSeleccionada);
         });
-        v.findViewById(R.id.noeliminar).setOnClickListener(view -> dialogEliminar.setVisibility(View.GONE));
+        v.findViewById(R.id.noeliminar)
+                .setOnClickListener(view -> dialogEliminar.setVisibility(View.GONE));
 
-        // Botones de navegación
         v.findViewById(R.id.btnescanycifrar).setOnClickListener(this);
         v.findViewById(R.id.candadoclose).setOnClickListener(this);
         v.findViewById(R.id.candadopen).setOnClickListener(this);
@@ -125,154 +129,248 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     }
 
     private void enviarAlServidor(List<Uri> uris) {
-        final NavController navController = Navigation.findNavController(requireView());
+        final NavController navController =
+                Navigation.findNavController(requireView());
         navController.navigate(R.id.cargaProcesos);
 
         Executors.newSingleThreadExecutor().execute(() -> {
             List<MultipartBody.Part> parts = new ArrayList<>();
-            for (Uri u : uris) {
-                MultipartBody.Part p = FileUtils.prepareFilePartArchivo(requireContext(), u);
+            List<Uri> urisACifrar = new ArrayList<>(uris);
+
+            for (Uri u : urisACifrar) {
+                MultipartBody.Part p =
+                        FileUtils.prepareFilePartArchivo(requireContext(), u);
                 if (p != null) parts.add(p);
             }
 
-            if (!parts.isEmpty()) {
-                archivoService.getAPI().cifrarArchivos(parts).enqueue(new Callback<List<Archivo>>() {
-                    @Override
-                    public void onResponse(Call<List<Archivo>> call, Response<List<Archivo>> response) {
-                        new Handler(Looper.getMainLooper()).post(() -> {
+            archivoService.getAPI().cifrarArchivos(parts)
+                    .enqueue(new Callback<List<Archivo>>() {
+                        @Override
+                        public void onResponse(Call<List<Archivo>> call,
+                                               Response<List<Archivo>> response) {
                             if (response.isSuccessful() && response.body() != null) {
+
                                 Executors.newSingleThreadExecutor().execute(() -> {
                                     for (Archivo a : response.body()) {
-                                        ArchivoMetadata meta = new ArchivoMetadata(a);
+                                        ArchivoMetadata meta =
+                                                new ArchivoMetadata(a);
                                         meta.setOrigen("ARCHIVOS");
                                         archivoDAO.insert(meta);
                                     }
+
+                                    // 🔥 EJECUCIÓN DEL BORRADO LOCAL
+                                    eliminarArchivosFisicos(urisACifrar);
+
                                     requireActivity().runOnUiThread(() -> {
                                         cargarDatosDesdeBD();
-                                        navController.popBackStack(R.id.archivosCifrados2, false);
+                                        navController.popBackStack(
+                                                R.id.archivosCifrados2,
+                                                false
+                                        );
+                                        Toast.makeText(
+                                                getContext(),
+                                                "Archivos cifrados y originales eliminados",
+                                                Toast.LENGTH_SHORT
+                                        ).show();
                                     });
                                 });
+
                             } else {
                                 navController.popBackStack();
                             }
-                        });
-                    }
-                    @Override public void onFailure(Call<List<Archivo>> call, Throwable t) {
-                        new Handler(Looper.getMainLooper()).post(() -> navController.popBackStack());
-                    }
-                });
-            } else {
-                new Handler(Looper.getMainLooper()).post(() -> navController.popBackStack());
-            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<List<Archivo>> call, Throwable t) {
+                            navController.popBackStack();
+                        }
+                    });
         });
+    }
+
+    /**
+     * 🔥 MÉTODO DE BORRADO FÍSICO
+     * Se encarga de remover el archivo del almacenamiento del dispositivo.
+     */
+    private void eliminarArchivosFisicos(List<Uri> uris) {
+        for (Uri uri : uris) {
+            try {
+                // 1. Borrado físico del archivo
+                DocumentFile doc = DocumentFile.fromSingleUri(requireContext(), uri);
+                if (doc != null && doc.exists()) {
+                    boolean borrado = doc.delete();
+                    Log.d("BORRADO_LOCAL", "Archivo: " + uri + " | Estado: " + (borrado ? "Eliminado" : "Fallo"));
+
+                    // 2. ✅ NUEVO: Limpiar la base de datos de la galería (MediaStore)
+                    // Esto hace que Google Fotos se entere de que el archivo ya no está
+                    if (borrado) {
+                        requireContext().getContentResolver().delete(uri, null, null);
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("BORRADO_ERROR", "Error al intentar borrar: " + uri, e);
+            }
+        }
     }
 
     @Override
     public void onDescifrarClick(int position) {
-        this.posicionSeleccionada = position;
+        posicionSeleccionada = position;
         dialogDescifrar.setVisibility(View.VISIBLE);
     }
 
     private void ejecutarDescifrado(int position) {
         if (position < 0 || position >= archivosSeleccionados.size()) return;
-        ArchivoMetadata meta = archivosSeleccionados.get(position);
 
+        ArchivoMetadata meta = archivosSeleccionados.get(position);
         final Context appContext = requireContext().getApplicationContext();
-        final NavController navController = Navigation.findNavController(requireView());
+        final NavController navController =
+                Navigation.findNavController(requireView());
 
         navController.navigate(R.id.cargaProcesos);
 
-        archivoService.getAPI().descifrarArchivo(meta.getIdArchivoServidor()).enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Executors.newSingleThreadExecutor().execute(() -> {
-                        try {
-                            File dir = new File(appContext.getFilesDir(), "descifrados");
-                            if (!dir.exists()) dir.mkdirs();
+        archivoService.getAPI()
+                .descifrarArchivo(meta.getIdArchivoServidor())
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call,
+                                           Response<ResponseBody> response) {
+                        if (response.isSuccessful() && response.body() != null) {
 
-                            String mimeType = (meta.getTipoArchivo() != null) ? meta.getTipoArchivo() : "application/pdf";
-                            String extension = mimeType.contains("/") ? mimeType.substring(mimeType.lastIndexOf("/") + 1) : mimeType;
+                            Executors.newSingleThreadExecutor().execute(() -> {
+                                try {
+                                    File dir =
+                                            new File(appContext.getFilesDir(), "descifrados");
+                                    if (!dir.exists()) dir.mkdirs();
 
-                            String nombreFinal = "file_" + System.currentTimeMillis() + "." + extension;
-                            File localFile = new File(dir, nombreFinal);
+                                    String extension =
+                                            meta.getTipoArchivo() != null
+                                                    ? meta.getTipoArchivo().substring(
+                                                    meta.getTipoArchivo().lastIndexOf("/") + 1)
+                                                    : "dat";
 
-                            InputStream is = response.body().byteStream();
-                            FileOutputStream fos = new FileOutputStream(localFile);
-                            byte[] buffer = new byte[8192];
-                            int read;
-                            while ((read = is.read(buffer)) != -1) fos.write(buffer, 0, read);
-                            fos.flush(); fos.close(); is.close();
+                                    File localFile =
+                                            new File(dir,
+                                                    "file_" + System.currentTimeMillis()
+                                                            + "." + extension);
 
-                            meta.setEstaCifrado(false);
-                            meta.setRutaLocalDescifrado(localFile.getAbsolutePath());
-                            meta.setTamanioBytes(localFile.length());
-                            archivoDAO.update(meta);
+                                    InputStream is =
+                                            response.body().byteStream();
+                                    FileOutputStream fos =
+                                            new FileOutputStream(localFile);
 
-                            new Handler(Looper.getMainLooper()).post(() -> {
-                                NavOptions navOptions = new NavOptions.Builder()
-                                        .setPopUpTo(R.id.cargaProcesos, true)
-                                        .build();
-                                navController.navigate(R.id.archivosDesifrados, null, navOptions);
+                                    byte[] buffer = new byte[8192];
+                                    int read;
+                                    while ((read = is.read(buffer)) != -1) {
+                                        fos.write(buffer, 0, read);
+                                    }
+                                    fos.close();
+                                    is.close();
+
+                                    meta.setEstaCifrado(false);
+                                    meta.setRutaLocalDescifrado(
+                                            localFile.getAbsolutePath());
+                                    meta.setTamanioBytes(localFile.length());
+                                    archivoDAO.update(meta);
+
+                                    new Handler(Looper.getMainLooper())
+                                            .post(() -> navController.navigate(
+                                                    R.id.archivosDesifrados,
+                                                    null,
+                                                    new NavOptions.Builder()
+                                                            .setPopUpTo(
+                                                                    R.id.cargaProcesos,
+                                                                    true
+                                                            ).build()
+                                            ));
+
+                                } catch (Exception e) {
+                                    navController.popBackStack();
+                                }
                             });
 
-                        } catch (Exception e) {
-                            new Handler(Looper.getMainLooper()).post(() -> navController.popBackStack());
+                        } else {
+                            navController.popBackStack();
                         }
-                    });
-                } else {
-                    new Handler(Looper.getMainLooper()).post(() -> navController.popBackStack());
-                }
-            }
-            @Override public void onFailure(Call<ResponseBody> call, Throwable t) {
-                new Handler(Looper.getMainLooper()).post(() -> navController.popBackStack());
-            }
-        });
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        navController.popBackStack();
+                    }
+                });
     }
 
     @Override
     public void onBorrarClick(int position) {
-        this.posicionSeleccionada = position;
+        posicionSeleccionada = position;
         dialogEliminar.setVisibility(View.VISIBLE);
     }
 
     private void ejecutarEliminacion(int position) {
         if (position < 0 || position >= archivosSeleccionados.size()) return;
+
         ArchivoMetadata archivo = archivosSeleccionados.get(position);
 
-        archivoService.getAPI().borrarArchivo(archivo.getIdArchivoServidor()).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                Executors.newSingleThreadExecutor().execute(() -> {
-                    archivoDAO.delete(archivo);
-                    requireActivity().runOnUiThread(() -> {
-                        archivosSeleccionados.remove(position);
-                        adaptador.notifyDataSetChanged();
-                        Toast.makeText(getContext(), "Eliminado correctamente", Toast.LENGTH_SHORT).show();
-                    });
+        archivoService.getAPI()
+                .borrarArchivo(archivo.getIdArchivoServidor())
+                .enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        Executors.newSingleThreadExecutor().execute(() -> {
+                            archivoDAO.delete(archivo);
+                            requireActivity().runOnUiThread(() -> {
+                                archivosSeleccionados.remove(position);
+                                adaptador.notifyDataSetChanged();
+                                Toast.makeText(
+                                        getContext(),
+                                        "Eliminado correctamente",
+                                        Toast.LENGTH_SHORT
+                                ).show();
+                            });
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(
+                                getContext(),
+                                "Error al borrar",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
                 });
-            }
-            @Override public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(getContext(), "Error al borrar", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        if (id == R.id.btnescanycifrar) filePickerLauncher.launch("*/*");
-        else if (id == R.id.candadopen) Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
-        else if (id == R.id.carpeta) Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
+        // ✅ CORREGIDO: Lanzar con el formato correcto para OpenMultipleDocuments
+        if (id == R.id.btnescanycifrar) filePickerLauncher.launch(new String[]{"*/*"});
+        else if (id == R.id.candadopen)
+            Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
+        else if (id == R.id.carpeta)
+            Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
         else if (id == R.id.candadoclose) cargarDatosDesdeBD();
-        else if (id == R.id.btnperfil) Navigation.findNavController(v).navigate(R.id.perfil2);
-        else if (id == R.id.mail) Navigation.findNavController(v).navigate(R.id.servivioCorreo);
-        else if (id == R.id.archivo) Navigation.findNavController(v).navigate(R.id.archivosCifrados);
-        else if (id == R.id.house) Navigation.findNavController(v).navigate(R.id.inicio);
+        else if (id == R.id.btnperfil)
+            Navigation.findNavController(v).navigate(R.id.perfil2);
+        else if (id == R.id.mail)
+            Navigation.findNavController(v).navigate(R.id.servivioCorreo);
+        else if (id == R.id.archivo)
+            Navigation.findNavController(v).navigate(R.id.archivosCifrados);
+        else if (id == R.id.house)
+            Navigation.findNavController(v).navigate(R.id.inicio);
     }
 
-    @Override public void onItemClick(int position) {
-        Toast.makeText(getContext(), "Archivo cifrado. Debe descifrarlo primero.", Toast.LENGTH_SHORT).show();
+    @Override
+    public void onItemClick(int position) {
+        Toast.makeText(
+                getContext(),
+                "Archivo cifrado. Debe descifrarlo primero.",
+                Toast.LENGTH_SHORT
+        ).show();
     }
-    @Override public void onCambiarEstadoClick(int position) {}
+
+    @Override
+    public void onCambiarEstadoClick(int position) {}
 }

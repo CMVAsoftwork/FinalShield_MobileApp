@@ -35,7 +35,7 @@ dependencies {
     implementation ("androidx.room:room-runtime:2.6.1")
     annotationProcessor ("androidx.room:room-compiler:2.6.1")
     implementation ("com.google.code.gson:gson:2.10.1")
-
+    implementation("androidx.documentfile:documentfile:1.0.1")
     implementation("com.github.CanHub:Android-Image-Cropper:4.3.2")
 
     implementation("com.github.chrisbanes:PhotoView:2.3.0")

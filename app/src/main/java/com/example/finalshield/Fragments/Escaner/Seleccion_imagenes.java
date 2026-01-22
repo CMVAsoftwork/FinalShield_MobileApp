@@ -1,6 +1,7 @@
 package com.example.finalshield.Fragments.Escaner;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,7 +17,6 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -35,9 +35,10 @@ import android.widget.Toast;
 
 import com.example.finalshield.Adaptadores.ImageAdapter;
 import com.example.finalshield.Adaptadores.SharedImageViewModel;
-import com.example.finalshield.Adaptadores.VistaImagenActivity;
-import com.example.finalshield.Fragments.EscanerGa.EscanerGaEliminarPaginas;
+import com.example.finalshield.DBM.AppDatabase;
+import com.example.finalshield.DBM.ArchivoDAO;
 import com.example.finalshield.R;
+import com.example.finalshield.Service.ArchivoService;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -49,7 +50,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class Seleccion_imagenes extends Fragment implements View.OnClickListener {
-    ImageButton camara,recortar, edicion, eliminar;
+    ImageButton camara, recortar, edicion, eliminar;
     private Button regresar;
     private Button guardar;
 
@@ -58,27 +59,31 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
 
     private SharedImageViewModel sharedViewModel;
 
+    // ✅ SERVICIOS AÑADIDOS PARA EL CIFRADO
+    private ArchivoService archivoService;
+    private ArchivoDAO archivoDAO;
+
     private RecyclerView recyclerViee;
     private ImageAdapter adapter;
-    private final List<Uri> listaMixta = new ArrayList<>(); // Lista de la galería completa
+    private final List<Uri> listaMixta = new ArrayList<>();
 
     private TextView selectionCount;
     private Button cancelarSeleccion;
     private Button guardarFotosSeleccionadas;
     private LinearLayout selectionBar;
 
-    private final ActivityResultLauncher<Intent> vistaImagenLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> { /* ... */ });
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedImageViewModel.class);
+
+        // ✅ Inicializar servicios
+        archivoService = new ArchivoService(requireContext());
+        archivoDAO = AppDatabase.getInstance(requireContext()).archivoDAO();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Asegúrate de reemplazar "R.layout.fragment_seleccion_imagenes" con el layout correcto.
         return inflater.inflate(R.layout.fragment_seleccion_imagenes, container, false);
     }
 
@@ -112,7 +117,7 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
             if (adapter != null && adapter.getSelectedCount() > 0) {
                 guardarImagenesSeleccionadas();
             } else {
-                Toast.makeText(getContext(), "No hay fotos seleccionadas para guardar.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "No hay fotos seleccionadas.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -126,10 +131,90 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
         pedirPermiso();
     }
 
-    // --- MANEJO DE PERMISOS Y CARGA DE GALERÍA (Sin cambios) ---
-    // (Métodos pedirPermiso, onRequestPermissionsResult, cargarImagenes son iguales)
+    // --- LÓGICA DE CIFRADO Y BORRADO (CORRECCIÓN SOLICITADA) ---
 
-    // ... (Inserte aquí los métodos de permisos y carga de imágenes) ...
+    private void ejecutarCifradoYBorrado(View v) {
+        List<Uri> listaActual = new ArrayList<>(sharedViewModel.getImageUriList());
+
+        if (listaActual.isEmpty()) {
+            Toast.makeText(requireContext(), "No hay fotos para cifrar.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 1. Bloquear UI y navegar a Carga
+        v.setEnabled(false);
+        final androidx.navigation.NavController navController = Navigation.findNavController(v);
+        navController.navigate(R.id.cargaProcesos);
+
+        // 2. Iniciar proceso de PDF y Cifrado
+        EscanerProcesador.generarPdfYEnviar(
+                requireContext(),
+                listaActual,
+                archivoService,
+                archivoDAO,
+                () -> {
+                    // ✅ 3. BORRAR ORIGINALES DE LA GALERÍA
+                    borrarFotosDeTodoElDispositivo(listaActual);
+
+                    new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
+                        // 4. Limpiar caché de la sesión
+                        limpiarArchivosTemporales();
+
+                        // 5. Navegar al éxito
+                        navController.navigate(R.id.action_cargaProcesos_to_cifradoEscaneo2);
+                        Toast.makeText(getContext(), "Cifrado completado. Galería limpia.", Toast.LENGTH_LONG).show();
+                    });
+                }
+        );
+    }
+
+    private void borrarFotosDeTodoElDispositivo(List<Uri> uris) {
+        ContentResolver resolver = requireContext().getContentResolver();
+        for (Uri uri : uris) {
+            try {
+                // Borrar del MediaStore (esto borra el archivo real del teléfono)
+                resolver.delete(uri, null, null);
+            } catch (Exception e) {
+                Log.e(TAG, "No se pudo borrar el original: " + uri);
+            }
+        }
+        // Forzar actualización para que Google Fotos se refresque
+        if (!uris.isEmpty()) {
+            requireContext().sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uris.get(0)));
+        }
+    }
+
+    private void limpiarArchivosTemporales() {
+        File cacheDir = requireContext().getCacheDir();
+        File[] files = cacheDir.listFiles((dir, name) -> name.startsWith("editable_") && name.endsWith(".jpg"));
+        if (files != null) for (File file : files) file.delete();
+        sharedViewModel.clearList();
+        sharedViewModel.clearCameraOnlyList();
+    }
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        if (id == R.id.guardar) {
+            ejecutarCifradoYBorrado(v);
+        } else if (id == R.id.scann) {
+            Navigation.findNavController(v).navigate(R.id.escanerCifradoMixto);
+        } else if (id == R.id.recortar) {
+            if (sharedViewModel.getImageUriList().isEmpty()) return;
+            Navigation.findNavController(v).navigate(R.id.cortarRotar);
+        } else if (id == R.id.edicion) {
+            if (sharedViewModel.getImageUriList().isEmpty()) return;
+            Navigation.findNavController(v).navigate(R.id.visualizacionYReordenamiento);
+        } else if (id == R.id.eliminar) {
+            if (sharedViewModel.getImageUriList().isEmpty()) return;
+            Navigation.findNavController(v).navigate(R.id.eliminarPaginas);
+        } else if (id == R.id.regresar) {
+            Navigation.findNavController(v).navigate(R.id.escanerCifradoMixto);
+        }
+    }
+
+    // --- MÉTODOS DE SOPORTE (CARGAR IMÁGENES, PERMISOS, ETC) ---
+
     private void pedirPermiso() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             requestPermissions(new String[]{Manifest.permission.READ_MEDIA_IMAGES}, REQUEST_CODE);
@@ -138,201 +223,64 @@ public class Seleccion_imagenes extends Fragment implements View.OnClickListener
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_CODE &&
-                grantResults.length > 0 &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_CODE && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             cargarImagenes();
-        } else {
-            Toast.makeText(getContext(), "Permiso requerido para acceder a la galería.", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void cargarImagenes() {
         listaMixta.clear();
-        List<Uri> loadedUris = new ArrayList<>();
-
         Uri collection = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
                 ? MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
                 : MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
         try (Cursor cursor = requireActivity().getContentResolver().query(
-                collection,
-                new String[]{MediaStore.Images.Media._ID},
-                null,
-                null,
-                MediaStore.Images.Media.DATE_ADDED + " DESC"
+                collection, new String[]{MediaStore.Images.Media._ID}, null, null, MediaStore.Images.Media.DATE_ADDED + " DESC"
         )) {
             if (cursor != null) {
                 int idColumn = cursor.getColumnIndex(MediaStore.Images.Media._ID);
-                if (idColumn != -1) {
-                    while (cursor.moveToNext()) {
-                        long id = cursor.getLong(idColumn);
-                        Uri uri = ContentUris.withAppendedId(collection, id);
-                        loadedUris.add(uri);
-                    }
+                while (cursor.moveToNext()) {
+                    listaMixta.add(ContentUris.withAppendedId(collection, cursor.getLong(idColumn)));
                 }
             }
-        } catch (Exception e) {
-            Log.e(TAG, "Error al consultar MediaStore: " + e.getMessage(), e);
-            Toast.makeText(getContext(), "Error al consultar MediaStore: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
+        } catch (Exception e) { Log.e(TAG, "Error carga: " + e.getMessage()); }
 
-        listaMixta.addAll(loadedUris);
-
-        if (listaMixta.isEmpty()) {
-            Toast.makeText(getContext(), "No se encontraron imágenes en la galería.", Toast.LENGTH_LONG).show();
-        }
-
-        adapter = new ImageAdapter(
-                listaMixta,
-                new ImageAdapter.Callbacks() {
-                    @Override
-                    public void onImageClicked(Uri uri) { /* ... */ }
-                    @Override
-                    public void onSelectionChanged(int count) { actualizarBarra(); }
-                },
-                R.layout.item_imagen,
-                true
-        );
-
+        adapter = new ImageAdapter(listaMixta, new ImageAdapter.Callbacks() {
+            @Override public void onImageClicked(Uri uri) {}
+            @Override public void onSelectionChanged(int count) { actualizarBarra(); }
+        }, R.layout.item_imagen, true);
         recyclerViee.setAdapter(adapter);
     }
-    // --- LÓGICA DE ACTUALIZACIÓN Y GUARDADO ---
 
     private void guardarImagenesSeleccionadas() {
-        if (adapter == null || adapter.getSelectedCount() == 0) return;
-
         List<Uri> selectedUris = adapter.getSelectedItems();
-        List<Uri> listaMaestraActual = new ArrayList<>(sharedViewModel.getImageUriList());
-        int countAdded = 0;
-
-        Set<String> originalIdInMaster = getOriginalIdInMaster(listaMaestraActual);
-
-        for (Uri galleryUri : selectedUris) {
-            String galleryId = galleryUri.getLastPathSegment();
-
-            if (galleryId != null && !originalIdInMaster.contains(galleryId)) {
-
-                Uri localEditableUri = obtenerCopiaEditableUnica(galleryUri);
-
-                if (localEditableUri != null) {
-                    listaMaestraActual.add(localEditableUri);
-                    originalIdInMaster.add(galleryId);
-                    countAdded++;
-                }
-            }
+        List<Uri> masterList = new ArrayList<>(sharedViewModel.getImageUriList());
+        for (Uri uri : selectedUris) {
+            Uri copy = obtenerCopiaEditableUnica(uri);
+            if (copy != null) masterList.add(copy);
         }
-
-        sharedViewModel.setImageUriList(listaMaestraActual);
-
+        sharedViewModel.setImageUriList(masterList);
         adapter.clearSelection();
         actualizarBarra();
-
-        Toast.makeText(getContext(), countAdded + " nuevas fotos añadidas para guardar. Total: " + listaMaestraActual.size(), Toast.LENGTH_LONG).show();
-    }
-
-    private Set<String> getOriginalIdInMaster(List<Uri> masterList) {
-        Set<String> ids = new HashSet<>();
-        for (Uri fileProviderUri : masterList) {
-            String path = fileProviderUri.getLastPathSegment();
-            if (path != null && path.startsWith("editable_")) {
-                int start = path.indexOf('_');
-                int end = path.lastIndexOf('_');
-                if (start != -1 && end > start) {
-                    ids.add(path.substring(start + 1, end));
-                }
-            }
-        }
-        return ids;
+        Toast.makeText(getContext(), "Fotos añadidas a la lista de cifrado", Toast.LENGTH_SHORT).show();
     }
 
     private Uri obtenerCopiaEditableUnica(Uri galleryUri) {
         try {
-            String uniqueId = UUID.randomUUID().toString().substring(0, 8);
-            String originalSegment = galleryUri.getLastPathSegment();
-
-            String filename = "editable_" + originalSegment + "_" + uniqueId + ".jpg";
-            File file = new File(requireContext().getCacheDir(), filename);
-
-            InputStream inputStream = requireContext().getContentResolver().openInputStream(galleryUri);
-            if (inputStream == null) return null;
-
-            FileOutputStream outputStream = new FileOutputStream(file);
-
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-
-            outputStream.close();
-            inputStream.close();
-
+            File file = new File(requireContext().getCacheDir(), "editable_" + System.currentTimeMillis() + ".jpg");
+            InputStream is = requireContext().getContentResolver().openInputStream(galleryUri);
+            FileOutputStream os = new FileOutputStream(file);
+            byte[] buf = new byte[1024]; int len;
+            while ((len = is.read(buf)) > 0) os.write(buf, 0, len);
+            os.close(); is.close();
             return FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".fileprovider", file);
-
-        } catch (Exception e) {
-            Log.e(TAG, "Fallo al crear copia editable única: " + e.getMessage(), e);
-            return null;
-        }
+        } catch (Exception e) { return null; }
     }
 
     private void actualizarBarra() {
-        if (adapter == null) return;
-
-        int count = adapter.getSelectedCount();
-
-        if (count == 0) {
-            selectionBar.setVisibility(View.GONE);
-        } else {
-            selectionBar.setVisibility(View.VISIBLE);
-            selectionCount.setText(count + " seleccionadas");
-            guardarFotosSeleccionadas.setEnabled(count > 0);
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        int id = v.getId();
-        List<Uri> listaActual = sharedViewModel.getImageUriList();
-
-        if(id == R.id.scann){
-            Navigation.findNavController(v).navigate(R.id.escanerCifradoMixto);
-        } else if (id == R.id.recortar) {
-            if (listaActual.isEmpty()) {
-                Toast.makeText(getContext(), "No hay elementos guardados para recortar.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Navigation.findNavController(v).navigate(R.id.cortarRotar);
-            if (adapter != null) {
-                adapter.clearSelection();
-                actualizarBarra();
-            }
-        } else if (id == R.id.edicion) {
-            if (listaActual.isEmpty()) {
-                Toast.makeText(getContext(), "No hay elementos guardados para acomodar.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Navigation.findNavController(v).navigate(R.id.visualizacionYReordenamiento);
-            if (adapter != null) {
-                adapter.clearSelection();
-                actualizarBarra();
-            }
-        } else if (id == R.id.eliminar) {
-            if (listaActual.isEmpty()) {
-                Toast.makeText(getContext(), "No hay elementos guardados para eliminar.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Navigation.findNavController(v).navigate(R.id.eliminarPaginas);
-
-            if (adapter != null) {
-                adapter.clearSelection();
-                actualizarBarra();
-            }
-        } else if (id == R.id.regresar) {
-            Navigation.findNavController(v).navigate(R.id.escanerCifradoMixto);
-        }
+        int count = (adapter != null) ? adapter.getSelectedCount() : 0;
+        selectionBar.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        selectionCount.setText(count + " seleccionadas");
     }
 }

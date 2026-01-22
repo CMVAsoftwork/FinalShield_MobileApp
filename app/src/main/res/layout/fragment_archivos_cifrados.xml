@@ -41,7 +41,7 @@
         <ImageView
             android:layout_width="41dp"
             android:layout_height="35dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="20dp"
             android:layout_marginStart="40dp"
             android:src="@drawable/monitoreo" />
         <TextView
@@ -52,30 +52,27 @@
             android:textSize="20dp"
             android:textStyle="bold"
             android:layout_marginStart="30dp"
-            android:layout_marginTop="30dp"/>
+            android:layout_marginTop="20dp"/>
     </LinearLayout>
     <ListView
         android:layout_width="349dp"
-        android:layout_height="390dp"
-        android:layout_marginTop="30dp"
+        android:layout_height="370dp"
+        android:layout_marginTop="10dp"
         android:layout_gravity="center"
         android:layout_centerHorizontal="true"
         android:id="@+id/listacarp"/>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="20dp"
         android:gravity="center_vertical">
-
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
+            android:layout_marginTop="10dp"
             android:orientation="vertical">
-
             <ImageView
                 android:id="@+id/btnWhatsappIcon"
                 android:layout_width="55dp"
@@ -85,9 +82,7 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:scaleType="fitCenter" />
-
         </LinearLayout>
-
         <androidx.cardview.widget.CardView
             android:id="@+id/btnFormulario"
             android:layout_width="0dp"
@@ -96,7 +91,6 @@
             app:cardBackgroundColor="#0088FF"
             app:cardCornerRadius="28dp"
             app:cardElevation="4dp">
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -119,7 +113,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="55dp"
+        android:layout_marginTop="35dp"
         android:layout_marginLeft="-15dp">
         <ImageButton
             android:id="@+id/house"
