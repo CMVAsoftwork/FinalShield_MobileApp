@@ -106,16 +106,6 @@
         android:textSize="15dp"
         android:textColor="@color/white"
         android:textStyle="bold"/>
-    <Button
-        android:id="@+id/btnnxd"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="80dp"
-        android:text="ENTIL"
-        android:backgroundTint="#1E90FF"
-        android:textSize="15dp"
-        android:textColor="@color/white"
-        android:textStyle="bold"/>
+
 
 </LinearLayout>

@@ -44,19 +44,15 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
         regre = v.findViewById(R.id.regresar1);
         regis = v.findViewById(R.id.btnregis);
         inises = v.findViewById(R.id.btninises1);
-        entil = v.findViewById(R.id.btnnxd);
         regre.setOnClickListener(this);
         regis.setOnClickListener(this);
         inises.setOnClickListener(this);
-        entil.setOnClickListener(this);
         // --- SE ELIMINÓ EL AUTO-SALTO A BIOMÉTRICOS AQUÍ ---
         // Para que el usuario pueda escribir su correo/pass sin que lo saquen de la pantalla.
     }
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        if (id == R.id.btnnxd) Navigation.findNavController(v).navigate(R.id.inicio);
-
         if (id == R.id.regresar1) {
             Navigation.findNavController(v).navigate(R.id.bienvenida);
         } else if (id == R.id.btninises1) {
