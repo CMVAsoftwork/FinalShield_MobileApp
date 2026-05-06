@@ -1,6 +1,8 @@
 package com.example.finalshield.Adaptadores;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,7 +31,7 @@ public class AdaptadorUltimos extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
+    public ArchivoMetadata getItem(int position) {
         return lista.get(position);
     }
 
@@ -40,7 +42,6 @@ public class AdaptadorUltimos extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
         if (convertView == null) {
             convertView = LayoutInflater.from(context)
                     .inflate(R.layout.a_list_ultimos_archivos, parent, false);
@@ -50,29 +51,24 @@ public class AdaptadorUltimos extends BaseAdapter {
         RadioButton radioButton = convertView.findViewById(R.id.radio);
         TextView textView = convertView.findViewById(R.id.text);
 
+        // Configuración de texto y estado
         textView.setText(archivo.getNombre());
-
         radioButton.setClickable(false);
         radioButton.setChecked(true);
 
+        // Lógica de colores: Verde (#4CAF50) si está cifrado, Rojo (#F44336) si no
         if (archivo.isEstaCifrado()) {
-            radioButton.setButtonTintList(
-                    android.content.res.ColorStateList.valueOf(
-                            android.graphics.Color.parseColor("#4CAF50")));
+            radioButton.setButtonTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
         } else {
-            radioButton.setButtonTintList(
-                    android.content.res.ColorStateList.valueOf(
-                            android.graphics.Color.parseColor("#F44336")));
+            radioButton.setButtonTintList(ColorStateList.valueOf(Color.parseColor("#F44336")));
         }
 
-        // 🧹 LIMPIAR estado previo (MUY IMPORTANTE)
+        // --- ANIMACIÓN ---
         convertView.animate().cancel();
         convertView.setAlpha(0f);
         convertView.setTranslationY(120f);
 
-        // 🔥 ANIMACIÓN DE ABAJO HACIA ARRIBA
-        int total = getCount();
-        long delay = (total - position) * 70L;
+        long delay = (long) position * 100L; // Delay basado en la posición para efecto cascada
 
         convertView.animate()
                 .translationY(0f)

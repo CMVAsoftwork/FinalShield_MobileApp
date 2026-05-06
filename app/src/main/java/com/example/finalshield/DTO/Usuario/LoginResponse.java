@@ -7,27 +7,22 @@ public class LoginResponse {
     private String nombre;
     private Integer idUsuario;
     private boolean biometricoActivo;
+    private String pinReal;
+    private String pinSeguro;
 
-    public String getNombre() {
-        return nombre;
+    public String getNombre() { return nombre; }
+    public Integer getIdUsuario() { return idUsuario; }
+    public String getToken() { return token; }
+    public String getTipoToken() { return tipoToken; }
+    public String getCorreo() { return correo; }
+    public boolean isBiometricoActivo() { return biometricoActivo; }
+
+    // METODOS QUE EL AUTHSERVICE NECESITA PARA QUITAR EL ERROR
+    public String getPinReal() {
+        return pinReal;
     }
 
-    public Integer getIdUsuario() {
-        return idUsuario;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public String getTipoToken() {
-        return tipoToken;
-    }
-
-    public String getCorreo() {
-        return correo;
-    }
-    public boolean isBiometricoActivo() {
-        return biometricoActivo;
+    public String getPinSeguro() {
+        return pinSeguro;
     }
 }

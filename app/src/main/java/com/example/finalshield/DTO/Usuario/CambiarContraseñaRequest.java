@@ -1,26 +1,31 @@
 package com.example.finalshield.DTO.Usuario;
 
+import com.google.gson.annotations.SerializedName;
+
 public class CambiarContraseñaRequest {
-    String contrasenaActual;
-    String nuevaContrasena;
+    @SerializedName("correo")
+    private String correo;
 
-    public CambiarContraseñaRequest(String contrasenaActual, String nuevaContrasena) {
+    @SerializedName("contrasenaActual")
+    private String contrasenaActual;
+
+    @SerializedName("nuevaContrasena")
+    private String nuevaContrasena;
+
+    // Constructor actualizado para incluir el correo
+    public CambiarContraseñaRequest(String correo, String contrasenaActual, String nuevaContrasena) {
+        this.correo = correo;
         this.contrasenaActual = contrasenaActual;
         this.nuevaContrasena = nuevaContrasena;
     }
 
-    public String getNuevaContrasena() {
-        return nuevaContrasena;
-    }
+    // Getters y Setters
+    public String getCorreo() { return correo; }
+    public void setCorreo(String correo) { this.correo = correo; }
 
-    public void setNuevaContrasena(String nuevaContrasena) {
-        this.nuevaContrasena = nuevaContrasena;
-    }
-    public String getContrasenaActual() {
-        return contrasenaActual;
-    }
+    public String getNuevaContrasena() { return nuevaContrasena; }
+    public void setNuevaContrasena(String nuevaContrasena) { this.nuevaContrasena = nuevaContrasena; }
 
-    public void setContrasenaActual(String contrasenaActual) {
-        this.contrasenaActual = contrasenaActual;
-    }
+    public String getContrasenaActual() { return contrasenaActual; }
+    public void setContrasenaActual(String contrasenaActual) { this.contrasenaActual = contrasenaActual; }
 }

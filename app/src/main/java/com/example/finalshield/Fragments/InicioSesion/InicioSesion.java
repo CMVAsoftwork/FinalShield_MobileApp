@@ -1,15 +1,19 @@
 package com.example.finalshield.Fragments.InicioSesion;
+
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,98 +22,209 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.finalshield.API.AuthAPI;
 import com.example.finalshield.DTO.Usuario.LoginResponse;
 import com.example.finalshield.R;
 import com.example.finalshield.Service.AuthService;
+import com.example.finalshield.ViewModel.CargaViewModel;
+
+import java.util.concurrent.Executor;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
 public class InicioSesion extends Fragment implements View.OnClickListener {
+
     private AuthService authService;
+    private CargaViewModel cargaViewModel; // 1. ViewModel para controlar la carga
     private EditText inputCorreo, inputContrasena;
     private Button regre, inises, regis, entil;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_inicio_sesion, container, false);
     }
+
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
+
+        // Inicializar ViewModels y Servicios
         authService = new AuthService(requireContext());
+        cargaViewModel = new ViewModelProvider(requireActivity()).get(CargaViewModel.class);
+
         inputCorreo = v.findViewById(R.id.editcorreo);
         inputContrasena = v.findViewById(R.id.editcontraseña);
         regre = v.findViewById(R.id.regresar1);
         regis = v.findViewById(R.id.btnregis);
         inises = v.findViewById(R.id.btninises1);
+        entil = v.findViewById(R.id.entil);
+
         regre.setOnClickListener(this);
         regis.setOnClickListener(this);
         inises.setOnClickListener(this);
-        // --- SE ELIMINÓ EL AUTO-SALTO A BIOMÉTRICOS AQUÍ ---
-        // Para que el usuario pueda escribir su correo/pass sin que lo saquen de la pantalla.
+        entil.setOnClickListener(this);
+
+        verificarAccesoAutomatico(v);
     }
-    @Override
-    public void onClick(View v) {
-        int id = v.getId();
-        if (id == R.id.regresar1) {
-            Navigation.findNavController(v).navigate(R.id.bienvenida);
-        } else if (id == R.id.btninises1) {
-            hacerLoginManual(v);
-        } else if (id == R.id.btnregis) {
-            Navigation.findNavController(v).navigate(R.id.registroSesion);
-        }
+
+    // =========================
+    // 🧬 DEEP LINK + BIOMETRIA
+    // =========================
+
+    private void lanzarBiometriaDirecta(View v, String tokenSeguro, String correo) {
+        if (!isNetworkAvailable()) return;
+
+        Executor executor = ContextCompat.getMainExecutor(requireContext());
+        NavController nav = Navigation.findNavController(v);
+
+        BiometricPrompt biometricPrompt = new BiometricPrompt(this, executor,
+                new BiometricPrompt.AuthenticationCallback() {
+                    @Override
+                    public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                        super.onAuthenticationSucceeded(result);
+
+                        // PASO 1: Ir a pantalla de carga inmediatamente
+                        irACarga(nav, R.id.verClave, tokenSeguro);
+
+                        // PASO 2: Iniciar proceso de red
+                        authService.loginBiometrico(correo, new Callback<LoginResponse>() {
+                            @Override
+                            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                                if (response.isSuccessful() && response.body() != null) {
+                                    authService.guardarToken(response.body().getToken());
+                                    requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE)
+                                            .edit().remove("pending_token").apply();
+
+                                    // ÉXITO: Señal para que CargaProcesos navegue a VerClave
+                                    cargaViewModel.terminarProceso();
+                                } else {
+                                    manejarErrorNav("Sesión expirada");
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                                manejarErrorNav("Error de red");
+                            }
+                        });
+                    }
+                });
+
+        BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Acceso Rápido")
+                .setSubtitle("FinalShield: Verificación de identidad")
+                .setNegativeButtonText("Usar contraseña")
+                .build();
+
+        biometricPrompt.authenticate(promptInfo);
     }
+
+    // =========================
+    // 🔐 LOGIN MANUAL
+    // =========================
+
     private void hacerLoginManual(View v) {
-        String correo = inputCorreo.getText().toString().trim();
-        String pass = inputContrasena.getText().toString().trim();
-        if (correo.isEmpty() || pass.isEmpty()) {
-            Toast.makeText(getContext(), "Ingresa correo y contraseña", Toast.LENGTH_SHORT).show();
+        if (!isNetworkAvailable()) {
+            Toast.makeText(getContext(), "Sin conexión", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        String correo = inputCorreo.getText().toString().trim();
+        String pass = inputContrasena.getText().toString().trim();
+
+        if (correo.isEmpty() || pass.isEmpty()) {
+            Toast.makeText(getContext(), "Campos incompletos", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        inises.setEnabled(false);
+        NavController nav = Navigation.findNavController(v);
+
+        // PASO 1: Navegar a carga antes de la petición
+        SharedPreferences prefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
+        String pendingToken = prefs.getString("pending_token", null);
+        int destino = (pendingToken != null) ? R.id.verClave : R.id.inicio;
+
+        irACarga(nav, destino, pendingToken);
+
+        // PASO 2: Petición de red
         authService.login(correo, pass, new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    authService.guardarCorreo(correo);
-                    authService.guardarToken(response.body().getToken());
-                    // SI YA SE LOGUEÓ MANUALMENTE, MANDAR DIRECTO AL INICIO
-                    // No tiene sentido mandarlo a biométricos si ya puso la contraseña
-                    handlePostLoginNavigation(v, R.id.inicio);
+                    if (pendingToken != null) prefs.edit().remove("pending_token").apply();
+
+                    // ÉXITO: Avisar a la carga que ya puede salir al destino
+                    cargaViewModel.terminarProceso();
                 } else {
-                    Toast.makeText(getContext(), "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show();
+                    manejarErrorNav("Credenciales incorrectas");
                 }
             }
+
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+                manejarErrorNav("Error de servidor");
             }
         });
     }
-    private void handlePostLoginNavigation(View view, int defaultDestination) {
-        if (!isAdded()) return;
-        SharedPreferences prefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
-        String pendingToken = prefs.getString("pending_token", null);
-        if (pendingToken != null) {
-            prefs.edit().remove("pending_token").apply();
-            Bundle args = new Bundle();
-            args.putString("security_token", pendingToken);
-            try {
-                Navigation.findNavController(view).navigate(R.id.action_inicioSesion_to_verClavePostLogin, args);
-            } catch (Exception e) {
-                Navigation.findNavController(view).navigate(R.id.verClave, args);
-            }
-        } else {
-            // Aseguramos que la navegación ocurra en el hilo principal
-            requireActivity().runOnUiThread(() -> {
-                try {
-                    Navigation.findNavController(view).navigate(defaultDestination);
-                } catch (Exception e) {
-                    // Fallback por si la vista se descolgó
-                    NavHostFragment.findNavController(InicioSesion.this).navigate(defaultDestination);
-                }
-            });
+
+    // =========================
+    // 🚀 UTILIDADES DE CARGA (Ajustadas)
+    // =========================
+
+    private void irACarga(NavController nav, int destino, String securityToken) {
+        Bundle bundle = new Bundle();
+        bundle.putInt("destino_final", destino);
+
+        if (securityToken != null) {
+            Bundle argsFinales = new Bundle();
+            argsFinales.putString("security_token", securityToken);
+            bundle.putBundle("argumentos_destino", argsFinales);
         }
+
+        nav.navigate(R.id.cargaProcesos, bundle);
+    }
+
+    private void manejarErrorNav(String msj) {
+        // Si hay error, detenemos la carga pero regresamos al login
+        // Usamos postDelayed para que no sea un salto brusco si el error fue instantáneo
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (isAdded()) {
+                cargaViewModel.resetear();
+                Navigation.findNavController(requireView()).popBackStack(); // Regresar de Carga a InicioSesion
+                inises.setEnabled(true);
+                Toast.makeText(getContext(), msj, Toast.LENGTH_SHORT).show();
+            }
+        }, 1000);
+    }
+
+    // ... verificarAccesoAutomatico y onClick se mantienen igual ...
+    private void verificarAccesoAutomatico(View v) {
+        SharedPreferences shieldPrefs = requireContext().getSharedPreferences("ShieldPrefs", Context.MODE_PRIVATE);
+        SharedPreferences linkPrefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
+
+        boolean usaHuella = shieldPrefs.getBoolean("huella_login", false);
+        String pendingToken = linkPrefs.getString("pending_token", null);
+        String correoGuardado = authService.obtenerCorreo();
+
+        if (usaHuella && pendingToken != null && correoGuardado != null) {
+            lanzarBiometriaDirecta(v, pendingToken, correoGuardado);
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        if (id == R.id.btninises1) hacerLoginManual(v);
+        else if (id == R.id.btnregis) Navigation.findNavController(v).navigate(R.id.registroSesion);
+        else if (id == R.id.regresar1) Navigation.findNavController(v).navigate(R.id.bienvenida);
+        else if (id == R.id.entil) Navigation.findNavController(v).navigate(R.id.inicio);
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager cm = (ConnectivityManager) requireActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo net = cm.getActiveNetworkInfo();
+        return net != null && net.isConnected();
     }
 }

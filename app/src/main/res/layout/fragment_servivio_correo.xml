@@ -6,6 +6,56 @@
     android:orientation="vertical"
     android:background="@color/degradado_azul_medio"
     tools:context=".Fragments.Correo.ServivioCorreo">
+    <LinearLayout
+        android:id="@+id/dialogListaAdjuntos"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#A0000000"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:elevation="15dp"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_marginHorizontal="24dp"
+            android:background="@drawable/cuadrado"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ARCHIVOS SELECCIONADOS"
+                android:textSize="18sp"
+                android:textAlignment="center"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"/>
+
+            <ListView
+                android:id="@+id/lvArchivosSeleccionados"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:divider="@color/white"
+                android:dividerHeight="0.5dp"/>
+
+            <Button
+                android:id="@+id/btnCerrarLista"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CERRAR"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="#1E90FF"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+    </LinearLayout>
     <ImageButton
         android:id="@+id/btnperfil"
         android:layout_width="30dp"
@@ -14,6 +64,7 @@
         android:background="@android:color/transparent"
         android:layout_marginStart="330dp"
         android:layout_marginTop="40dp"/>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -33,11 +84,43 @@
             android:layout_marginTop="20dp"
             android:src="@drawable/flower" />
     </LinearLayout>
-    <ImageView
-        android:layout_width="190dp"
-        android:layout_height="150dp"
-        android:src="@drawable/robot"
-        android:layout_marginStart="90dp"/>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <ImageView
+            android:layout_width="190dp"
+            android:layout_height="150dp"
+            android:src="@drawable/robot" />
+
+        <FrameLayout
+            android:id="@+id/btnVerArchivos"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:layout_marginStart="155dp"
+            android:layout_marginTop="10dp">
+            <ImageView
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:src="@drawable/carpetiux"
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:id="@+id/badgeContador"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="top|end"
+                android:background="@drawable/circle_badge"
+                android:text="0"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:gravity="center" />
+        </FrameLayout>
+    </RelativeLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -60,6 +143,7 @@
             android:textColorHint="@color/white"
             android:textColor="@color/white"/>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -82,6 +166,7 @@
             android:textColorHint="@color/white"
             android:textColor="@color/white"/>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -101,9 +186,11 @@
             android:background="@drawable/edittextshape"
             android:paddingStart="10dp"
             android:hint="Mensaje"
+            android:gravity="top"
             android:textColorHint="@color/white"
             android:textColor="@color/white"/>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -125,59 +212,17 @@
             android:textColor="@color/white"
             android:layout_marginStart="40dp"/>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="31dp"
         android:layout_marginStart="-6dp">
-        <ImageButton
-            android:id="@+id/house"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="20dp"
-            android:src="@drawable/housecolor"
-            android:scaleType="fitCenter"
-            android:background="@android:color/transparent"/>
-        <ImageButton
-            android:id="@+id/archivo"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/iconazulinfo"
-            android:scaleType="fitCenter"
-            android:layout_marginStart="20dp"
-            android:background="@android:color/transparent"/>
-        <ImageButton
-            android:id="@+id/candadoclose"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/candadoclose"
-            android:scaleType="fitCenter"
-            android:layout_marginStart="20dp"
-            android:background="@android:color/transparent"/>
-        <ImageButton
-            android:id="@+id/carpeta"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/carpeta"
-            android:scaleType="fitCenter"
-            android:layout_marginStart="20dp"
-            android:background="@android:color/transparent"/>
-        <ImageButton
-            android:id="@+id/mail"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/mailblanc"
-            android:scaleType="fitCenter"
-            android:layout_marginStart="20dp"
-            android:background="@android:color/transparent"/>
-        <ImageButton
-            android:id="@+id/candadopen"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/candadopen"
-            android:scaleType="fitCenter"
-            android:layout_marginStart="20dp"
-            android:background="@android:color/transparent"/>
+        <ImageButton android:id="@+id/house" android:layout_width="40dp" android:layout_height="40dp" android:layout_marginStart="20dp" android:src="@drawable/housecolor" android:background="@android:color/transparent" android:scaleType="fitCenter"/>
+        <ImageButton android:id="@+id/archivo" android:layout_width="40dp" android:layout_height="40dp" android:layout_marginStart="20dp" android:src="@drawable/iconazulinfo" android:background="@android:color/transparent" android:scaleType="fitCenter"/>
+        <ImageButton android:id="@+id/candadoclose" android:layout_width="40dp" android:layout_height="40dp" android:layout_marginStart="20dp" android:src="@drawable/candadoclose" android:background="@android:color/transparent" android:scaleType="fitCenter"/>
+        <ImageButton android:id="@+id/carpeta" android:layout_width="40dp" android:layout_height="40dp" android:layout_marginStart="20dp" android:src="@drawable/carpeta" android:background="@android:color/transparent" android:scaleType="fitCenter"/>
+        <ImageButton android:id="@+id/mail" android:layout_width="40dp" android:layout_height="40dp" android:layout_marginStart="20dp" android:src="@drawable/mailblanc" android:background="@android:color/transparent" android:scaleType="fitCenter"/>
+        <ImageButton android:id="@+id/candadopen" android:layout_width="40dp" android:layout_height="40dp" android:layout_marginStart="20dp" android:src="@drawable/candadopen" android:background="@android:color/transparent" android:scaleType="fitCenter"/>
     </LinearLayout>
-
 </LinearLayout>

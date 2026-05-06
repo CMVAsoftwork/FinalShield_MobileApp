@@ -1,115 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragments.Correo.VerClave"
-    android:orientation="vertical"
-    android:padding="16dp"
     android:background="@color/degradado_negro_azul">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <Button
-            android:id="@+id/regresarEnlace"
-            android:layout_width="69dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="37dp"
-            android:backgroundTint="#10FFFFFF"
-            android:text="←"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="40dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🔐 Ver Contenido del Correo Seguro"
-            android:textColor="@color/white"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="32dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Token de Enlace Seguro:"
-            android:textColor="@color/white"
-            android:textSize="16dp"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="15dp"
-            android:layout_marginEnd="17dp"/>
-
-        <EditText
-            android:id="@+id/etTokenSeguro"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Pega el enlace o token aquí"
-            android:layout_gravity="center"
-            android:layout_marginTop="20dp"
-            android:gravity="center_vertical"
-            android:textColor="@color/white"
-            android:textColorHint="@color/white"
-            android:textSize="16dp"
-            android:paddingStart="49dp"
-            android:background="@drawable/edittextshape"
-            android:minHeight="48dp"
-            android:layout_marginBottom="8dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Contenido del Correo Descifrado:"
-            android:textColor="@color/white"
-            android:textSize="16dp"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="25dp"
-            android:layout_marginEnd="17dp"/>
-
-
-        <TextView
-            android:id="@+id/tvContenidoDescifrado"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="100dp"
-            android:padding="8dp"
-            android:background="@color/white"
-            android:hint="El contenido aparecerá aquí una vez descifrado."
-            android:textColorHint="@color/degradado_negro_azul"
-            android:layout_marginBottom="24dp"
-            android:layout_marginTop="10dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Archivos Adjuntos:"
-            android:textColor="@color/white"
-            android:textSize="16dp"
-            android:layout_marginStart="30dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="17dp"/>
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:id="@+id/layoutAdjuntos"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#009607"
             android:orientation="vertical"
-            android:padding="8dp" />
+            android:padding="16dp">
 
-        <ProgressBar
-            android:id="@+id/pbDescargaAdjuntos"
-            style="@android:style/Widget.ProgressBar.Horizontal"
+            <Button
+                android:id="@+id/regresarEnlace"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:backgroundTint="#15FFFFFF"
+                android:text="←"
+                android:textColor="@color/white"
+                android:textSize="30sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔐 Mensaje Seguro"
+                android:textColor="@color/white"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center_horizontal"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Token de Seguridad:"
+                android:textColor="#B0FFFFFF"
+                android:layout_marginTop="25dp"
+                android:layout_marginStart="8dp"
+                android:textSize="12sp"
+                android:textAllCaps="true"/>
+
+            <EditText
+                android:id="@+id/etTokenSeguro"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/bg_card_perfil"
+                android:paddingHorizontal="16dp"
+                android:textColor="#80FFFFFF"
+                android:enabled="false"
+                android:textSize="14sp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="monospace"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Contenido Descifrado:"
+                android:textColor="#B0FFFFFF"
+                android:layout_marginTop="25dp"
+                android:layout_marginStart="8dp"
+                android:textSize="12sp"
+                android:textAllCaps="true"/>
+
+            <TextView
+                android:id="@+id/tvContenidoDescifrado"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="150dp"
+                android:padding="20dp"
+                android:background="@drawable/bg_card_perfil"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="4dp"
+                android:hint="Descifrando..."
+                android:textColorHint="#40FFFFFF"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Archivos Adjuntos:"
+                android:textColor="#B0FFFFFF"
+                android:layout_marginTop="25dp"
+                android:layout_marginStart="8dp"
+                android:textSize="12sp"
+                android:textAllCaps="true"/>
+
+            <LinearLayout
+                android:id="@+id/layoutAdjuntos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp"
+                android:paddingBottom="40dp"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/dialogContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#B0000000"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:elevation="15dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:visibility="gone"/>
+            android:layout_height="180dp"
+            android:layout_marginHorizontal="24dp"
+            android:background="@drawable/cuadrado"
+            android:orientation="vertical"
+            android:padding="24dp">
 
+            <TextView
+                android:id="@+id/tvDialogMsg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="¿Deseas descargar y descifrar este archivo?"
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="30dp">
+
+                <Button
+                    android:id="@+id/sicifrar"
+                    android:text="Sí"
+                    android:backgroundTint="#4CAF50"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:textAllCaps="false"/>
+
+                <Button
+                    android:id="@+id/nocifrar"
+                    android:text="No"
+                    android:backgroundTint="#1E90FF"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:textAllCaps="false"/>
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
-</ScrollView>
+    <ProgressBar
+        android:id="@+id/pbDescargaAdjuntos"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:indeterminate="true"
+        android:visibility="gone"
+        android:progressTint="@color/white"/>
+
+</RelativeLayout>

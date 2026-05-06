@@ -2,12 +2,12 @@ package com.example.finalshield.Fragments.EscanerCa;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +31,8 @@ import androidx.camera.view.PreviewView;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
@@ -40,6 +42,8 @@ import com.example.finalshield.DBM.ArchivoDAO;
 import com.example.finalshield.Fragments.Escaner.EscanerProcesador;
 import com.example.finalshield.R;
 import com.example.finalshield.Service.ArchivoService;
+import com.example.finalshield.ViewModel.CargaViewModel;
+
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
@@ -50,35 +54,37 @@ import java.util.List;
 public class EscanerCifradoCamara extends Fragment implements View.OnClickListener {
 
     private static final String FOTO_PREFIX = "CAMARA_TEMP_";
+    public static final String KEY_REORDENAR_RESULT = "reordenar_key_verfotos";
+    public static final String BUNDLE_REORDENAR_URI_LIST = "reordenar_uri_list_verfotos";
+
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    startCamera(); // Se ejecuta en el momento que el usuario pulsa "Permitir"
-                } else {
-                    Toast.makeText(requireContext(), "Se requiere permiso de cámara", Toast.LENGTH_SHORT).show();
-                }
+                if (isGranted) startCamera();
+                else Toast.makeText(requireContext(), "Se requiere permiso de cámara", Toast.LENGTH_SHORT).show();
             });
 
-    ImageButton recortar1, eliminar1;
-    Button regresar, guardarPdf;
     private PreviewView vistaPrevia;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private ImageCapture imageCapture;
-    private Button tomarfoto;
+
+    private Button tomarfoto, regresar, guardarPdf;
     private ImageView imagencita;
     private TextView contadorfot;
+    private ImageButton recortar1, eliminar1;
 
     private int contador = 0;
     private final List<File> fotosTomadas = new ArrayList<>();
 
     private ArchivoService archivoService;
     private ArchivoDAO archivoDAO;
+    private CargaViewModel cargaViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         archivoService = new ArchivoService(requireContext());
         archivoDAO = AppDatabase.getInstance(requireContext()).archivoDAO();
+        cargaViewModel = new ViewModelProvider(requireActivity()).get(CargaViewModel.class);
     }
 
     @Override
@@ -90,14 +96,14 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
 
-        vistaPrevia = v.findViewById(R.id.vistaprevia);
-        regresar = v.findViewById(R.id.regresar4);
-        guardarPdf = v.findViewById(R.id.guardar);
-        tomarfoto = v.findViewById(R.id.tomarfoto);
-        imagencita = v.findViewById(R.id.imagencita);
-        contadorfot = v.findViewById(R.id.Contadorfot);
-        recortar1 = v.findViewById(R.id.recortar1);
-        eliminar1 = v.findViewById(R.id.eliminar1);
+        vistaPrevia   = v.findViewById(R.id.vistaprevia);
+        regresar      = v.findViewById(R.id.regresar4);
+        guardarPdf    = v.findViewById(R.id.guardar);
+        tomarfoto     = v.findViewById(R.id.tomarfoto);
+        imagencita    = v.findViewById(R.id.imagencita);
+        contadorfot   = v.findViewById(R.id.Contadorfot);
+        recortar1     = v.findViewById(R.id.recortar1);
+        eliminar1     = v.findViewById(R.id.eliminar1);
 
         tomarfoto.setOnClickListener(this);
         if (imagencita != null) imagencita.setOnClickListener(this);
@@ -106,73 +112,131 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
         regresar.setOnClickListener(this);
         guardarPdf.setOnClickListener(this);
 
-        // ✅ 2. VERIFICACIÓN DE PERMISOS INICIAL
+        getParentFragmentManager().setFragmentResultListener(KEY_REORDENAR_RESULT, getViewLifecycleOwner(), (requestKey, bundle) -> {
+            ArrayList<String> urisActualizadas = bundle.getStringArrayList(BUNDLE_REORDENAR_URI_LIST);
+            if (urisActualizadas != null) {
+                sincronizarFotosDesdeUris(urisActualizadas);
+            }
+        });
+
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera();
         } else {
             requestPermissionLauncher.launch(Manifest.permission.CAMERA);
         }
+
+        recontarFotosDesdeCache();
+    }
+
+    private void sincronizarFotosDesdeUris(ArrayList<String> uris) {
+        fotosTomadas.clear();
+        for (String uriStr : uris) {
+            Uri uri = Uri.parse(uriStr);
+            File file = getFileFromUri(uri);
+            if (file != null && file.exists()) {
+                fotosTomadas.add(file);
+            }
+        }
+        actualizarUIConDatosActuales();
+    }
+
+    private Bundle crearBundleConUris() {
+        Bundle bundle = new Bundle();
+        ArrayList<String> uriStrings = new ArrayList<>();
+        for (File f : fotosTomadas) {
+            Uri uri = FileProvider.getUriForFile(requireContext(),
+                    requireContext().getPackageName() + ".fileprovider", f);
+            uriStrings.add(uri.toString());
+        }
+        bundle.putStringArrayList("FOTOS_CAPTURA", uriStrings);
+        return bundle;
     }
 
     @Override
     public void onClick(View v) {
         int id = v.getId();
+        NavController nav = Navigation.findNavController(v);
 
         if (id == R.id.tomarfoto) {
             tomarFoto();
-        } else if (id == R.id.guardar) {
-            if (!fotosTomadas.isEmpty()) {
-                v.setEnabled(false); // Evitar doble clic
-                final androidx.navigation.NavController navController = Navigation.findNavController(v);
-                navController.navigate(R.id.cargaProcesos);
-
-                List<Uri> urisParaCifrar = new ArrayList<>();
-                for (File f : fotosTomadas) {
-                    urisParaCifrar.add(FileProvider.getUriForFile(requireContext(),
-                            requireContext().getPackageName() + ".fileprovider", f));
-                }
-
-                // 3. PROCESO DE CIFRADO Y BORRADO TOTAL
-                EscanerProcesador.generarPdfYEnviar(requireContext(), urisParaCifrar, archivoService, archivoDAO, () -> {
-
-                    // ✅ BORRADO DE ARCHIVOS TRAS CIFRADO EXITOSO
-                    borrarOriginalesExhaustivo(urisParaCifrar);
-
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        limpiarArchivosDeSesionAnterior();
-                        navController.navigate(R.id.cifradoEscaneo2);
-                        Toast.makeText(getContext(), "Archivos protegidos y originales eliminados", Toast.LENGTH_SHORT).show();
-                    });
-                });
-            }
-        } else if (id == R.id.regresar4) {
-            limpiarArchivosDeSesionAnterior();
-            Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
         }
-        // ... (resto de tus IDs se mantienen igual)
+        else if (id == R.id.guardar) {
+            procesarYGuardarPdf(nav);
+        }
+        else if (id == R.id.regresar4) {
+            limpiarArchivosDeSesionAnterior();
+            nav.navigate(R.id.opcionCifrado2);
+        }
+        else if (id == R.id.recortar1) {
+            if (!fotosTomadas.isEmpty()) {
+                nav.navigate(R.id.escanerCaCortarRotar, crearBundleConUris());
+            } else {
+                Toast.makeText(requireContext(), "Toma una foto primero", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else if (id == R.id.eliminar1) {
+            if (!fotosTomadas.isEmpty()) {
+                nav.navigate(R.id.escanerCaVerFotosTomadas, crearBundleConUris());
+            } else {
+                Toast.makeText(requireContext(), "No hay fotos para ver", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else if (id == R.id.imagencita) {
+            if (!fotosTomadas.isEmpty()) {
+                nav.navigate(R.id.escanerCaReordenar, crearBundleConUris());
+            }
+        }
     }
 
-    // ✅ 4. MÉTODO DE BORRADO PARA LIMPIAR RASTROS
-    private void borrarOriginalesExhaustivo(List<Uri> uris) {
-        ContentResolver resolver = requireContext().getContentResolver();
-        for (Uri uri : uris) {
-            try {
-                // Borrar del MediaStore si existe rastro en galería
-                resolver.delete(uri, null, null);
-
-                // Borrar físicamente si es archivo de caché
-                File f = getFileFromUri(uri);
-                if (f != null && f.exists()) f.delete();
-
-            } catch (Exception e) {
-                Log.e("Borrado", "No se pudo eliminar el original: " + uri);
-            }
+    private void procesarYGuardarPdf(NavController nav) {
+        if (fotosTomadas.isEmpty()) {
+            Toast.makeText(requireContext(), "Toma al menos una foto", Toast.LENGTH_SHORT).show();
+            return;
         }
-        // Notificar al sistema para refrescar miniaturas de galería
-        if (!uris.isEmpty()) {
-            requireContext().sendBroadcast(new android.content.Intent(
-                    android.content.Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uris.get(0)));
+
+        guardarPdf.setEnabled(false);
+
+        // Referencia final para asegurar el acceso en el callback
+        final CargaViewModel vm = this.cargaViewModel;
+        final Context appCtx = requireContext().getApplicationContext();
+
+        // 1. Navegar a CargaProcesos inmediatamente
+        Bundle args = new Bundle();
+        args.putInt("destino_final", R.id.cifradoEscaneo2);
+        nav.navigate(R.id.cargaProcesos, args);
+
+        List<Uri> urisParaCifrar = new ArrayList<>();
+        for (File f : fotosTomadas) {
+            urisParaCifrar.add(FileProvider.getUriForFile(requireContext(),
+                    requireContext().getPackageName() + ".fileprovider", f));
         }
+
+        // 2. Ejecutar procesamiento en background usando ApplicationContext
+        EscanerProcesador.generarPdfYEnviar(
+                appCtx,
+                urisParaCifrar,
+                archivoService,
+                archivoDAO,
+                () -> { // Callback de Éxito
+                    borrarOriginalesExhaustivo(urisParaCifrar);
+
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        vm.terminarProceso(); // Notificar al ViewModel compartido
+                        limpiarArchivosDeSesionAnterior();
+                        Log.d("FINALSHIELD", "Cifrado exitoso, cerrando pantalla de carga");
+                    }, 800);
+                },
+                errorMsg -> { // Callback de Error
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        vm.resetear();
+                        if (isAdded()) {
+                            nav.popBackStack(); // Regresa al escáner si falla
+                            guardarPdf.setEnabled(true);
+                            Toast.makeText(requireContext(), "Error: " + errorMsg, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+        );
     }
 
     private void startCamera() {
@@ -189,46 +253,44 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
                 cameraProvider.unbindAll();
                 cameraProvider.bindToLifecycle(getViewLifecycleOwner(), CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture);
             } catch (Exception e) {
-                Log.e("Camara", "Error CameraX", e);
+                Log.e("CAMERA_ERROR", "Fallo al iniciar cámara", e);
             }
         }, ContextCompat.getMainExecutor(requireContext()));
     }
 
     private void tomarFoto() {
         if (imageCapture == null) return;
+
         File photoFile = new File(requireContext().getCacheDir(), FOTO_PREFIX + System.currentTimeMillis() + ".jpg");
         ImageCapture.OutputFileOptions options = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
 
         imageCapture.takePicture(options, ContextCompat.getMainExecutor(requireContext()), new ImageCapture.OnImageSavedCallback() {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults results) {
+                if (!isAdded()) return;
                 fotosTomadas.add(photoFile);
                 actualizarUIConDatosActuales();
             }
+
             @Override
             public void onError(@NonNull ImageCaptureException e) {
-                Toast.makeText(requireContext(), "Error al capturar", Toast.LENGTH_SHORT).show();
+                if (isAdded()) Toast.makeText(requireContext(), "Error de captura", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    // --- MANTENIMIENTO DE TUS MÉTODOS DE UI ---
-
-    private void limpiarArchivosDeSesionAnterior() {
-        File cacheDir = requireContext().getCacheDir();
-        File[] files = cacheDir.listFiles((dir, name) ->
-                (name.startsWith(FOTO_PREFIX) || name.startsWith("EDITADO_")) && name.endsWith(".jpg"));
-        if (files != null) for (File file : files) file.delete();
-        fotosTomadas.clear();
-        limpiarUI();
     }
 
     private void actualizarUIConDatosActuales() {
         if (!fotosTomadas.isEmpty()) {
             contador = fotosTomadas.size();
             if (contadorfot != null) contadorfot.setText(String.valueOf(contador));
-            Glide.with(this).load(fotosTomadas.get(fotosTomadas.size() - 1))
-                    .skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(imagencita);
+
+            File ultimaFoto = fotosTomadas.get(fotosTomadas.size() - 1);
+            Glide.with(this)
+                    .load(ultimaFoto)
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .centerCrop()
+                    .into(imagencita);
         } else {
             limpiarUI();
         }
@@ -240,18 +302,37 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
         if (imagencita != null) Glide.with(this).load((String) null).into(imagencita);
     }
 
-    private File getFileFromUri(Uri uri) {
-        if (uri == null) return null;
-        String fileName = uri.getLastPathSegment();
-        File file = new File(requireContext().getCacheDir(), fileName);
-        return file.exists() ? file : null;
+    private void limpiarArchivosDeSesionAnterior() {
+        File cacheDir = requireContext().getCacheDir();
+        File[] files = cacheDir.listFiles((dir, name) ->
+                (name.startsWith(FOTO_PREFIX) || name.startsWith("EDITADO_")) && name.endsWith(".jpg"));
+
+        if (files != null) {
+            for (File file : files) file.delete();
+        }
+        fotosTomadas.clear();
+        limpiarUI();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (fotosTomadas.isEmpty()) recontarFotosDesdeCache();
-        else actualizarUIConDatosActuales();
+    private void borrarOriginalesExhaustivo(List<Uri> uris) {
+        if (getContext() == null) return;
+        ContentResolver resolver = requireContext().getContentResolver();
+        for (Uri uri : uris) {
+            try {
+                resolver.delete(uri, null, null);
+                File f = getFileFromUri(uri);
+                if (f != null && f.exists()) f.delete();
+            } catch (Exception e) {
+                Log.e("BORRADO_ERROR", "Error: " + uri, e);
+            }
+        }
+    }
+
+    private File getFileFromUri(Uri uri) {
+        if (uri == null || getContext() == null) return null;
+        String fileName = uri.getLastPathSegment();
+        if (fileName == null) return null;
+        return new File(requireContext().getCacheDir(), fileName);
     }
 
     private void recontarFotosDesdeCache() {
@@ -259,6 +340,7 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
         File cacheDir = requireContext().getCacheDir();
         File[] files = cacheDir.listFiles((dir, name) ->
                 (name.startsWith(FOTO_PREFIX) || name.startsWith("EDITADO_")) && name.endsWith(".jpg"));
+
         if (files != null) {
             List<File> temp = new ArrayList<>(List.of(files));
             temp.sort(Comparator.comparingLong(File::lastModified));

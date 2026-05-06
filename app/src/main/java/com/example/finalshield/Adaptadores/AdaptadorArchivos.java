@@ -81,11 +81,9 @@ public class AdaptadorArchivos extends BaseAdapter {
 
         ArchivoMetadata archivo = listaArchivos.get(position);
 
-        // 1. Formatear Fecha (Sigue igual, está bien)
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         String fechaStr = archivo.getFechaSeleccion() != null ? sdf.format(archivo.getFechaSeleccion()) : "N/A";
 
-        // 2. Determinar Ruta INTELIGENTE
         // Priorizamos la ruta de descifrado si el archivo ya no está cifrado
         String rutaAMostrar = "Pendiente...";
 
@@ -97,8 +95,8 @@ public class AdaptadorArchivos extends BaseAdapter {
             rutaAMostrar = archivo.getRutaServidor();
         }
 
-        // 3. Construir String Multilínea
-        // Usamos getTamanioFormateado() que ya tienes en el modelo
+        //Construir String Multilínea
+        //Usamos getTamanioFormateado() que ya esta en el modelo
         String infoCompleta = "Archivo: " + archivo.getNombre() + "\n"
                 + "Tamaño: " + archivo.getTamanioFormateado() + "\n"
                 + "Fecha: " + fechaStr + "\n"
@@ -106,7 +104,6 @@ public class AdaptadorArchivos extends BaseAdapter {
 
         holder.textDescrip.setText(infoCompleta);
 
-        // --- ESTADO Y BOTONES ---
         if (archivo.isEstaCifrado()) {
             holder.textEstatus.setText("Cifrado");
             holder.textEstatus.setTextColor(ContextCompat.getColor(contexto, android.R.color.holo_red_dark));
@@ -121,7 +118,6 @@ public class AdaptadorArchivos extends BaseAdapter {
         holder.btnBorrar.setOnClickListener(v -> listener.onBorrarClick(position));
         convertView.setOnClickListener(v -> listener.onItemClick(position));
 
-        // Animación (Sin cambios)
         if (position > lastPosition) {
             convertView.setTranslationY(100f);
             convertView.setAlpha(0f);

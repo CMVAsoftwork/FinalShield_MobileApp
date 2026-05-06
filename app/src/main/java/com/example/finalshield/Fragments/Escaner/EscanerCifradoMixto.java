@@ -2,10 +2,12 @@ package com.example.finalshield.Fragments.Escaner;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +32,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.bumptech.glide.Glide;
@@ -37,8 +40,10 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.finalshield.Adaptadores.SharedImageViewModel;
 import com.example.finalshield.DBM.AppDatabase;
 import com.example.finalshield.DBM.ArchivoDAO;
+import com.example.finalshield.Fragments.Escaner.EscanerProcesador;
 import com.example.finalshield.R;
 import com.example.finalshield.Service.ArchivoService;
+import com.example.finalshield.ViewModel.CargaViewModel;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
@@ -50,35 +55,32 @@ import java.util.concurrent.ExecutionException;
 public class EscanerCifradoMixto extends Fragment implements View.OnClickListener {
 
     private static final String FOTO_PREFIX = "CAMARA_TEMP_";
+    private static final String TAG = "EscanerMixto";
 
-    // ✅ 1. NUEVO LAUNCHER PARA PERMISOS (Activa cámara al instante)
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    startCamera();
-                } else {
-                    Toast.makeText(requireContext(), "Permiso de cámara denegado", Toast.LENGTH_SHORT).show();
-                }
+                if (isGranted) startCamera();
+                else Toast.makeText(requireContext(), "Permiso de cámara denegado", Toast.LENGTH_SHORT).show();
             });
 
-    ImageButton recortar, eliminar, selectimg, acomodar;
-    Button regresar, guardarPdf;
+    private ImageButton recortar, eliminar, selectimg, acomodar;
+    private Button regresar, guardarPdf, tomarfoto;
     private PreviewView vistaPrevia;
     private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
     private ImageCapture imageCapture;
-    private Button tomarfoto;
     private ImageView imagencita;
     private TextView contadorfot;
 
-    private int contador = 0;
     private SharedImageViewModel sharedViewModel;
     private ArchivoService archivoService;
     private ArchivoDAO archivoDAO;
+    private CargaViewModel cargaViewModel;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedViewModel = new ViewModelProvider(requireActivity()).get(SharedImageViewModel.class);
+        cargaViewModel = new ViewModelProvider(requireActivity()).get(CargaViewModel.class);
         archivoService = new ArchivoService(requireContext());
         archivoDAO = AppDatabase.getInstance(requireContext()).archivoDAO();
     }
@@ -92,16 +94,16 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
 
-        vistaPrevia = v.findViewById(R.id.vistaprevia);
-        regresar = v.findViewById(R.id.regresar4);
-        guardarPdf = v.findViewById(R.id.guardar);
-        tomarfoto = v.findViewById(R.id.tomarfoto);
-        imagencita = v.findViewById(R.id.imagencita);
-        contadorfot = v.findViewById(R.id.Contadorfot);
-        selectimg = v.findViewById(R.id.selecgaleria);
-        acomodar = v.findViewById(R.id.edicion);
-        recortar = v.findViewById(R.id.recortar);
-        eliminar = v.findViewById(R.id.eliminar);
+        vistaPrevia    = v.findViewById(R.id.vistaprevia);
+        regresar       = v.findViewById(R.id.regresar4);
+        guardarPdf     = v.findViewById(R.id.guardar);
+        tomarfoto      = v.findViewById(R.id.tomarfoto);
+        imagencita     = v.findViewById(R.id.imagencita);
+        contadorfot    = v.findViewById(R.id.Contadorfot);
+        selectimg      = v.findViewById(R.id.selecgaleria);
+        acomodar       = v.findViewById(R.id.edicion);
+        recortar       = v.findViewById(R.id.recortar);
+        eliminar       = v.findViewById(R.id.eliminar);
 
         tomarfoto.setOnClickListener(this);
         if (imagencita != null) imagencita.setOnClickListener(this);
@@ -112,7 +114,6 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
         acomodar.setOnClickListener(this);
         guardarPdf.setOnClickListener(this);
 
-        // ✅ CORRECCIÓN PERMISOS: Si no tiene permiso, lo lanza. Si lo tiene, inicia cámara.
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             startCamera();
         } else {
@@ -131,81 +132,87 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        List<Uri> listaActual = new ArrayList<>(sharedViewModel.getImageUriList());
+        NavController nav = Navigation.findNavController(v);
 
-        if (id == R.id.imagencita) {
-            if (!sharedViewModel.getCameraOnlyUriList().isEmpty()) {
-                Navigation.findNavController(v).navigate(R.id.escanerReordenarFotosTomadas);
-            }
-        } else if (id == R.id.regresar4) {
-            limpiarArchivosDeSesionAnterior();
-            Navigation.findNavController(v).navigate(R.id.opcionCifrado2);
-        } else if (id == R.id.tomarfoto) {
+        if (id == R.id.tomarfoto) {
             tomarFoto();
-        } else if (id == R.id.guardar) {
-            if (listaActual.isEmpty()) {
-                Toast.makeText(requireContext(), "No hay fotos para cifrar.", Toast.LENGTH_SHORT).show();
-            } else {
-                v.setEnabled(false);
-                final androidx.navigation.NavController navController = Navigation.findNavController(v);
-                navController.navigate(R.id.cargaProcesos);
+        }
+        else if (id == R.id.guardar) {
+            procesarYGuardarMixto(nav);
+        }
+        else if (id == R.id.regresar4) {
+            limpiarArchivosDeSesionAnterior();
+            nav.navigate(R.id.opcionCifrado2);
+        }
+        else if (id == R.id.selecgaleria) {
+            nav.navigate(R.id.seleccion_imagenes);
+        }
+        else if (id == R.id.imagencita) {
+            if (!sharedViewModel.getCameraOnlyUriList().isEmpty()) {
+                nav.navigate(R.id.escanerReordenarFotosTomadas);
+            }
+        }
+        else if (id == R.id.recortar || id == R.id.edicion || id == R.id.eliminar) {
+            if (!sharedViewModel.getImageUriList().isEmpty()) {
+                int dest = (id == R.id.recortar) ? R.id.cortarRotar :
+                        (id == R.id.edicion) ? R.id.visualizacionYReordenamiento : R.id.eliminarPaginas;
+                nav.navigate(dest);
+            }
+        }
+    }
 
-                EscanerProcesador.generarPdfYEnviar(
-                        requireContext(),
-                        listaActual,
-                        archivoService,
-                        archivoDAO,
-                        () -> {
-                            // ✅ 2. BORRADO EXHAUSTIVO TRAS CIFRADO
-                            borrarFotosDeTodoElDispositivo(listaActual);
+    private void procesarYGuardarMixto(NavController nav) {
+        List<Uri> todasLasUris = sharedViewModel.getImageUriList();
+        if (todasLasUris.isEmpty()) {
+            Toast.makeText(requireContext(), "No hay imágenes para procesar", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-                            new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-                                limpiarArchivosDeSesionAnterior();
-                                navController.navigate(R.id.action_cargaProcesos_to_cifradoEscaneo2);
-                                Toast.makeText(getContext(), "Archivos cifrados y originales eliminados", Toast.LENGTH_LONG).show();
-                            });
+        guardarPdf.setEnabled(false);
+
+        // Referencias finales para el proceso en background
+        final CargaViewModel vm = this.cargaViewModel;
+        final Context appCtx = requireContext().getApplicationContext();
+
+        // 1. Navegar a pantalla de carga inmediatamente indicando el destino final
+        Bundle args = new Bundle();
+        args.putInt("destino_final", R.id.cifradoEscaneo2);
+        nav.navigate(R.id.cargaProcesos, args);
+
+        // 2. Ejecutar procesamiento
+        // IMPORTANTE: Asegúrate que EscanerProcesador no llame al callback inmediatamente
+        EscanerProcesador.generarPdfYEnviar(
+                appCtx,
+                new ArrayList<>(todasLasUris),
+                archivoService,
+                archivoDAO,
+                () -> { // ESTO SE EJECUTA CUANDO EL PDF SE SUBIÓ Y GUARDÓ EN DB
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        // Primero marcamos como terminado para que la pantalla de carga
+                        // muestre el éxito y navegue por su cuenta usando el "destino_final"
+                        vm.terminarProceso();
+
+                        // Limpieza después de que la señal de éxito fue enviada
+                        borrarFotosDeTodoElDispositivo(todasLasUris);
+                        sharedViewModel.clearList();
+                        sharedViewModel.clearCameraOnlyList();
+                        limpiarArchivosDeSesionAnterior();
+
+                        Log.d(TAG, "Cifrado Mixto Completado con éxito");
+                    }, 800); // El delay ayuda a que la animación de carga se vea natural
+                },
+                errorMsg -> { // ERROR real
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        vm.resetear();
+                        if (isAdded()) {
+                            nav.popBackStack(); // Regresa al escaner para intentar de nuevo
+                            guardarPdf.setEnabled(true);
+                            Toast.makeText(appCtx, "Error: " + errorMsg, Toast.LENGTH_LONG).show();
                         }
-                );
-            }
-        } else if (id == R.id.recortar && !listaActual.isEmpty()) {
-            Navigation.findNavController(v).navigate(R.id.cortarRotar);
-        } else if (id == R.id.edicion && !listaActual.isEmpty()) {
-            Navigation.findNavController(v).navigate(R.id.visualizacionYReordenamiento);
-        } else if (id == R.id.eliminar && !listaActual.isEmpty()) {
-            Navigation.findNavController(v).navigate(R.id.eliminarPaginas);
-        } else if (id == R.id.selecgaleria) {
-            Navigation.findNavController(v).navigate(R.id.seleccion_imagenes);
-        }
-    }
-
-    // ✅ 3. MÉTODO DE BORRADO REAL (Galería + Almacenamiento)
-    private void borrarFotosDeTodoElDispositivo(List<Uri> uris) {
-        ContentResolver resolver = requireContext().getContentResolver();
-        for (Uri uri : uris) {
-            try {
-                // Si es un archivo temporal en caché
-                if (uri.toString().contains(requireContext().getPackageName())) {
-                    File f = getFileFromUri(uri);
-                    if (f != null && f.exists()) f.delete();
+                    });
                 }
-
-                // Borrado del MediaStore (Galería real del celular)
-                // Intentamos borrar tanto por Images como por Video por seguridad
-                resolver.delete(uri, null, null);
-
-            } catch (Exception e) {
-                Log.e("BORRADO_ERROR", "No se pudo borrar el original de la galería: " + uri, e);
-            }
-        }
-
-        // Refrescar galería para que no queden miniaturas
-        if (!uris.isEmpty()) {
-            requireContext().sendBroadcast(new android.content.Intent(
-                    android.content.Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uris.get(0)));
-        }
+        );
     }
-
-    // --- MÉTODOS DE CÁMARA Y MANTENIMIENTO ---
 
     private void startCamera() {
         cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext());
@@ -218,24 +225,25 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
                         .build();
 
                 preview.setSurfaceProvider(vistaPrevia.getSurfaceProvider());
-                CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
-
                 cameraProvider.unbindAll();
-                cameraProvider.bindToLifecycle(getViewLifecycleOwner(), cameraSelector, preview, imageCapture);
+                cameraProvider.bindToLifecycle(getViewLifecycleOwner(), CameraSelector.DEFAULT_BACK_CAMERA, preview, imageCapture);
             } catch (ExecutionException | InterruptedException e) {
-                Log.e("CAMERA_ERROR", "Fallo al iniciar cámara", e);
+                Log.e(TAG, "Fallo al iniciar cámara", e);
             }
         }, ContextCompat.getMainExecutor(requireContext()));
     }
 
     private void tomarFoto() {
         if (imageCapture == null) return;
+
         File photoFile = new File(requireContext().getCacheDir(), FOTO_PREFIX + System.currentTimeMillis() + ".jpg");
         ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(photoFile).build();
 
         imageCapture.takePicture(outputOptions, ContextCompat.getMainExecutor(requireContext()), new ImageCapture.OnImageSavedCallback() {
             @Override
             public void onImageSaved(@NonNull ImageCapture.OutputFileResults results) {
+                if (!isAdded()) return;
+
                 Uri fileUri = FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".fileprovider", photoFile);
 
                 List<Uri> listaCombinada = new ArrayList<>(sharedViewModel.getImageUriList());
@@ -251,7 +259,7 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
 
             @Override
             public void onError(@NonNull ImageCaptureException exception) {
-                Toast.makeText(requireContext(), "Error al capturar", Toast.LENGTH_SHORT).show();
+                if (isAdded()) Toast.makeText(requireContext(), "Error al capturar foto", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -259,65 +267,80 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
     private void limpiarArchivosDeSesionAnterior() {
         File cacheDir = requireContext().getCacheDir();
         File[] files = cacheDir.listFiles((dir, name) ->
-                (name.startsWith(FOTO_PREFIX) || name.startsWith("EDITADO_") || name.startsWith("editable_")) && name.endsWith(".jpg"));
-        if (files != null) for (File file : files) file.delete();
-        sharedViewModel.clearList();
-        sharedViewModel.clearCameraOnlyList();
+                (name.startsWith(FOTO_PREFIX) || name.startsWith("EDITADO_") || name.startsWith("editable_"))
+                        && name.endsWith(".jpg"));
+
+        if (files != null) {
+            for (File file : files) file.delete();
+        }
         limpiarUI();
     }
 
     private void actualizarUIConDatosActuales() {
         List<Uri> listaCamara = sharedViewModel.getCameraOnlyUriList();
-        contador = listaCamara.size();
-        actualizarContadorUI();
+        int size = listaCamara.size();
+        if (contadorfot != null) contadorfot.setText(String.valueOf(size));
 
         if (!listaCamara.isEmpty()) {
-            Uri lastCameraUri = listaCamara.get(listaCamara.size() - 1);
-            Glide.with(this).load(lastCameraUri).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(imagencita);
+            Uri lastUri = listaCamara.get(size - 1);
+            Glide.with(this)
+                    .load(lastUri)
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .centerCrop()
+                    .into(imagencita);
         } else {
             limpiarUI();
         }
     }
 
     private void limpiarUI() {
-        contador = 0;
         if (contadorfot != null) contadorfot.setText("0");
         if (imagencita != null) Glide.with(this).load((String) null).into(imagencita);
     }
 
     private void recontarFotosDesdeCache() {
-        List<Uri> tempUris = new ArrayList<>();
         File cacheDir = requireContext().getCacheDir();
-        File[] cachedFiles = cacheDir.listFiles();
-        List<File> tempFiles = new ArrayList<>();
-        if (cachedFiles != null) {
-            for (File file : cachedFiles) {
-                if (file.isFile() && (file.getName().startsWith(FOTO_PREFIX) || file.getName().startsWith("EDITADO_") || file.getName().startsWith("editable_")) && file.getName().endsWith(".jpg")) {
-                    tempFiles.add(file);
-                }
-            }
-        }
-        tempFiles.sort(Comparator.comparingLong(File::lastModified));
-        for (File file : tempFiles) {
-            tempUris.add(FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".fileprovider", file));
-        }
-        if (!tempUris.isEmpty()) {
-            sharedViewModel.setImageUriList(tempUris);
+        File[] cachedFiles = cacheDir.listFiles((dir, name) ->
+                (name.startsWith(FOTO_PREFIX) || name.startsWith("EDITADO_") || name.startsWith("editable_")) && name.endsWith(".jpg"));
+
+        if (cachedFiles != null && cachedFiles.length > 0) {
+            List<File> tempFiles = new ArrayList<>(List.of(cachedFiles));
+            tempFiles.sort(Comparator.comparingLong(File::lastModified));
+
+            List<Uri> todasUris = new ArrayList<>();
             List<Uri> camaraUris = new ArrayList<>();
-            for (File f : tempFiles) if (f.getName().startsWith(FOTO_PREFIX)) camaraUris.add(FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".fileprovider", f));
+
+            for (File f : tempFiles) {
+                Uri uri = FileProvider.getUriForFile(requireContext(), requireContext().getPackageName() + ".fileprovider", f);
+                todasUris.add(uri);
+                if (f.getName().startsWith(FOTO_PREFIX)) camaraUris.add(uri);
+            }
+
+            sharedViewModel.setImageUriList(todasUris);
             sharedViewModel.setCameraOnlyUriList(camaraUris);
         }
         actualizarUIConDatosActuales();
     }
 
-    private void actualizarContadorUI() { if (contadorfot != null) contadorfot.setText(String.valueOf(contador)); }
+    private void borrarFotosDeTodoElDispositivo(List<Uri> uris) {
+        if (getContext() == null) return;
+        ContentResolver resolver = requireContext().getContentResolver();
+        for (Uri uri : uris) {
+            try {
+                if (uri.toString().contains(requireContext().getPackageName())) {
+                    File f = getFileFromUri(uri);
+                    if (f != null && f.exists()) f.delete();
+                }
+                resolver.delete(uri, null, null);
+            } catch (Exception ignored) {}
+        }
+    }
 
     private File getFileFromUri(Uri uri) {
-        if (uri == null) return null;
-        if ("content".equals(uri.getScheme())) {
-            File file = new File(requireContext().getCacheDir(), uri.getLastPathSegment());
-            if (file.exists()) return file;
-        }
-        return null;
+        if (uri == null || getContext() == null) return null;
+        String name = uri.getLastPathSegment();
+        if (name == null) return null;
+        return new File(requireContext().getCacheDir(), name);
     }
 }

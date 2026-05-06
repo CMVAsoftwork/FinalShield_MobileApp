@@ -4,10 +4,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavOptions;
 import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
@@ -27,7 +29,20 @@ import java.util.List;
 
 public class ArchivosCifrados extends Fragment implements View.OnClickListener{
     ListView listac;
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Navegar a inicio y limpiar la pila para evitar bucles
+                Navigation.findNavController(requireView()).navigate(R.id.inicio, null,
+                        new NavOptions.Builder().setPopUpTo(R.id.inicio, true).build());
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -168,11 +183,12 @@ public class ArchivosCifrados extends Fragment implements View.OnClickListener{
         if(v.getId() == R.id.carpeta){
             Navigation.findNavController(v).navigate(R.id.cifradoEscaneo2);
         } else if (v.getId() == R.id.house) {
-            Navigation.findNavController(v).navigate(R.id.inicio);
+            Navigation.findNavController(v).navigate(R.id.inicio, null,
+                    new NavOptions.Builder().setPopUpTo(R.id.inicio, true).build());
         } else if (v.getId() == R.id.candadoclose) {
             Navigation.findNavController(v).navigate(R.id.archivosCifrados2);
         } else if (v.getId() == R.id.candadopen) {
-            Navigation.findNavController(v).navigate(R.id.archivosDesifrados);
+            Navigation.findNavController(v).navigate(R.id.filtroDescifrados);
         } else if (v.getId() == R.id.mail) {
             Navigation.findNavController(v).navigate(R.id.servivioCorreo);
         }else if (v.getId() == R.id.archivo) {

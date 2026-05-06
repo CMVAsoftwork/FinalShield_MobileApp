@@ -1,224 +1,158 @@
 package com.example.finalshield.Fragments.InicioSesion;
-import androidx.biometric.BiometricManager;
-import androidx.biometric.BiometricPrompt;
 
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.example.finalshield.DTO.Usuario.LoginResponse;
 import com.example.finalshield.R;
 import com.example.finalshield.Service.AuthService;
+import com.example.finalshield.ViewModel.CargaViewModel;
 
 import java.util.concurrent.Executor;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DatosBiometricos extends Fragment implements View.OnClickListener, View.OnTouchListener {
-    ImageView huella;
-    private Executor executor;
+
+    private ImageView huella;
     private BiometricPrompt biometricPrompt;
     private BiometricPrompt.PromptInfo promptInfo;
     private AuthService authService;
+    private CargaViewModel cargaViewModel;
     private String correoParaLogin;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_datos_biometricos, container, false);
     }
+
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
         authService = new AuthService(requireContext());
+        cargaViewModel = new ViewModelProvider(requireActivity()).get(CargaViewModel.class);
         correoParaLogin = authService.obtenerCorreo();
-        Button regre;
-        Button regis;
-        Button inic;
-        regre = v.findViewById(R.id.regresar3);
-        regre.setOnClickListener(this);
-        regis = v.findViewById(R.id.btnregis);
-        regis.setOnClickListener(this);
-        inic = v.findViewById(R.id.btninses2);
-        inic.setOnClickListener(this);
+
+        v.findViewById(R.id.regresar3).setOnClickListener(this);
+        v.findViewById(R.id.btnregis).setOnClickListener(this);
+        v.findViewById(R.id.btninses2).setOnClickListener(this);
         huella = v.findViewById(R.id.huella);
         huella.setOnTouchListener(this);
 
-        executor = ContextCompat.getMainExecutor(getContext());
-        biometricPrompt = new BiometricPrompt(this,
-                executor, new BiometricPrompt.AuthenticationCallback() {
+        configurarBiometria();
+    }
 
-            @Override
-            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
-                super.onAuthenticationError(errorCode, errString);
-                Toast.makeText(getContext(),
-                        "Error de autenticación: " + errString,
-                        Toast.LENGTH_SHORT).show();
-            }
-
+    private void configurarBiometria() {
+        Executor executor = ContextCompat.getMainExecutor(requireContext());
+        biometricPrompt = new BiometricPrompt(this, executor, new BiometricPrompt.AuthenticationCallback() {
             @Override
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
-                Toast.makeText(getContext(),
-                        "¡Huella verificada localmente! Validando en servidor...",
-                        Toast.LENGTH_SHORT).show();
+                lanzarFlujoDeCarga();
+            }
+        });
 
-                if (correoParaLogin != null && authService != null) {
-                    authService.loginBiometrico(correoParaLogin, new Callback<LoginResponse>() {
-                        @Override
-                        public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                            if (response.isSuccessful() && response.body() != null) {
-                                Toast.makeText(getContext(), "Inicio de sesión biométrico exitoso", Toast.LENGTH_SHORT).show();
-                                if (getView() != null) {
-                                    handleSuccessfulBiometricAuth();
-                                }
-                            } else {
-                                Toast.makeText(getContext(), "Error en el login biométrico del servidor.", Toast.LENGTH_SHORT).show();
-                                if (getView() != null) {
-                                    handleSuccessfulBiometricAuth();
-                                }
-                            }
-                        }
-                        @Override
-                        public void onFailure(Call<LoginResponse> call, Throwable t) {
-                            Toast.makeText(getContext(), "Error de conexión al intentar el login biométrico.", Toast.LENGTH_SHORT).show();
-                            if (getView() != null) {
-                                handleSuccessfulBiometricAuth();
-                            }
-                        }
-                    });
+        promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("FinalShield")
+                .setSubtitle("Identidad verificada por hardware")
+                .setNegativeButtonText("Usar contraseña")
+                .build();
+    }
+
+    private void lanzarFlujoDeCarga() {
+        // 1. REVISAR EL DEEP LINK PRIMERO QUE NADA
+        SharedPreferences linkPrefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
+        String pendingToken = linkPrefs.getString("pending_token", null);
+
+        // DEBUG PARA QUE VEAS EN CONSOLA SI EL TOKEN LLEGA AQUÍ
+        Log.d("FINALSHIELD_FLOW", "Token detectado en Biometricos: " + (pendingToken != null));
+
+        // 2. DEFINIR DESTINO (Si hay token, VerClave es OBLIGATORIO)
+        final int destinoId = (pendingToken != null) ? R.id.verClave : R.id.inicio;
+
+        final Bundle bundleCarga = new Bundle();
+        bundleCarga.putInt("destino_final", destinoId);
+
+        if (pendingToken != null) {
+            Bundle argsDestino = new Bundle();
+            argsDestino.putString("security_token", pendingToken);
+            bundleCarga.putBundle("argumentos_destino", argsDestino);
+
+            // Limpiamos el token para que no se cicle en el futuro
+            linkPrefs.edit().remove("pending_token").apply();
+        }
+
+        // 3. SEGUIR CON EL LOGIN Y NAVEGAR
+        authService.loginBiometrico(correoParaLogin, new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                if (response.isSuccessful()) {
+                    // ESTA ES LA CLAVE: Pasar el bundleCarga que configuramos arriba
+                    NavHostFragment.findNavController(DatosBiometricos.this)
+                            .navigate(R.id.cargaProcesos, bundleCarga);
+
+                    cargaViewModel.terminarProceso();
                 } else {
-                    Toast.makeText(getContext(), "Error: Correo de usuario no disponible.", Toast.LENGTH_SHORT).show();
+                    manejarErrorAuth("Error de servidor");
                 }
             }
 
             @Override
-            public void onAuthenticationFailed() {
-                super.onAuthenticationFailed();
-                Toast.makeText(getContext(), "Huella no reconocida. Intente de nuevo.", Toast.LENGTH_SHORT).show();
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                manejarErrorAuth("Error de red");
             }
         });
-        promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Inicio de Sesión Biométrico")
-                .setSubtitle("Toca el sensor de huellas para acceder")
-                .setNegativeButtonText("Usar Contraseña")
-                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
-                .build();
+    }
+    private void manejarErrorAuth(String msj) {
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            if (isAdded()) {
+                cargaViewModel.resetear();
+                NavHostFragment.findNavController(this).popBackStack();
+                Toast.makeText(getContext(), msj, Toast.LENGTH_SHORT).show();
+            }
+        }, 800);
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            huella.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.escaladito2));
+            BiometricManager bm = BiometricManager.from(requireContext());
+            if (bm.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS) {
+                biometricPrompt.authenticate(promptInfo);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.regresar3) {
-            Navigation.findNavController(v).navigate(R.id.bienvenida);
-        } else if (v.getId() == R.id.btnregis) {
-            lanzarConfiguracionHuella(); // Llama al nuevo método
-        } else if (v.getId() == R.id.btninses2) {
-            Navigation.findNavController(v).navigate(R.id.inicioSesion);
-        }
-    }
-
-    // Método para abrir la configuración de registro de huella
-    private void lanzarConfiguracionHuella() {
-        // Acción para ir directamente a la configuración de huella (o pantalla de bloqueo/seguridad)
-        Intent intent = new Intent(android.provider.Settings.ACTION_FINGERPRINT_ENROLL);
-
-        // Si la acción específica existe, la usamos.
-        if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
-            startActivity(intent);
-        } else {
-            // Si no existe, vamos a la configuración de seguridad general.
-            intent = new Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS);
-            if (intent.resolveActivity(requireActivity().getPackageManager()) != null) {
-                startActivity(intent);
-            } else {
-                // Como último recurso, la configuración principal.
-                intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
-                startActivity(intent);
-            }
-        }
-    }
-    // Fin del nuevo método
-
-    @Override
-    public boolean onTouch(View v, MotionEvent motionEvent) {
-        // La animación es puramente estética y se lanza inmediatamente
-        Animation animationscale = AnimationUtils.loadAnimation(getContext(), R.anim.escaladito2);
-        switch (motionEvent.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                huella.startAnimation(animationscale);
-                animationscale.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        // Al terminar la animación, lanzamos la autenticación biométrica
-                        mostrarDialogoBiometrico();
-                    }
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {}
-                    @Override
-                    public void onAnimationStart(Animation animation) {}
-                });
-                return true; // Consumir el evento de toque
-            case MotionEvent.ACTION_UP:
-                return true;
-            default:
-                return false;
-        }
-    }
-    private void mostrarDialogoBiometrico() {
-        BiometricManager biometricManager = BiometricManager.from(getContext());
-        int resultado = biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG);
-
-        if (resultado == BiometricManager.BIOMETRIC_SUCCESS) {
-            // Huella disponible y registrada: Iniciar el diálogo
-            biometricPrompt.authenticate(promptInfo);
-
-        } else if (resultado == BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED) {
-            // No hay huellas registradas: Mostrar Toast
-            Toast.makeText(getContext(),
-                    "Por favor, registra una huella digital en la configuración del dispositivo.",
-                    Toast.LENGTH_LONG).show();
-
-        } else {
-            // Otro error (ej: hardware no disponible, no hay bloqueo de pantalla)
-            Toast.makeText(getContext(),
-                    "La autenticación biométrica no está disponible en este momento.",
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void handleSuccessfulBiometricAuth() {
-        SharedPreferences prefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
-        String pendingToken = prefs.getString("pending_token", null);
-
-        View v = getView();
-        if (v == null) return;
-
-        if (pendingToken != null) {
-            prefs.edit().remove("pending_token").apply();
-
-            Bundle bundle = new Bundle();
-            bundle.putString("security_token", pendingToken);
-
-            Navigation.findNavController(v).navigate(R.id.action_datosBiometricos_to_verClavePostLogin, bundle);
-
-        } else {
-            Navigation.findNavController(v).navigate(R.id.action_datosBiometricos_to_inicio);
-        }
+        int id = v.getId();
+        if (id == R.id.regresar3) NavHostFragment.findNavController(this).navigate(R.id.bienvenida);
+        else if (id == R.id.btninses2) NavHostFragment.findNavController(this).navigate(R.id.inicioSesion);
+        else if (id == R.id.btnregis) startActivity(new Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS));
     }
 }
