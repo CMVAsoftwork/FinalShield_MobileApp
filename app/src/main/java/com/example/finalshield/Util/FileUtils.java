@@ -8,7 +8,10 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.util.Log;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -18,6 +21,49 @@ import okhttp3.RequestBody;
 import okio.BufferedSink;
 
 public class FileUtils {
+
+    /**
+     * Prepara una parte Multipart a partir de un objeto File físico (ya cifrado).
+     * Reemplaza el flujo directo de URI para enviar datos blindados localmente.
+     */
+    public static MultipartBody.Part prepareFilePartDesdeFile(Context context, File file) {
+        if (file == null || !file.exists()) return null;
+
+        // Intentamos inferir el tipo MIME basándonos en el nombre o dejamos binario por defecto
+        String mimeType = "application/octet-stream";
+
+        RequestBody fileBody = RequestBody.create(file, MediaType.parse(mimeType));
+        // Enviamos el archivo bajo el parámetro "archivo" que espera el servidor
+        return MultipartBody.Part.createFormData("archivo", file.getName(), fileBody);
+    }
+
+    /**
+     * Toma una URI del sistema y realiza una copia física temporal en el directorio
+     * de caché de la aplicación para poder manipular y encriptar sus bytes.
+     */
+    public static File getFileFromUri(Context context, Uri uri) {
+        String nombreArchivo = getFileName(context, uri);
+        if (nombreArchivo == null) {
+            nombreArchivo = "temp_file_" + System.currentTimeMillis();
+        }
+
+        File tempFile = new File(context.getCacheDir(), nombreArchivo);
+        try (InputStream inputStream = context.getContentResolver().openInputStream(uri);
+             FileOutputStream outputStream = new FileOutputStream(tempFile)) {
+
+            if (inputStream == null) return null;
+
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            return tempFile;
+        } catch (IOException e) {
+            Log.e("FINALSHIELD_FILEUTILS", "Error al volcar URI a archivo temporal: " + e.getMessage());
+            return null;
+        }
+    }
 
     public static MultipartBody.Part prepareFilePart(Context context, Uri fileUri) {
         String fileName = getFileName(context, fileUri);
@@ -57,14 +103,8 @@ public class FileUtils {
         return result;
     }
 
-    /**
-     * Intenta obtener la ruta real del archivo desde una URI.
-     * Necesario para operaciones de borrado físico (File.delete()).
-     */
     public static String getPath(final Context context, final Uri uri) {
-        // DocumentProvider
         if (DocumentsContract.isDocumentUri(context, uri)) {
-            // ExternalStorageProvider
             if (isExternalStorageDocument(uri)) {
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");
@@ -74,14 +114,12 @@ public class FileUtils {
                     return Environment.getExternalStorageDirectory() + "/" + split[1];
                 }
             }
-            // DownloadsProvider
             else if (isDownloadsDocument(uri)) {
                 final String id = DocumentsContract.getDocumentId(uri);
                 final Uri contentUri = ContentUris.withAppendedId(
                         Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
                 return getDataColumn(context, contentUri, null, null);
             }
-            // MediaProvider
             else if (isMediaDocument(uri)) {
                 final String docId = DocumentsContract.getDocumentId(uri);
                 final String[] split = docId.split(":");
@@ -101,11 +139,9 @@ public class FileUtils {
                 return getDataColumn(context, contentUri, selection, selectionArgs);
             }
         }
-        // MediaStore (and general)
         else if ("content".equalsIgnoreCase(uri.getScheme())) {
             return getDataColumn(context, uri, null, null);
         }
-        // File
         else if ("file".equalsIgnoreCase(uri.getScheme())) {
             return uri.getPath();
         }

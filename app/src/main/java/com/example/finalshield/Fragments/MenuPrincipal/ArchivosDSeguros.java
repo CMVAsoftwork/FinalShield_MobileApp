@@ -210,6 +210,12 @@ public class ArchivosDSeguros extends Fragment implements View.OnClickListener, 
     }
 
     @Override public void onDescifrarClick(int position) { this.posicionSeleccionada = position; dialogContainerCifrar.setVisibility(View.VISIBLE); }
+
+    @Override
+    public void onItemLongClick(View view, int position) {
+
+    }
+
     @Override public void onBorrarClick(int position) { this.posicionSeleccionada = position; dialogContainerEliminar.setVisibility(View.VISIBLE); }
     @Override public void onCambiarEstadoClick(int position) {}
 

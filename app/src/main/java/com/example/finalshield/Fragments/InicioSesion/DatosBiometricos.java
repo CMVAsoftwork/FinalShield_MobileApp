@@ -82,38 +82,51 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
     }
 
     private void lanzarFlujoDeCarga() {
-        // 1. REVISAR EL DEEP LINK PRIMERO QUE NADA
+        // 1. LEER EL RECADO DIRECTO DE LA MAIN_ACTIVITY (DEEP LINK DE TRABAJO ASÍNCRONO)
+        com.example.finalshield.MainActivity activity = (com.example.finalshield.MainActivity) requireActivity();
+        String desvioNotificacion = activity.getDestinoPendiente();
+
+        // 2. REVISAR SI EXISTÍA OTRO DEEP LINK WEB (TU TOKEN ANTERIOR)
         SharedPreferences linkPrefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
         String pendingToken = linkPrefs.getString("pending_token", null);
 
-        // DEBUG PARA QUE VEAS EN CONSOLA SI EL TOKEN LLEGA AQUÍ
-        Log.d("FINALSHIELD_FLOW", "Token detectado en Biometricos: " + (pendingToken != null));
+        Log.d("FINALSHIELD_FLOW", "Notificación pendiente: " + desvioNotificacion + " | Token Web pendiente: " + (pendingToken != null));
 
-        // 2. DEFINIR DESTINO (Si hay token, VerClave es OBLIGATORIO)
-        final int destinoId = (pendingToken != null) ? R.id.verClave : R.id.inicio;
+        // 3. DISCRIMINACIÓN DE DESTINO DE NAVEGACIÓN INTELIGENTE
+        int destinoId = R.id.inicio; // Fallback por defecto si se abre la app normal
+
+        if ("CIFRADOS".equals(desvioNotificacion)) {
+            destinoId = R.id.archivosCifrados2;
+            activity.limpiarDestinoPendiente(); // Consumimos el recado de inmediato
+        } else if ("DESCIFRADOS".equals(desvioNotificacion)) {
+            destinoId = R.id.filtroDescifrados;
+            activity.limpiarDestinoPendiente();
+        } else if (pendingToken != null) {
+            destinoId = R.id.verClave; // Mantiene compatibilidad con tu flujo de tokens anterior
+        }
 
         final Bundle bundleCarga = new Bundle();
         bundleCarga.putInt("destino_final", destinoId);
 
-        if (pendingToken != null) {
+        // Adjuntar argumentos del token web si existían
+        if (pendingToken != null && destinoId == R.id.verClave) {
             Bundle argsDestino = new Bundle();
             argsDestino.putString("security_token", pendingToken);
             bundleCarga.putBundle("argumentos_destino", argsDestino);
-
-            // Limpiamos el token para que no se cicle en el futuro
             linkPrefs.edit().remove("pending_token").apply();
         }
 
-        // 3. SEGUIR CON EL LOGIN Y NAVEGAR
+        // 4. EJECUTAR LOGIN BIOMÉTRICO CONTRA LA API
         authService.loginBiometrico(correoParaLogin, new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful()) {
-                    // ESTA ES LA CLAVE: Pasar el bundleCarga que configuramos arriba
-                    NavHostFragment.findNavController(DatosBiometricos.this)
-                            .navigate(R.id.cargaProcesos, bundleCarga);
-
-                    cargaViewModel.terminarProceso();
+                    // Catapultamos a CargaProcesos con las órdenes de destino finales inyectadas
+                    if (isAdded()) {
+                        NavHostFragment.findNavController(DatosBiometricos.this)
+                                .navigate(R.id.cargaProcesos, bundleCarga);
+                        cargaViewModel.terminarProceso();
+                    }
                 } else {
                     manejarErrorAuth("Error de servidor");
                 }

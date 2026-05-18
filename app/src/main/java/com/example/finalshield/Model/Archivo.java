@@ -1,7 +1,6 @@
 package com.example.finalshield.Model;
 
 import com.google.gson.annotations.SerializedName;
-
 import java.io.Serializable;
 
 public class Archivo implements Serializable {
@@ -21,10 +20,14 @@ public class Archivo implements Serializable {
     private String rutaArchivo;
 
     @SerializedName("tamano")
-    private long tamano;
+    private Long tamano; // Cambiado a Long por si el servidor llega a mandar null
 
     @SerializedName("fechaSubida")
     private String fechaSubida;
+
+    // --- NUEVO OBJETO ANIDADO SERIALIZABLE ---
+    @SerializedName("usuario")
+    private UsuarioEmbed usuario;
 
     public Integer getIdArchivo() {
         return idArchivo;
@@ -66,11 +69,11 @@ public class Archivo implements Serializable {
         this.rutaArchivo = rutaArchivo;
     }
 
-    public long getTamano() {
+    public Long getTamano() {
         return tamano;
     }
 
-    public void setTamano(long tamano) {
+    public void setTamano(Long tamano) {
         this.tamano = tamano;
     }
 
@@ -80,5 +83,51 @@ public class Archivo implements Serializable {
 
     public void setFechaSubida(String fechaSubida) {
         this.fechaSubida = fechaSubida;
+    }
+
+    public UsuarioEmbed getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(UsuarioEmbed usuario) {
+        this.usuario = usuario;
+    }
+
+    // =========================================================================
+    // Subclase estática interna para interceptar el JSON de usuario sin romper nada
+    // =========================================================================
+    public static class UsuarioEmbed implements Serializable {
+        @SerializedName("idUsuario")
+        private Integer idUsuario;
+
+        @SerializedName("nombre")
+        private String nombre;
+
+        @SerializedName("correo")
+        private String correo;
+
+        public Integer getIdUsuario() {
+            return idUsuario;
+        }
+
+        public void setIdUsuario(Integer idUsuario) {
+            this.idUsuario = idUsuario;
+        }
+
+        public String getNombre() {
+            return nombre;
+        }
+
+        public void setNombre(String nombre) {
+            this.nombre = nombre;
+        }
+
+        public String getCorreo() {
+            return correo;
+        }
+
+        public void setCorreo(String correo) {
+            this.correo = correo;
+        }
     }
 }

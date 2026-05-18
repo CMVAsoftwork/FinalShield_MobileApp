@@ -1,4 +1,5 @@
 package com.example.finalshield.Model;
+
 import android.net.Uri;
 
 import androidx.room.Entity;
@@ -20,6 +21,7 @@ public class ArchivoMetadata implements Serializable {
     private long idLocal;
 
     private Integer idArchivoServidor;
+    private Integer idUsuario; // --- NUEVA COLUMNA DE BASE DE DATOS LOCAL ---
     private String nombre;
     private Uri uriOriginal;
     private long tamanioBytes;
@@ -45,12 +47,16 @@ public class ArchivoMetadata implements Serializable {
     @Ignore
     public ArchivoMetadata(Archivo archivo) {
         if (archivo != null) {
-            // Asegúrate que estos métodos en tu clase 'Archivo' coincidan
             this.idArchivoServidor = archivo.getIdArchivo();
             this.nombre = archivo.getNombreArchivo();
 
-            // Si el servidor no manda el tamaño, intentamos obtenerlo de donde sea
-            // para que no sea 0B y Drive no falle.
+            // Mapeamos de forma automática el ID del usuario dueño que viene desde la API del servidor
+            if (archivo.getUsuario() != null) {
+                this.idUsuario = archivo.getUsuario().getIdUsuario();
+            } else {
+                this.idUsuario = 18; // Fallback por seguridad con tu ID activo
+            }
+
             Long s = archivo.getTamano();
             this.tamanioBytes = (s != null) ? s : 0;
 
@@ -61,29 +67,47 @@ public class ArchivoMetadata implements Serializable {
         }
     }
 
-    // --- GETTERS Y SETTERS ---
-    public long getIdLocal() { return idLocal; }
-    public void setIdLocal(long idLocal) { this.idLocal = idLocal; }
-    public Integer getIdArchivoServidor() { return idArchivoServidor; }
-    public void setIdArchivoServidor(Integer idArchivoServidor) { this.idArchivoServidor = idArchivoServidor; }
+    // --- NUEVO GETTER Y SETTER PARA EL CONTROL MULTI-USUARIO ---
+    public Integer getIdUsuario() { return idUsuario; }
+    public void setIdUsuario(Integer idUsuario) { this.idUsuario = idUsuario; }
+
+    // --- GETTERS Y SETTERS COMPATIBLES CON TU FRAGMENTO Y ADAPTADOR ---
+    public String getNombreArchivo() { return nombre; }
+    public void setNombreArchivo(String nombreArchivo) { this.nombre = nombreArchivo; }
+
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
+
+    public long getIdLocal() { return idLocal; }
+    public void setIdLocal(long idLocal) { this.idLocal = idLocal; }
+
+    public Integer getIdArchivoServidor() { return idArchivoServidor; }
+    public void setIdArchivoServidor(Integer idArchivoServidor) { this.idArchivoServidor = idArchivoServidor; }
+
     public Uri getUriOriginal() { return uriOriginal; }
     public void setUriOriginal(Uri uriOriginal) { this.uriOriginal = uriOriginal; }
+
     public long getTamanioBytes() { return tamanioBytes; }
     public void setTamanioBytes(long tamanioBytes) { this.tamanioBytes = tamanioBytes; }
+
     public Date getFechaSeleccion() { return fechaSeleccion; }
     public void setFechaSeleccion(Date fechaSeleccion) { this.fechaSeleccion = fechaSeleccion; }
+
     public boolean isEstaCifrado() { return estaCifrado; }
     public void setEstaCifrado(boolean estaCifrado) { this.estaCifrado = estaCifrado; }
+
     public String getTipoArchivo() { return tipoArchivo; }
     public void setTipoArchivo(String tipoArchivo) { this.tipoArchivo = tipoArchivo; }
+
     public String getRutaServidor() { return rutaServidor; }
     public void setRutaServidor(String rutaServidor) { this.rutaServidor = rutaServidor; }
+
     public String getRutaLocalEncriptada() { return rutaLocalEncriptada; }
     public void setRutaLocalEncriptada(String rutaLocalEncriptada) { this.rutaLocalEncriptada = rutaLocalEncriptada; }
+
     public String getRutaLocalDescifrado() { return rutaLocalDescifrado; }
     public void setRutaLocalDescifrado(String rutaLocalDescifrado) { this.rutaLocalDescifrado = rutaLocalDescifrado; }
+
     public String getOrigen() { return origen; }
     public void setOrigen(String origen) { this.origen = origen; }
 

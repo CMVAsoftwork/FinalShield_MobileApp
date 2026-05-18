@@ -290,6 +290,12 @@ public class CifradoEscaneo2 extends Fragment implements View.OnClickListener, A
     }
 
     @Override public void onDescifrarClick(int position) { posicionSeleccionada = position; mostrarDialogo(dialogDescifrar, cardDescifrar, buttonsDescifrar); }
+
+    @Override
+    public void onItemLongClick(View view, int position) {
+
+    }
+
     @Override public void onBorrarClick(int position) { posicionSeleccionada = position; mostrarDialogo(dialogEliminar, cardEliminar, buttonsEliminar); }
     @Override public void onItemClick(int pos) { Toast.makeText(getContext(), "Archivo cifrado.", Toast.LENGTH_SHORT).show(); }
     @Override public void onCambiarEstadoClick(int pos) {}

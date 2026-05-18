@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import androidx.core.content.ContextCompat;
 
 import com.example.finalshield.Model.ArchivoMetadata;
 import com.example.finalshield.R;
@@ -14,17 +15,7 @@ import com.example.finalshield.R;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ImageButton;
-import android.widget.TextView;
-import androidx.core.content.ContextCompat;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Locale;
+import java.text.DecimalFormat;
 
 public class AdaptadorArchivos extends BaseAdapter {
 
@@ -34,11 +25,13 @@ public class AdaptadorArchivos extends BaseAdapter {
     private final AdaptadorListener listener;
     private int lastPosition = -1;
 
+    // --- INTERFAZ EXTENDIDA CON CLICK LARGO ---
     public interface AdaptadorListener {
         void onBorrarClick(int position);
         void onCambiarEstadoClick(int position);
         void onItemClick(int position);
         void onDescifrarClick(int position);
+        void onItemLongClick(View view, int position); // Nuevo método espejo
     }
 
     public AdaptadorArchivos(Context contexto, List<ArchivoMetadata> listaArchivos, AdaptadorListener listener) {
@@ -84,9 +77,7 @@ public class AdaptadorArchivos extends BaseAdapter {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         String fechaStr = archivo.getFechaSeleccion() != null ? sdf.format(archivo.getFechaSeleccion()) : "N/A";
 
-        // Priorizamos la ruta de descifrado si el archivo ya no está cifrado
         String rutaAMostrar = "Pendiente...";
-
         if (!archivo.isEstaCifrado() && archivo.getRutaLocalDescifrado() != null) {
             rutaAMostrar = archivo.getRutaLocalDescifrado();
         } else if (archivo.getRutaLocalEncriptada() != null) {
@@ -95,9 +86,8 @@ public class AdaptadorArchivos extends BaseAdapter {
             rutaAMostrar = archivo.getRutaServidor();
         }
 
-        //Construir String Multilínea
-        //Usamos getTamanioFormateado() que ya esta en el modelo
-        String infoCompleta = "Archivo: " + archivo.getNombre() + "\n"
+        // Usamos getNombreArchivo() para heredar los cambios del menú contextual
+        String infoCompleta = "Archivo: " + archivo.getNombreArchivo() + "\n"
                 + "Tamaño: " + archivo.getTamanioFormateado() + "\n"
                 + "Fecha: " + fechaStr + "\n"
                 + "Ruta: " + rutaAMostrar;
@@ -117,6 +107,16 @@ public class AdaptadorArchivos extends BaseAdapter {
         holder.btnCifradoMark.setOnClickListener(v -> listener.onDescifrarClick(position));
         holder.btnBorrar.setOnClickListener(v -> listener.onBorrarClick(position));
         convertView.setOnClickListener(v -> listener.onItemClick(position));
+
+        // --- SOLUCIÓN DE RAÍZ AL CLICK LARGO ---
+        // Asignamos el escuchador largo directamente a la celda del hilo visual
+        final View finalConvertView = convertView;
+        convertView.setOnLongClickListener(v -> {
+            if (listener != null) {
+                listener.onItemLongClick(finalConvertView, position);
+            }
+            return true; // Retornamos true para frenar el disparo en cascada del click normal
+        });
 
         if (position > lastPosition) {
             convertView.setTranslationY(100f);

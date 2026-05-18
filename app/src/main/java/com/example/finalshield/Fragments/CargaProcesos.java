@@ -12,7 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast; // Importado para el aviso
 
+import androidx.activity.OnBackPressedCallback; // Importado para el bloqueo
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -36,14 +38,21 @@ public class CargaProcesos extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            // Recuperamos el ID del destino (ej. R.id.verClave)
-            this.destinoFinal = getArguments().getInt("destino_final", -1);
 
-            // Recuperamos el Bundle que contiene el "security_token"
+        // --- BLOQUEO DEL BOTÓN ATRÁS (HARDWARE) ---
+        // Esto intercepta el gesto o botón físico de atrás mientras este fragmento sea visible
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // Si el usuario intenta regresar, solo mandamos el aviso
+                Toast.makeText(getContext(), "Por favor espera, estamos procesando tu solicitud de forma segura.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        if (getArguments() != null) {
+            this.destinoFinal = getArguments().getInt("destino_final", -1);
             this.argumentosDestino = getArguments().getBundle("argumentos_destino");
 
-            // LOG DE EMERGENCIA: Para que veas en el Logcat si el token llegó a la carga
             if (argumentosDestino != null && argumentosDestino.containsKey("security_token")) {
                 Log.d("FINALSHIELD_DEBUG", "CargaProcesos: Token de seguridad recibido correctamente.");
             }
@@ -59,7 +68,6 @@ public class CargaProcesos extends Fragment {
     @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-
         ivLogo = v.findViewById(R.id.icono_proceso);
         tvMensaje = v.findViewById(R.id.texto_carga);
 
@@ -97,7 +105,6 @@ public class CargaProcesos extends Fragment {
     private void ejecutarSalidaYNav() {
         if (animatorRespiracion != null) animatorRespiracion.cancel();
 
-        // Animación de salida: Giro, se achica y desaparece (Magnetic Style)
         ObjectAnimator rotation = ObjectAnimator.ofFloat(ivLogo, View.ROTATION, 0f, 500f);
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(ivLogo, View.SCALE_X, 1f, 0f);
         ObjectAnimator scaleY = ObjectAnimator.ofFloat(ivLogo, View.SCALE_Y, 1f, 0f);
@@ -115,18 +122,14 @@ public class CargaProcesos extends Fragment {
                 cargaViewModel.resetear();
                 NavController navController = Navigation.findNavController(requireView());
 
-                // CASO ESPECIAL: VER CLAVE (Tu prioridad actual)
                 if (destinoFinal == R.id.verClave) {
                     if (argumentosDestino != null && argumentosDestino.containsKey("security_token")) {
                         navController.navigate(R.id.verClave, argumentosDestino);
                     } else {
-                        // Si por algún error de memoria se perdió el token,
-                        // mejor mandarlo al inicio que dejar la pantalla en blanco
                         Log.e("FINALSHIELD_ERROR", "Se intentó ir a verClave sin token.");
                         navController.navigate(R.id.inicio);
                     }
                 }
-                // RESTO DE LA APP (Tu funcionamiento normal)
                 else if (destinoFinal != -1) {
                     navController.navigate(destinoFinal, argumentosDestino);
                 } else {

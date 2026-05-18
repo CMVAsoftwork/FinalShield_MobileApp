@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,7 +37,7 @@ import retrofit2.Response;
 public class InicioSesion extends Fragment implements View.OnClickListener {
 
     private AuthService authService;
-    private CargaViewModel cargaViewModel; // 1. ViewModel para controlar la carga
+    private CargaViewModel cargaViewModel;
     private EditText inputCorreo, inputContrasena;
     private Button regre, inises, regis, entil;
 
@@ -49,7 +50,6 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
 
-        // Inicializar ViewModels y Servicios
         authService = new AuthService(requireContext());
         cargaViewModel = new ViewModelProvider(requireActivity()).get(CargaViewModel.class);
 
@@ -68,11 +68,11 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
         verificarAccesoAutomatico(v);
     }
 
-    // =========================
-    // 🧬 DEEP LINK + BIOMETRIA
-    // =========================
+    // ==========================================
+    // 🧬 DEEP LINK + BIOMETRIA (Mapeado de Fondo)
+    // ==========================================
 
-    private void lanzarBiometriaDirecta(View v, String tokenSeguro, String correo) {
+    private void lanzarBiometriaDirecta(View v, String desvioNotificacion, String tokenSeguro, String correo) {
         if (!isNetworkAvailable()) return;
 
         Executor executor = ContextCompat.getMainExecutor(requireContext());
@@ -84,10 +84,23 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
                     public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                         super.onAuthenticationSucceeded(result);
 
-                        // PASO 1: Ir a pantalla de carga inmediatamente
-                        irACarga(nav, R.id.verClave, tokenSeguro);
+                        // 1. Traducimos la orden asíncrona en el ID real del nav_graph
+                        int destino = R.id.inicio;
+                        com.example.finalshield.MainActivity activity = (com.example.finalshield.MainActivity) requireActivity();
 
-                        // PASO 2: Iniciar proceso de red
+                        if ("CIFRADOS".equals(desvioNotificacion)) {
+                            destino = R.id.archivosCifrados2;
+                            activity.limpiarDestinoPendiente();
+                        } else if ("DESCIFRADOS".equals(desvioNotificacion)) {
+                            destino = R.id.filtroDescifrados;
+                            activity.limpiarDestinoPendiente();
+                        } else if (tokenSeguro != null) {
+                            destino = R.id.verClave;
+                        }
+
+                        // 2. Desplegamos fragmento mediador con el destino inyectado
+                        irACarga(nav, destino, tokenSeguro);
+
                         authService.loginBiometrico(correo, new Callback<LoginResponse>() {
                             @Override
                             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
@@ -96,7 +109,6 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
                                     requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE)
                                             .edit().remove("pending_token").apply();
 
-                                    // ÉXITO: Señal para que CargaProcesos navegue a VerClave
                                     cargaViewModel.terminarProceso();
                                 } else {
                                     manejarErrorNav("Sesión expirada");
@@ -120,9 +132,9 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
         biometricPrompt.authenticate(promptInfo);
     }
 
-    // =========================
-    // 🔐 LOGIN MANUAL
-    // =========================
+    // ==========================================
+    // 🔐 LOGIN MANUAL (Mapeado de Fondo)
+    // ==========================================
 
     private void hacerLoginManual(View v) {
         if (!isNetworkAvailable()) {
@@ -141,21 +153,32 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
         inises.setEnabled(false);
         NavController nav = Navigation.findNavController(v);
 
-        // PASO 1: Navegar a carga antes de la petición
+        // Interceptamos la orden de desvío de la notificación por si el login es manual
+        com.example.finalshield.MainActivity activity = (com.example.finalshield.MainActivity) requireActivity();
+        String desvioNotificacion = activity.getDestinoPendiente();
+
         SharedPreferences prefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
         String pendingToken = prefs.getString("pending_token", null);
-        int destino = (pendingToken != null) ? R.id.verClave : R.id.inicio;
+
+        // Resolvemos el destino final basándonos en la procedencia
+        int destino = R.id.inicio;
+        if ("CIFRADOS".equals(desvioNotificacion)) {
+            destino = R.id.archivosCifrados2;
+            activity.limpiarDestinoPendiente();
+        } else if ("DESCIFRADOS".equals(desvioNotificacion)) {
+            destino = R.id.filtroDescifrados;
+            activity.limpiarDestinoPendiente();
+        } else if (pendingToken != null) {
+            destino = R.id.verClave;
+        }
 
         irACarga(nav, destino, pendingToken);
 
-        // PASO 2: Petición de red
         authService.login(correo, pass, new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     if (pendingToken != null) prefs.edit().remove("pending_token").apply();
-
-                    // ÉXITO: Avisar a la carga que ya puede salir al destino
                     cargaViewModel.terminarProceso();
                 } else {
                     manejarErrorNav("Credenciales incorrectas");
@@ -169,9 +192,9 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
         });
     }
 
-    // =========================
-    // 🚀 UTILIDADES DE CARGA (Ajustadas)
-    // =========================
+    // ==========================================
+    // 🚀 UTILIDADES DE CARGA
+    // ==========================================
 
     private void irACarga(NavController nav, int destino, String securityToken) {
         Bundle bundle = new Bundle();
@@ -187,19 +210,16 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
     }
 
     private void manejarErrorNav(String msj) {
-        // Si hay error, detenemos la carga pero regresamos al login
-        // Usamos postDelayed para que no sea un salto brusco si el error fue instantáneo
         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
             if (isAdded()) {
                 cargaViewModel.resetear();
-                Navigation.findNavController(requireView()).popBackStack(); // Regresar de Carga a InicioSesion
+                Navigation.findNavController(requireView()).popBackStack();
                 inises.setEnabled(true);
                 Toast.makeText(getContext(), msj, Toast.LENGTH_SHORT).show();
             }
         }, 1000);
     }
 
-    // ... verificarAccesoAutomatico y onClick se mantienen igual ...
     private void verificarAccesoAutomatico(View v) {
         SharedPreferences shieldPrefs = requireContext().getSharedPreferences("ShieldPrefs", Context.MODE_PRIVATE);
         SharedPreferences linkPrefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
@@ -208,8 +228,13 @@ public class InicioSesion extends Fragment implements View.OnClickListener {
         String pendingToken = linkPrefs.getString("pending_token", null);
         String correoGuardado = authService.obtenerCorreo();
 
-        if (usaHuella && pendingToken != null && correoGuardado != null) {
-            lanzarBiometriaDirecta(v, pendingToken, correoGuardado);
+        // Recuperamos el desvío de la actividad
+        com.example.finalshield.MainActivity activity = (com.example.finalshield.MainActivity) requireActivity();
+        String desvioNotificacion = activity.getDestinoPendiente();
+
+        // Forzamos el prompt biométrico inmediato si hay una acción asíncrona de fondo o un token pendiente
+        if (usaHuella && correoGuardado != null && (pendingToken != null || desvioNotificacion != null)) {
+            lanzarBiometriaDirecta(v, desvioNotificacion, pendingToken, correoGuardado);
         }
     }
 

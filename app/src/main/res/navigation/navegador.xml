@@ -684,6 +684,9 @@
         <action
             android:id="@+id/action_cargaProcesos_to_verClave"
             app:destination="@id/verClave" />
+        <action
+            android:id="@+id/action_cargaProcesos_to_archivosCifrados22"
+            app:destination="@id/archivosCifrados2" />
     </fragment>
     <fragment
         android:id="@+id/archivosDSeguros"

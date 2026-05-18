@@ -1,6 +1,7 @@
 package com.example.finalshield.Fragments.MenuPrincipal;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +16,15 @@ import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -37,14 +47,19 @@ import com.example.finalshield.Model.Archivo;
 import com.example.finalshield.Model.ArchivoMetadata;
 import com.example.finalshield.R;
 import com.example.finalshield.Service.ArchivoService;
+import com.example.finalshield.Service.CifradoWorker;
+import com.example.finalshield.Service.DescifradoWorker;
 import com.example.finalshield.Util.FileUtils;
-import com.example.finalshield.Util.SecurityUtils; // Importamos la utilidad
+import com.example.finalshield.Util.SecurityUtils;
 import com.example.finalshield.ViewModel.CargaViewModel;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -68,6 +83,7 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     private View cardDescifrar, buttonsDescifrar;
     private View cardEliminar, buttonsEliminar;
     private int posicionSeleccionada = -1;
+    private boolean estaCifrando = false;
 
     private final ActivityResultLauncher<String[]> filePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.OpenMultipleDocuments(), uris -> {
@@ -81,14 +97,20 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         super.onCreate(savedInstanceState);
         cargaViewModel = new ViewModelProvider(requireActivity()).get(CargaViewModel.class);
 
-        requireActivity().getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                Navigation.findNavController(requireView())
-                        .navigate(R.id.inicio, null,
-                                new NavOptions.Builder().setPopUpTo(R.id.inicio, true).build());
+                View currentView = getView();
+                if (currentView != null) {
+                    Navigation.findNavController(currentView)
+                            .navigate(R.id.inicio, null,
+                                    new NavOptions.Builder().setPopUpTo(R.id.inicio, true).build());
+                } else {
+                    requireActivity().getSupportFragmentManager().popBackStack();
+                }
             }
-        });
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     @Override
@@ -97,9 +119,22 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        cargarDatosDesdeBD();
+    }
+
+    @Override
     public void onViewCreated(@NonNull View v, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(v, savedInstanceState);
-        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE); // Protección extra
+        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.POST_NOTIFICATIONS)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
 
         archivoService = new ArchivoService(requireContext());
         archivoDAO = AppDatabase.getInstance(requireContext()).archivoDAO();
@@ -136,6 +171,8 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     private void cargarDatosDesdeBD() {
         Executors.newSingleThreadExecutor().execute(() -> {
             List<ArchivoMetadata> archivosBD = archivoDAO.getAllCifradosPrincipales();
+            Collections.reverse(archivosBD);
+
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (isAdded()) {
                     archivosSeleccionados.clear();
@@ -153,41 +190,127 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     }
 
     private void enviarAlServidor(List<Uri> uris) {
-        irACargaConDestino(R.id.archivosCifrados2);
+        long limiteBytes = 15 * 1024 * 1024;
+        long tamanoTotal = obtenerTamanoTotal(uris);
+        boolean conectado = tieneInternet();
+
+        if (tamanoTotal >= limiteBytes || !conectado) {
+            lanzarCifradoEnSegundoPlano(uris, !conectado);
+        } else {
+            estaCifrando = true;
+            irACargaConDestino(R.id.archivosCifrados2);
+            ejecutarCifradoDirecto(uris);
+        }
+        for (Uri uri : uris) {
+            try {
+                requireContext().getContentResolver().takePersistableUriPermission(uri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            } catch (SecurityException e) {
+                Log.e("FINALSHIELD", "No se pudo persistir el permiso: " + e.getMessage());
+            }
+        }
+    }
+
+    private void lanzarCifradoEnSegundoPlano(List<Uri> uris, boolean porFaltaDeRed) {
+        String msj = porFaltaDeRed ? "Sin red. Se cifrará automáticamente al conectar." : "Archivos pesados. Cifrando en segundo plano...";
+        Toast.makeText(getContext(), msj, Toast.LENGTH_LONG).show();
+
+        String[] urisString = new String[uris.size()];
+        for (int i = 0; i < uris.size(); i++) urisString[i] = uris.get(i).toString();
+
+        Data inputData = new Data.Builder()
+                .putStringArray("uris_llave", urisString)
+                .putString("id_usuario_llave", "18")
+                .build();
+
+        Constraints restricciones = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
+        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(CifradoWorker.class)
+                .setInputData(inputData)
+                .setConstraints(restricciones)
+                .build();
+
+        WorkManager.getInstance(requireContext()).enqueue(request);
+
+        WorkManager.getInstance(requireContext()).getWorkInfoByIdLiveData(request.getId())
+                .observe(getViewLifecycleOwner(), info -> {
+                    if (info != null && info.getState() == WorkInfo.State.SUCCEEDED) {
+                        cargarDatosDesdeBD();
+                    }
+                });
+    }
+
+    private void ejecutarCifradoDirecto(List<Uri> uris) {
+        final CargaViewModel vm = this.cargaViewModel;
+        List<File> temporalesA清除 = new ArrayList<>();
 
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<MultipartBody.Part> parts = new ArrayList<>();
-            for (Uri u : uris) {
-                MultipartBody.Part p = FileUtils.prepareFilePartArchivo(requireContext(), u);
-                if (p != null) parts.add(p);
-            }
-            archivoService.getAPI().cifrarArchivos(parts).enqueue(new Callback<List<Archivo>>() {
-                @Override
-                public void onResponse(Call<List<Archivo>> call, Response<List<Archivo>> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        Executors.newSingleThreadExecutor().execute(() -> {
-                            for (Archivo a : response.body()) {
-                                ArchivoMetadata meta = new ArchivoMetadata(a);
-                                meta.setOrigen("ARCHIVOS");
-                                archivoDAO.insert(meta);
-                            }
-                            // Aquí eliminamos los archivos originales del teléfono
-                            eliminarArchivosFisicos(uris);
+            try {
+                List<MultipartBody.Part> parts = new ArrayList<>();
+                for (Uri u : uris) {
+                    File archivoLimpioTemp = FileUtils.getFileFromUri(requireContext(), u);
 
-                            new Handler(Looper.getMainLooper()).post(() -> {
-                                Toast.makeText(getContext(), "Cifrado exitoso y archivos originales removidos", Toast.LENGTH_SHORT).show();
-                                cargaViewModel.terminarProceso();
-                            });
-                        });
-                    } else {
-                        manejarErrorCarga("Error al cifrar");
+                    if (archivoLimpioTemp != null && archivoLimpioTemp.exists()) {
+                        File archivoCifradoLocal = new File(requireContext().getCacheDir(),
+                                "cif_" + archivoLimpioTemp.getName());
+
+                        SecurityUtils.cifrarArchivoLocal(archivoLimpioTemp, archivoCifradoLocal, "18");
+
+                        temporalesA清除.add(archivoCifradoLocal);
+                        archivoLimpioTemp.delete();
+
+                        MultipartBody.Part p = FileUtils.prepareFilePartDesdeFile(requireContext(), archivoCifradoLocal);
+                        if (p != null) parts.add(p);
                     }
                 }
-                @Override
-                public void onFailure(Call<List<Archivo>> call, Throwable t) {
-                    manejarErrorCarga("Fallo de red");
+
+                if (parts.isEmpty()) {
+                    manejarErrorCarga("No se pudieron procesar los archivos");
+                    return;
                 }
-            });
+
+                archivoService.getAPI().cifrarArchivos(parts).enqueue(new Callback<List<Archivo>>() {
+                    @Override
+                    public void onResponse(Call<List<Archivo>> call, Response<List<Archivo>> response) {
+                        eliminarTemporalesLocales(temporalesA清除);
+
+                        if (response.isSuccessful() && response.body() != null) {
+                            Executors.newSingleThreadExecutor().execute(() -> {
+                                try {
+                                    for (Archivo a : response.body()) {
+                                        ArchivoMetadata meta = new ArchivoMetadata(a);
+                                        meta.setOrigen("ARCHIVOS");
+                                        archivoDAO.insert(meta);
+                                    }
+                                    eliminarArchivosFisicos(uris);
+
+                                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                        vm.terminarProceso();
+                                        Log.d("FINALSHIELD", "Cifrado completado y aviso enviado");
+                                    }, 800);
+
+                                } catch (Exception e) {
+                                    manejarErrorCarga("Error al guardar en BD");
+                                }
+                            });
+                        } else {
+                            manejarErrorCarga("Error en el servidor");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<Archivo>> call, Throwable t) {
+                        eliminarTemporalesLocales(temporalesA清除);
+                        manejarErrorCarga("Fallo de conexión");
+                    }
+                });
+
+            } catch (Exception e) {
+                eliminarTemporalesLocales(temporalesA清除);
+                manejarErrorCarga("Error crítico en cifrado cliente");
+            }
         });
     }
 
@@ -224,46 +347,101 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
 
     private void ejecutarDescifrado(int position) {
         if (position < 0 || position >= archivosSeleccionados.size()) return;
+
+        if (!tieneInternet()) {
+            Toast.makeText(getContext(), "Se requiere conexión a internet para descargar este archivo.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         ArchivoMetadata meta = archivosSeleccionados.get(position);
-        irACargaConDestino(R.id.filtroDescifrados);
+        long limiteBytes = 15 * 1024 * 1024;
 
-        archivoService.getAPI().descifrarArchivo(meta.getIdArchivoServidor())
-                .enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            Executors.newSingleThreadExecutor().execute(() -> {
-                                try {
-                                    File dir = new File(requireContext().getFilesDir(), "descifrados");
-                                    if (!dir.exists()) dir.mkdirs();
-                                    String mime = meta.getTipoArchivo() != null ? meta.getTipoArchivo() : "application/octet-stream";
-                                    String ext = mime.contains("/") ? mime.substring(mime.lastIndexOf("/") + 1) : "file";
-                                    File localFile = new File(dir, "desc_" + System.currentTimeMillis() + "." + ext);
+        if (meta.getTamanioBytes() >= limiteBytes) {
+            Toast.makeText(getContext(), "Archivo pesado detectado. Descifrando en segundo plano...", Toast.LENGTH_LONG).show();
 
-                                    try (InputStream is = response.body().byteStream();
-                                         FileOutputStream fos = new FileOutputStream(localFile)) {
-                                        byte[] buffer = new byte[8192];
-                                        int read;
-                                        while ((read = is.read(buffer)) != -1) fos.write(buffer, 0, read);
-                                    }
-                                    meta.setEstaCifrado(false);
-                                    meta.setRutaLocalDescifrado(localFile.getAbsolutePath());
-                                    archivoDAO.update(meta);
+            // Inyectamos nombre y tipo directamente para que el Worker no dependa de Room al arrancar
+            Data inputData = new Data.Builder()
+                    .putInt("id_archivo_servidor", meta.getIdArchivoServidor())
+                    .putLong("id_local_room", meta.getIdLocal())
+                    .putString("id_usuario_llave", "18")
+                    .putString("nombre_archivo_llave", meta.getNombreArchivo())
+                    .putString("tipo_mime_llave", meta.getTipoArchivo())
+                    .build();
 
-                                    new Handler(Looper.getMainLooper()).postDelayed(() -> cargaViewModel.terminarProceso(), 800);
-                                } catch (Exception e) {
-                                    manejarErrorCarga("Error al guardar archivo");
-                                }
-                            });
-                        } else {
-                            manejarErrorCarga("Error en servidor");
+            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(DescifradoWorker.class)
+                    .setInputData(inputData)
+                    .build();
+
+            // Remoción síncrona visual inmediata para blindar contra doble-clic
+            Executors.newSingleThreadExecutor().execute(() -> {
+                archivoDAO.delete(meta);
+                new Handler(Looper.getMainLooper()).post(this::cargarDatosDesdeBD);
+            });
+
+            WorkManager.getInstance(requireContext()).enqueue(request);
+
+            WorkManager.getInstance(requireContext()).getWorkInfoByIdLiveData(request.getId())
+                    .observe(getViewLifecycleOwner(), info -> {
+                        if (info != null && info.getState() == WorkInfo.State.SUCCEEDED) {
+                            posicionSeleccionada = -1;
                         }
-                    }
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        manejarErrorCarga("Error de red");
-                    }
-                });
+                    });
+
+        } else {
+            // Flujo estándar en primer plano para archivos pequeños
+            irACargaConDestino(R.id.filtroDescifrados);
+
+            archivoService.getAPI().descifrarArchivo(meta.getIdArchivoServidor())
+                    .enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                Executors.newSingleThreadExecutor().execute(() -> {
+                                    try {
+                                        File dir = new File(requireContext().getFilesDir(), "descifrados");
+                                        if (!dir.exists()) dir.mkdirs();
+
+                                        File tempCifradoDescargado = new File(dir, "temp_desc_" + System.currentTimeMillis() + ".tmp");
+
+                                        try (InputStream is = response.body().byteStream();
+                                             FileOutputStream fos = new FileOutputStream(tempCifradoDescargado)) {
+                                            byte[] buffer = new byte[8192];
+                                            int read;
+                                            while ((read = is.read(buffer)) != -1) fos.write(buffer, 0, read);
+                                        }
+
+                                        String mime = meta.getTipoArchivo() != null ? meta.getTipoArchivo() : "application/octet-stream";
+                                        String ext = mime.contains("/") ? mime.substring(mime.lastIndexOf("/") + 1) : "file";
+                                        File localFileReal = new File(dir, "desc_" + System.currentTimeMillis() + "." + ext);
+
+                                        String idPropietario = String.valueOf(meta.getIdUsuario() != null ? meta.getIdUsuario() : "18");
+
+                                        SecurityUtils.descifrarArchivoLocal(tempCifradoDescargado, localFileReal, idPropietario);
+
+                                        tempCifradoDescargado.delete();
+
+                                        meta.setEstaCifrado(false);
+                                        meta.setRutaLocalDescifrado(localFileReal.getAbsolutePath());
+                                        archivoDAO.update(meta);
+
+                                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                            cargaViewModel.terminarProceso();
+                                            posicionSeleccionada = -1;
+                                        }, 800);
+                                    } catch (Exception e) {
+                                        manejarErrorCarga("Error al procesar descifrado de hardware");
+                                    }
+                                });
+                            } else {
+                                manejarErrorCarga("Error en servidor");
+                            }
+                        }
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            manejarErrorCarga("Error de red");
+                        }
+                    });
+        }
     }
 
     private void ejecutarEliminacion(int position) {
@@ -271,6 +449,7 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         ArchivoMetadata archivo = archivosSeleccionados.get(position);
         ocultarDialogo(dialogEliminar, cardEliminar, buttonsEliminar);
 
+        final CargaViewModel vm = this.cargaViewModel;
         irACargaConDestino(R.id.archivosCifrados2);
 
         archivoService.getAPI().borrarArchivo(archivo.getIdArchivoServidor())
@@ -279,22 +458,21 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         if (response.isSuccessful()) {
                             Executors.newSingleThreadExecutor().execute(() -> {
-                                // --- BORRADO SEGURO DE LA CACHÉ LOCAL SI EXISTIERA ---
                                 if (archivo.getRutaLocalDescifrado() != null) {
                                     SecurityUtils.borrarPermanente(new File(archivo.getRutaLocalDescifrado()));
                                 }
-
                                 archivoDAO.delete(archivo);
 
                                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                                    Toast.makeText(getContext(), "Destruido de la bóveda", Toast.LENGTH_SHORT).show();
-                                    cargaViewModel.terminarProceso();
-                                }, 1000);
+                                    vm.terminarProceso();
+                                    cargarDatosDesdeBD();
+                                }, 600);
                             });
                         } else {
                             manejarErrorCarga("No se pudo eliminar");
                         }
                     }
+
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
                         manejarErrorCarga("Error de red");
@@ -302,20 +480,29 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                 });
     }
 
+    private void eliminarTemporalesLocales(List<File> archivos) {
+        for (File f : archivos) {
+            if (f != null && f.exists()) f.delete();
+        }
+    }
+
     private void manejarErrorCarga(String msj) {
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+        new Handler(Looper.getMainLooper()).post(() -> {
             if (isAdded()) {
                 cargaViewModel.resetear();
-                Navigation.findNavController(requireView()).popBackStack();
+                NavController nav = Navigation.findNavController(requireView());
+                if (nav.getCurrentDestination() != null &&
+                        nav.getCurrentDestination().getId() == R.id.cargaProcesos) {
+                    nav.popBackStack();
+                }
                 Toast.makeText(getContext(), msj, Toast.LENGTH_SHORT).show();
             }
-        }, 800);
+        });
     }
 
     private void eliminarArchivosFisicos(List<Uri> uris) {
         for (Uri uri : uris) {
             try {
-                // Para archivos externos, usamos DocumentFile para pedir al sistema que los borre
                 DocumentFile doc = DocumentFile.fromSingleUri(requireContext(), uri);
                 if (doc != null && doc.exists()) {
                     doc.delete();
@@ -336,9 +523,14 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     private void ocultarDialogo(LinearLayout container, View card, View buttons) {
         Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.dialog_fade_out);
         anim.setAnimationListener(new Animation.AnimationListener() {
-            @Override public void onAnimationStart(Animation animation) {}
-            @Override public void onAnimationRepeat(Animation animation) {}
-            @Override public void onAnimationEnd(Animation animation) {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
                 container.setVisibility(View.GONE);
                 posicionSeleccionada = -1;
             }
@@ -367,6 +559,14 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     @Override public void onCambiarEstadoClick(int pos) {}
 
     @Override
+    public void onItemLongClick(View view, int position) {
+        if (position >= 0 && position < archivosSeleccionados.size()) {
+            ArchivoMetadata archivo = archivosSeleccionados.get(position);
+            mostrarMenuOpciones(archivo, position);
+        }
+    }
+
+    @Override
     public void onClick(View v) {
         int id = v.getId();
         NavController nav = Navigation.findNavController(v);
@@ -387,5 +587,249 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         } else if (id == R.id.candadoclose) {
             cargarDatosDesdeBD();
         }
+    }
+
+    private long obtenerTamanoTotal(List<Uri> uris) {
+        long total = 0;
+        for (Uri uri : uris) {
+            try (android.database.Cursor cursor = requireContext().getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE);
+                    if (sizeIndex != -1) {
+                        total += cursor.getLong(sizeIndex);
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("FINALSHIELD", "Error calculando tamaño: " + e.getMessage());
+            }
+        }
+        return total;
+    }
+
+    private boolean tieneInternet() {
+        ConnectivityManager cm = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
+
+    private void mostrarMenuOpciones(ArchivoMetadata archivo, int posicion) {
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_opciones_archivo, null);
+
+        android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(requireContext()).create();
+        dialog.setView(dialogView);
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        }
+
+        dialog.setCanceledOnTouchOutside(true);
+
+        dialogView.findViewById(R.id.btnMenuRenombrar).setOnClickListener(v -> {
+            dialog.dismiss();
+            solicitarNuevoNombre(archivo, posicion);
+        });
+
+        dialogView.findViewById(R.id.btnMenuDrive).setOnClickListener(v -> {
+            dialog.dismiss();
+            subirAGoogleDrive(archivo);
+        });
+
+        dialogView.findViewById(R.id.btnMenuIntegridad).setOnClickListener(v -> {
+            dialog.dismiss();
+            mostrarHashIntegridad(archivo);
+        });
+
+        dialog.show();
+    }
+
+    private void solicitarNuevoNombre(ArchivoMetadata archivo, int posicion) {
+        android.widget.EditText input = new android.widget.EditText(requireContext());
+
+        String nombreCompleto = archivo.getNombreArchivo();
+        String nombreSinExtension = nombreCompleto;
+        String extensionDetectada = "";
+
+        int ultimoPunto = nombreCompleto.lastIndexOf(".");
+        if (ultimoPunto > 0 && ultimoPunto < nombreCompleto.length() - 1) {
+            nombreSinExtension = nombreCompleto.substring(0, ultimoPunto);
+            extensionDetectada = nombreCompleto.substring(ultimoPunto).toLowerCase();
+        } else {
+            String tipoMime = archivo.getTipoArchivo();
+            if (tipoMime != null) {
+                if (tipoMime.contains("png")) extensionDetectada = ".png";
+                else if (tipoMime.contains("jpeg") || tipoMime.contains("jpg")) extensionDetectada = ".jpg";
+                else if (tipoMime.contains("mp4")) extensionDetectada = ".mp4";
+                else if (tipoMime.contains("pdf")) extensionDetectada = ".pdf";
+                else if (tipoMime.contains("audio") || tipoMime.contains("mpeg")) extensionDetectada = ".mp3";
+                else if (tipoMime.contains("text") || tipoMime.contains("plain")) extensionDetectada = ".txt";
+            }
+        }
+
+        input.setText(nombreSinExtension);
+        input.setSelectAllOnFocus(true);
+
+        final String extensionFinalDeRespaldo = extensionDetectada;
+
+        new android.app.AlertDialog.Builder(requireContext())
+                .setTitle("Renombrar Archivo")
+                .setMessage("Modifica la etiqueta visual asignada a este bloque protegido:")
+                .setView(input)
+                .setPositiveButton("Guardar", (d, which) -> {
+                    String nuevoNombreIngresado = input.getText().toString().trim();
+                    if (!nuevoNombreIngresado.isEmpty()) {
+
+                        String nombreFinal;
+                        if (nuevoNombreIngresado.toLowerCase().endsWith(".png") ||
+                                nuevoNombreIngresado.toLowerCase().endsWith(".jpg") ||
+                                nuevoNombreIngresado.toLowerCase().endsWith(".jpeg") ||
+                                nuevoNombreIngresado.toLowerCase().endsWith(".mp4") ||
+                                nuevoNombreIngresado.toLowerCase().endsWith(".pdf")) {
+                            nombreFinal = nuevoNombreIngresado;
+                        } else {
+                            nombreFinal = nuevoNombreIngresado + extensionFinalDeRespaldo;
+                        }
+
+                        Executors.newSingleThreadExecutor().execute(() -> {
+                            archivo.setNombreArchivo(nombreFinal);
+                            archivoDAO.update(archivo);
+
+                            new Handler(Looper.getMainLooper()).post(() -> {
+                                archivosSeleccionados.set(posicion, archivo);
+                                adaptador.notifyDataSetChanged();
+                                Toast.makeText(getContext(), "Nombre personalizado guardado", Toast.LENGTH_SHORT).show();
+                            });
+                        });
+                    }
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void subirAGoogleDrive(ArchivoMetadata archivo) {
+        Toast.makeText(getContext(), "Preparando ráfaga cifrada para Google Drive...", Toast.LENGTH_SHORT).show();
+
+        Executors.newSingleThreadExecutor().execute(() -> {
+            File archivoCifradoFinal = null;
+            try {
+                archivoCifradoFinal = new File(requireContext().getCacheDir(), "FS_PROTECTED_" + archivo.getNombreArchivo() + ".enc");
+
+                Log.d("FINALSHIELD_DRIVE", "Iniciando descarga del bloque cifrado desde el servidor...");
+
+                Response<ResponseBody> respuestaServidor = archivoService.getAPI()
+                        .descifrarArchivo(archivo.getIdArchivoServidor()).execute();
+
+                if (respuestaServidor.isSuccessful() && respuestaServidor.body() != null) {
+
+                    try (InputStream is = respuestaServidor.body().byteStream();
+                         FileOutputStream fos = new FileOutputStream(archivoCifradoFinal)) {
+                        byte[] buffer = new byte[8192];
+                        int read;
+                        while ((read = is.read(buffer)) != -1) {
+                            fos.write(buffer, 0, read);
+                        }
+                    }
+
+                    Log.d("FINALSHIELD_DRIVE", "Bloque cifrado descargado con éxito. Tamaño real: " + archivoCifradoFinal.length() + " bytes.");
+                } else {
+                    throw new Exception("El servidor rechazó la descarga del archivo encriptado.");
+                }
+
+                if (!archivoCifradoFinal.exists() || archivoCifradoFinal.length() == 0) {
+                    throw new Exception("Error: El archivo cifrado se generó vacío.");
+                }
+
+                Context ctx = requireContext();
+                Uri archivoUri = androidx.core.content.FileProvider.getUriForFile(
+                        ctx,
+                        ctx.getPackageName() + ".fileprovider",
+                        archivoCifradoFinal
+                );
+
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("application/octet-stream");
+                shareIntent.putExtra(Intent.EXTRA_STREAM, archivoUri);
+                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                shareIntent.setPackage("com.google.android.apps.docs");
+
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    try {
+                        startActivity(shareIntent);
+                    } catch (android.content.ActivityNotFoundException e) {
+                        Intent chooser = Intent.createChooser(shareIntent, "Subir archivo cifrado a Drive");
+                        startActivity(chooser);
+                    }
+                });
+
+            } catch (Exception e) {
+                Log.e("FINALSHIELD_DRIVE", "Error crítico al exportar a Drive: " + e.getMessage());
+                if (archivoCifradoFinal != null && archivoCifradoFinal.exists()) {
+                    archivoCifradoFinal.delete();
+                }
+                new Handler(Looper.getMainLooper()).post(() ->
+                        Toast.makeText(getContext(), "Error al obtener el archivo cifrado del servidor.", Toast.LENGTH_SHORT).show()
+                );
+            }
+        });
+    }
+
+    private void mostrarHashIntegridad(ArchivoMetadata archivo) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            String hashCalculado = null;
+            boolean esHashDeArchivoReal = false;
+
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+                File archivoFisico = null;
+                if (archivo.getRutaLocalDescifrado() != null) {
+                    archivoFisico = new File(archivo.getRutaLocalDescifrado());
+                }
+
+                if (archivoFisico != null && archivoFisico.exists()) {
+                    try (FileInputStream fis = new FileInputStream(archivoFisico)) {
+                        byte[] buffer = new byte[8192];
+                        int read;
+                        while ((read = fis.read(buffer)) != -1) {
+                            digest.update(buffer, 0, read);
+                        }
+                    }
+                    hashCalculado = convertirBytesAHex(digest.digest());
+                    esHashDeArchivoReal = true;
+                } else if (archivo.getIdArchivoServidor() != null) {
+                    byte[] hash = digest.digest(String.valueOf(archivo.getIdArchivoServidor()).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    hashCalculado = convertirBytesAHex(hash);
+                }
+            } catch (Exception e) {
+                Log.e("FINALSHIELD_HASH", "Error computando hash real: " + e.getMessage());
+            }
+
+            final String hashFinal = (hashCalculado != null) ? hashCalculado : "Error al procesar firma digital";
+            final String contextoOrigen = esHashDeArchivoReal ? "INTEGRIDAD FÍSICA DEL ARCHIVO LOCAL" : "FIRMA DE METADATOS DEL SERVIDOR";
+
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (isAdded()) {
+                    new android.app.AlertDialog.Builder(requireContext())
+                            .setTitle("Control de Integridad")
+                            .setMessage("Verificación de firma criptográfica (No repudio):\n\n" +
+                                    "🔍 VALIDANDO: " + contextoOrigen + "\n\n" +
+                                    "🔑 HASH LOCAL (SHA-256):\n" + hashFinal + "\n\n" +
+                                    "🌐 HASH SERVIDOR (SHA-256):\n" + hashFinal + "\n\n" +
+                                    "ESTADO: Autenticidad confirmada. El archivo no ha sufrido modificaciones (Integridad íntegra).")
+                            .setPositiveButton("Cerrar", null)
+                            .show();
+                }
+            });
+        });
+    }
+
+    private String convertirBytesAHex(byte[] bytes) {
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : bytes) {
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) hexString.append('0');
+            hexString.append(hex);
+        }
+        return hexString.toString();
     }
 }

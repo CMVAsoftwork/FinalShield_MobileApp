@@ -10,7 +10,7 @@ import com.example.finalshield.DBM.ArchivoDAO;
 import com.example.finalshield.DBM.Converters;
 import com.example.finalshield.Model.ArchivoMetadata;
 
-@Database(entities = {ArchivoMetadata.class}, version = 3, exportSchema = false)
+@Database(entities = {ArchivoMetadata.class}, version = 4, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
 
