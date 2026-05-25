@@ -13,9 +13,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.webkit.MimeTypeMap;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -68,7 +71,11 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
     private ArchivoDAO archivoDAO;
     private CargaViewModel cargaViewModel;
 
-    private LinearLayout dialogContainerCifrar, dialogContainerEliminar;
+    // Contenedores principales de los diálogos mapeados del XML
+    private LinearLayout dialogContainerCifrar, dialogContainerEliminar, dialogContainerIntegridad;
+    private View cardIntegridad;
+    private TextView tvCuerpoIntegridad;
+
     private int posicionSeleccionada = -1;
     private int intentosHuella = 0;
 
@@ -112,17 +119,34 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
         archivoDAO = AppDatabase.getInstance(requireContext()).archivoDAO();
 
         listView = v.findViewById(R.id.listadesc);
+
+        // Inicialización de diálogos existentes
         dialogContainerCifrar = v.findViewById(R.id.dialogContainer);
         dialogContainerEliminar = v.findViewById(R.id.dialogContainer2);
+
+        // Inicialización de las nuevas vistas del XML para control de integridad
+        dialogContainerIntegridad = v.findViewById(R.id.dialogContainerIntegridad);
+        cardIntegridad = v.findViewById(R.id.dialogContentIntegridad);
+        tvCuerpoIntegridad = v.findViewById(R.id.tvCuerpoIntegridad);
 
         adaptador = new AdaptadorArchivos(getContext(), listaMetadata, this);
         listView.setAdapter(adaptador);
 
+        listView.setOnItemLongClickListener((parent, view, position, id) -> {
+            onItemLongClick(view, position);
+            return true;
+        });
+
+        // Listeners de los flujos de diálogos existentes
         v.findViewById(R.id.sicifrar).setOnClickListener(view -> ejecutarAccionCifrar());
         v.findViewById(R.id.nocifrar).setOnClickListener(view -> dialogContainerCifrar.setVisibility(View.GONE));
 
         v.findViewById(R.id.sieliminar2).setOnClickListener(view -> solicitarHuellaParaEliminar());
-        v.findViewById(v.getId() == R.id.noeliminar2 ? R.id.noeliminar2 : R.id.noeliminar2).setOnClickListener(view -> dialogContainerEliminar.setVisibility(View.GONE));
+        v.findViewById(R.id.noeliminar2).setOnClickListener(view -> dialogContainerEliminar.setVisibility(View.GONE));
+
+        // Listener dedicado para cerrar el nuevo diálogo de integridad personalizado
+        v.findViewById(R.id.btnCerrarIntegridad).setOnClickListener(view ->
+                ocultarDialogo(dialogContainerIntegridad, cardIntegridad, null));
 
         View btnDrive = v.findViewById(R.id.btnImportarDrive);
         if (btnDrive != null) btnDrive.setOnClickListener(this);
@@ -201,7 +225,7 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
             Log.e("FinalShield_Drive", "Error leyendo metadata de Drive", e);
         }
 
-        if (!nombreArchivo.endsWith(".enc") && !nombreArchivo.startsWith("FS_PROTECTED_")) {
+        if (!nombreArchivo.endsWith(".enc") && !nombreArchivo.startsWith("FS_PROTECTED_") && !nombreArchivo.startsWith("FS_SCAN_")) {
             Toast.makeText(getContext(), "Error: El archivo no pertenece a un contenedor protegido de FinalShield.", Toast.LENGTH_LONG).show();
             return;
         }
@@ -230,7 +254,7 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
                     }
                 }
 
-                String nombreLimpio = finalNombre.replace("FS_PROTECTED_", "").replace(".enc", "");
+                String nombreLimpio = finalNombre.replace("FS_PROTECTED_", "").replace("FS_SCAN_", "").replace(".enc", "");
                 if (!nombreLimpio.contains(".")) nombreLimpio += ".jpg";
 
                 File archivoClaroDestino = new File(dirDescifrados, "desc_" + System.currentTimeMillis() + "_" + nombreLimpio);
@@ -243,9 +267,14 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
                 meta.setTamanioBytes(finalTamano);
                 meta.setEstaCifrado(false);
                 meta.setRutaLocalDescifrado(archivoClaroDestino.getAbsolutePath());
-                meta.setOrigen("DRIVE_IMPORT");
                 meta.setIdUsuario(18);
                 meta.setFechaSeleccion(new Date());
+
+                if (finalNombre.startsWith("FS_SCAN_")) {
+                    meta.setOrigen("ESCANEO");
+                } else {
+                    meta.setOrigen("DRIVE_IMPORT");
+                }
 
                 String ext = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(archivoClaroDestino).toString());
                 meta.setTipoArchivo(MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext.toLowerCase()));
@@ -269,7 +298,6 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
         });
     }
 
-    // --- SECCIÓN CORREGIDA: SANEAMIENTO DE NOMBRE SEGURO Y TAMAÑO EN BYTES ---
     private void ejecutarAccionCifrar() {
         if (posicionSeleccionada < 0 || posicionSeleccionada >= listaMetadata.size()) return;
 
@@ -282,19 +310,37 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
         long limiteBytes = 15 * 1024 * 1024;
         boolean conectado = tieneInternet();
 
-        if (archivoFisicoClaro.exists() && (archivoFisicoClaro.length() >= limiteBytes || !conectado)) {
+        String origenDetectado = archivo.getOrigen();
+        String nombreArchivoLower = archivo.getNombreArchivo() != null ? archivo.getNombreArchivo().toLowerCase() : "";
+        String nombreFisicoLower = archivoFisicoClaro.getName().toLowerCase();
 
+        if ("ESCANEO".equals(origenDetectado) ||
+                "ESCANEO".equals(archivo.getOrigen()) ||
+                nombreArchivoLower.contains("scan") ||
+                nombreArchivoLower.contains("gal") ||
+                nombreArchivoLower.startsWith("fs_scan_") ||
+                nombreFisicoLower.contains("scan") ||
+                nombreFisicoLower.contains("mix") ||
+                nombreFisicoLower.contains("camarap")) {
+            origenDetectado = "ESCANEO";
+        } else {
+            origenDetectado = "ARCHIVOS";
+        }
+
+        final String origenFinalConstante = origenDetectado;
+
+        if (archivoFisicoClaro.exists() && (archivoFisicoClaro.length() >= limiteBytes || !conectado)) {
             String msj = !conectado ? "Sin red activa. Re-cifrando localmente, se sincronizará al conectar." : "Archivo pesado. Re-protegiendo en segundo plano...";
             Toast.makeText(getContext(), msj, Toast.LENGTH_LONG).show();
 
-            Uri archivoUri = Uri.fromFile(archivoFisicoClaro);
-            String[] urisString = { archivoUri.toString() };
+            String[] urisString = { archivoFisicoClaro.getAbsolutePath() };
+            String nombreEnvioFinal = archivo.getNombreArchivo();
 
-            // Le mandamos al Worker la metadata visual real del archivo limpio (sin prefijos del sistema de archivos)
             Data inputData = new Data.Builder()
                     .putStringArray("uris_llave", urisString)
                     .putString("id_usuario_llave", "18")
-                    .putString("nombre_visual_limpio", archivo.getNombreArchivo())
+                    .putString("nombre_visual_limpio", nombreEnvioFinal)
+                    .putString("origen_boveda", origenFinalConstante)
                     .build();
 
             Constraints restricciones = new Constraints.Builder()
@@ -321,10 +367,9 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
                     });
 
         } else {
-            // Flujo estándar rápido para archivos menores a la frontera en primer plano
             cargaViewModel.resetear();
 
-            int destinoFinalId = "ESCANEO".equals(archivo.getOrigen()) ? R.id.cifradoEscaneo2 : R.id.archivosCifrados2;
+            int destinoFinalId = "ESCANEO".equals(origenFinalConstante) ? R.id.cifradoEscaneo2 : R.id.archivosCifrados2;
             Bundle args = new Bundle();
             args.putInt("destino_final", destinoFinalId);
 
@@ -332,25 +377,30 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
 
             Executors.newSingleThreadExecutor().execute(() -> {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(800);
 
-                    if (archivo.getRutaLocalDescifrado() != null) {
-                        SecurityUtils.borrarPermanente(new File(archivo.getRutaLocalDescifrado()));
+                    if (archivoFisicoClaro.exists()) {
+                        File dirCifrados = new File(requireContext().getFilesDir(), "cifrados_locales");
+                        if (!dirCifrados.exists()) dirCifrados.mkdirs();
+
+                        File archivoCifradoDestino = new File(dirCifrados, "cif_" + archivo.getNombreArchivo());
+
+                        SecurityUtils.cifrarArchivoLocal(archivoFisicoClaro, archivoCifradoDestino, "18");
+                        SecurityUtils.borrarPermanente(archivoFisicoClaro);
+
+                        archivo.setEstaCifrado(true);
+                        archivo.setRutaLocalDescifrado(archivoCifradoDestino.getAbsolutePath());
+                        archivo.setOrigen(origenFinalConstante);
+                        archivoDAO.update(archivo);
                     }
 
-                    // Forzamos que se mantenga el nombre visual limpio en la re-encriptación síncrona
-                    archivo.setEstaCifrado(true);
-                    archivo.setRutaLocalDescifrado(null);
-                    archivoDAO.update(archivo);
-
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        Log.d("FinalShield", "Proceso terminado, disparando navegación final...");
                         cargaViewModel.terminarProceso();
                         posicionSeleccionada = -1;
                     }, 500);
 
                 } catch (Exception e) {
-                    Log.e("FinalShield", "Error en re-cifrado", e);
+                    Log.e("FinalShield", "Error crítico en flujo de re-cifrado atómico", e);
                     new Handler(Looper.getMainLooper()).post(() -> {
                         cargaViewModel.resetear();
                         if (isAdded()) {
@@ -427,7 +477,7 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
                 if (intentosHuella >= 5) {
                     requireActivity().finishAffinity();
                 } else {
-                    Toast.makeText(getContext(), "Identidad no reconocida (" + intentosHuella + "/5)", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Identity not recognized (" + intentosHuella + "/5)", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -556,7 +606,7 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
 
     private void compartirArchivoDirecto(ArchivoMetadata archivo) {
         if (archivo.getRutaLocalDescifrado() == null) {
-            Toast.makeText(getContext(), "Archivo no disponible para compartir", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Ruta de archivo no disponible", Toast.LENGTH_SHORT).show();
             return;
         }
         File fileOrigen = new File(archivo.getRutaLocalDescifrado());
@@ -612,6 +662,7 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
         });
     }
 
+    // INTERFAZ DINÁMICA: MIGRACIÓN DE ALERT DIALOG A COMPONENTE EMBEBIDO XML DE INTEGRIDAD
     private void mostrarHashIntegridadReal(ArchivoMetadata archivo) {
         Executors.newSingleThreadExecutor().execute(() -> {
             String hashCalculado = null;
@@ -645,24 +696,42 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (isAdded()) {
-                    new android.app.AlertDialog.Builder(requireContext())
-                            .setTitle("Control de Integridad")
-                            .setMessage("Verificación de firma criptográfica del archivo local:\n\n" +
-                                    "🔍 ALGORITMO: SHA-256 (Validación de Bytes)\n\n" +
-                                    "🔑 HASH GENERADO:\n" + hashFinal + "\n\n" +
-                                    "🌐 HASH ESPERADO:\n" + hashFinal + "\n\n" +
-                                    "ESTADO: Bloque binario íntegro. El archivo es auténtico, le pertenece al usuario 18 y no ha sido alterado localmente.")
-                            .setPositiveButton("Cerrar", null)
-                            .show();
+                    // Armamos la cadena del reporte criptográfico dinámico
+                    String textoReporte = "Verificación de firma criptográfica del archivo local:\n\n" +
+                            "🔍 ALGORITMO: SHA-256 \n\n" +
+                            "🔑 HASH GENERADO:\n" + hashFinal + "\n\n" +
+                            "🌐 HASH ESPERADO:\n" + hashFinal + "\n\n" +
+                            "ESTADO: Bloque binario íntegro. El archivo es auténtico, le pertenece al usuario 18 y no ha sido alterado localmente.";
+
+                    // Inyectamos el texto directo en la vista mapeada del XML
+                    tvCuerpoIntegridad.setText(textoReporte);
+
+                    // Desplegamos el diálogo usando tu animación de entrada personalizada
+                    mostrarDialogo(dialogContainerIntegridad, cardIntegridad, null);
                 }
             });
         });
     }
 
-    private boolean tieneInternet() {
-        ConnectivityManager cm = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    private void mostrarDialogo(LinearLayout container, View card, View buttons) {
+        container.setVisibility(View.VISIBLE);
+        Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.dialog_fade_in);
+        if (card != null) card.startAnimation(anim);
+        if (buttons != null) buttons.startAnimation(anim);
+    }
+
+    private void ocultarDialogo(LinearLayout container, View card, View buttons) {
+        Animation anim = AnimationUtils.loadAnimation(getContext(), R.anim.dialog_fade_out);
+        anim.setAnimationListener(new Animation.AnimationListener() {
+            @Override public void onAnimationStart(Animation animation) {}
+            @Override public void onAnimationRepeat(Animation animation) {}
+            @Override public void onAnimationEnd(Animation animation) {
+                container.setVisibility(View.GONE);
+                posicionSeleccionada = -1;
+            }
+        });
+        if (card != null) card.startAnimation(anim);
+        if (buttons != null) buttons.startAnimation(anim);
     }
 
     @Override
@@ -688,5 +757,11 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
         } else if (id == R.id.candadopen) {
             cargarDatos();
         }
+    }
+
+    private boolean tieneInternet() {
+        android.net.ConnectivityManager cm = (android.net.ConnectivityManager) requireContext().getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+        android.net.NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 }

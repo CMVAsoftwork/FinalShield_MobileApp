@@ -25,7 +25,6 @@ public class AdaptadorArchivos extends BaseAdapter {
     private final AdaptadorListener listener;
     private int lastPosition = -1;
 
-    // --- INTERFAZ EXTENDIDA CON CLICK LARGO ---
     public interface AdaptadorListener {
         void onBorrarClick(int position);
         void onCambiarEstadoClick(int position);
@@ -84,6 +83,8 @@ public class AdaptadorArchivos extends BaseAdapter {
             rutaAMostrar = archivo.getRutaLocalEncriptada();
         } else if (archivo.getRutaServidor() != null) {
             rutaAMostrar = archivo.getRutaServidor();
+        } else if (archivo.getIdArchivoServidor() == null && archivo.getRutaLocalDescifrado() != null) {
+            rutaAMostrar = archivo.getRutaLocalDescifrado();
         }
 
         // Usamos getNombreArchivo() para heredar los cambios del menú contextual
@@ -108,7 +109,6 @@ public class AdaptadorArchivos extends BaseAdapter {
         holder.btnBorrar.setOnClickListener(v -> listener.onBorrarClick(position));
         convertView.setOnClickListener(v -> listener.onItemClick(position));
 
-        // --- SOLUCIÓN DE RAÍZ AL CLICK LARGO ---
         // Asignamos el escuchador largo directamente a la celda del hilo visual
         final View finalConvertView = convertView;
         convertView.setOnLongClickListener(v -> {

@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.finalshield.DBM.ArchivoDAO;
 import com.example.finalshield.Model.Archivo;
@@ -32,6 +31,53 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class EscanerProcesador {
+
+    // en el hilo secundario provisto por el disparador del fragmento de la cámara.
+    public static void compilarPdfLocalDesdeUris(Context context, List<Uri> uris, File fileDestino) throws Exception {
+        if (uris == null || uris.isEmpty()) {
+            throw new IllegalArgumentException("No hay imágenes para el procesamiento local");
+        }
+
+        PdfDocument document = new PdfDocument();
+        FileOutputStream fos = null;
+
+        try {
+            for (int i = 0; i < uris.size(); i++) {
+                Uri uri = uris.get(i);
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
+
+                // Redimensionar para optimizar peso en transmisión asíncrona
+                if (bitmap.getWidth() > 1600 || bitmap.getHeight() > 1600) {
+                    float scale = Math.min(1600f / bitmap.getWidth(), 1600f / bitmap.getHeight());
+                    bitmap = Bitmap.createScaledBitmap(bitmap,
+                            (int) (bitmap.getWidth() * scale),
+                            (int) (bitmap.getHeight() * scale),
+                            true);
+                }
+
+                PdfDocument.PageInfo pageInfo = new PdfDocument.PageInfo.Builder(
+                        bitmap.getWidth(), bitmap.getHeight(), i + 1).create();
+                PdfDocument.Page page = document.startPage(pageInfo);
+                Canvas canvas = page.getCanvas();
+                canvas.drawBitmap(bitmap, 0, 0, null);
+                document.finishPage(page);
+
+                bitmap.recycle(); // Liberación inmediata de RAM por ráfagas pesadas
+            }
+
+            fos = new FileOutputStream(fileDestino);
+            document.writeTo(fos);
+            Log.d("FINALSHIELD_PROCESSOR", "PDF local compilado con éxito. Peso: " + fileDestino.length() + " bytes.");
+
+        } finally {
+            if (document != null) {
+                document.close();
+            }
+            if (fos != null) {
+                try { fos.close(); } catch (IOException ignored) {}
+            }
+        }
+    }
 
     public static void generarPdfYEnviar(
             Context context,
@@ -58,7 +104,6 @@ public class EscanerProcesador {
                     Uri uri = uris.get(i);
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
 
-                    // Redimensionar si es necesario
                     if (bitmap.getWidth() > 1600 || bitmap.getHeight() > 1600) {
                         float scale = Math.min(1600f / bitmap.getWidth(), 1600f / bitmap.getHeight());
                         bitmap = Bitmap.createScaledBitmap(bitmap,
@@ -74,14 +119,13 @@ public class EscanerProcesador {
                     canvas.drawBitmap(bitmap, 0, 0, null);
                     document.finishPage(page);
 
-                    bitmap.recycle(); // Liberar memoria ASAP
+                    bitmap.recycle();
                 }
 
                 pdfFile = new File(context.getCacheDir(), "SCAN_" + System.currentTimeMillis() + ".pdf");
                 fos = new FileOutputStream(pdfFile);
                 document.writeTo(fos);
 
-                // Subida al servidor
                 RequestBody requestFile = RequestBody.create(MediaType.parse("application/pdf"), pdfFile);
                 MultipartBody.Part body = MultipartBody.Part.createFormData("archivo", pdfFile.getName(), requestFile);
 
@@ -95,7 +139,8 @@ public class EscanerProcesador {
 
                                     ArchivoMetadata meta = new ArchivoMetadata();
                                     meta.setIdArchivoServidor(a.getIdArchivo());
-                                    meta.setNombre(a.getNombreArchivo());
+                                    // Se corrigió a .setNombreArchivo para empalmar limpio con tu entidad Room corregida
+                                    meta.setNombreArchivo(a.getNombreArchivo());
                                     meta.setTamanioBytes(a.getTamano());
                                     meta.setFechaSeleccion(new Date());
                                     meta.setRutaServidor(a.getRutaArchivo());
@@ -119,7 +164,6 @@ public class EscanerProcesador {
                                     new Handler(Looper.getMainLooper()).post(() -> onError.accept(msg));
                                 }
 
-                                // Limpiar PDF temporal siempre
                                 if (finalPdfFile != null && finalPdfFile.exists()) finalPdfFile.delete();
                             }
 
@@ -128,7 +172,6 @@ public class EscanerProcesador {
                                 new Handler(Looper.getMainLooper()).post(() ->
                                         onError.accept("Fallo de conexión: " + t.getMessage()));
 
-                                // Limpiar PDF temporal
                                 if (finalPdfFile != null && finalPdfFile.exists()) finalPdfFile.delete();
                             }
                         });

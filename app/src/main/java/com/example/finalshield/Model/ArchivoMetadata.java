@@ -21,7 +21,7 @@ public class ArchivoMetadata implements Serializable {
     private long idLocal;
 
     private Integer idArchivoServidor;
-    private Integer idUsuario; // --- NUEVA COLUMNA DE BASE DE DATOS LOCAL ---
+    private Integer idUsuario;
     private String nombre;
     private Uri uriOriginal;
     private long tamanioBytes;
@@ -67,11 +67,11 @@ public class ArchivoMetadata implements Serializable {
         }
     }
 
-    // --- NUEVO GETTER Y SETTER PARA EL CONTROL MULTI-USUARIO ---
+    // NUEVO GETTER Y SETTER PARA EL CONTROL MULTI-USUARIO
     public Integer getIdUsuario() { return idUsuario; }
     public void setIdUsuario(Integer idUsuario) { this.idUsuario = idUsuario; }
 
-    // --- GETTERS Y SETTERS COMPATIBLES CON TU FRAGMENTO Y ADAPTADOR ---
+    // GETTERS Y SETTERS COMPATIBLES CON TU FRAGMENTO Y ADAPTADOR
     public String getNombreArchivo() { return nombre; }
     public void setNombreArchivo(String nombreArchivo) { this.nombre = nombreArchivo; }
 

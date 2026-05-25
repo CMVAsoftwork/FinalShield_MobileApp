@@ -3,7 +3,10 @@ package com.example.finalshield.Fragments.Escaner;
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,15 +37,20 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.finalshield.Adaptadores.SharedImageViewModel;
 import com.example.finalshield.DBM.AppDatabase;
 import com.example.finalshield.DBM.ArchivoDAO;
-import com.example.finalshield.Fragments.Escaner.EscanerProcesador;
 import com.example.finalshield.R;
 import com.example.finalshield.Service.ArchivoService;
+import com.example.finalshield.Service.CifradoWorker;
 import com.example.finalshield.ViewModel.CargaViewModel;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -51,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 public class EscanerCifradoMixto extends Fragment implements View.OnClickListener {
 
@@ -169,49 +178,109 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
         }
 
         guardarPdf.setEnabled(false);
-
-        // Referencias finales para el proceso en background
         final CargaViewModel vm = this.cargaViewModel;
         final Context appCtx = requireContext().getApplicationContext();
 
-        // 1. Navegar a pantalla de carga inmediatamente indicando el destino final
-        Bundle args = new Bundle();
-        args.putInt("destino_final", R.id.cifradoEscaneo2);
-        nav.navigate(R.id.cargaProcesos, args);
+        // Trasladamos todo el procesamiento de compilación a segundo plano inmediatamente
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                // 1. Compilamos primero el PDF real en el caché para saber exactamente cuánto pesa inflado
+                String nombreLimpioFinal = "FS_SCAN_MIX_" + (System.currentTimeMillis() / 1000) + ".pdf";
+                File outputPdfLocal = new File(appCtx.getCacheDir(), nombreLimpioFinal);
 
-        // 2. Ejecutar procesamiento
-        // IMPORTANTE: Asegúrate que EscanerProcesador no llame al callback inmediatamente
-        EscanerProcesador.generarPdfYEnviar(
-                appCtx,
-                new ArrayList<>(todasLasUris),
-                archivoService,
-                archivoDAO,
-                () -> { // ESTO SE EJECUTA CUANDO EL PDF SE SUBIÓ Y GUARDÓ EN DB
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        // Primero marcamos como terminado para que la pantalla de carga
-                        // muestre el éxito y navegue por su cuenta usando el "destino_final"
-                        vm.terminarProceso();
+                EscanerProcesador.compilarPdfLocalDesdeUris(appCtx, new ArrayList<>(todasLasUris), outputPdfLocal);
 
-                        // Limpieza después de que la señal de éxito fue enviada
-                        borrarFotosDeTodoElDispositivo(todasLasUris);
+                if (!outputPdfLocal.exists() || outputPdfLocal.length() == 0) {
+                    throw new java.io.FileNotFoundException("Error al estructurar contenedor binario del PDF Mixto.");
+                }
+
+                // 2. Medimos los bytes reales del archivo final construido
+                long tamanoRealPdfBytes = outputPdfLocal.length();
+                long limiteBytes = 15 * 1024 * 1024; // 15 MB reglamentarios
+                boolean conectado = tieneInternet();
+
+                // 3. Evaluamos la bifurcación con datos certeros del binario
+                if (tamanoRealPdfBytes >= limiteBytes || !conectado) {
+
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        String msj = !conectado
+                                ? "Sin red. Compilando contenedor mixto para procesar al recuperar señal."
+                                : "Lote mixto pesado detectado. Cifrando en segundo plano...";
+                        Toast.makeText(appCtx, msj, Toast.LENGTH_LONG).show();
+                    });
+
+                    // Despachamos la ruta absoluta directa al disco privado
+                    String[] inputUris = new String[]{outputPdfLocal.getAbsolutePath()};
+
+                    Data dataWorker = new Data.Builder()
+                            .putStringArray("uris_llave", inputUris)
+                            .putString("id_usuario_llave", "18")
+                            .putString("nombre_visual_limpio", nombreLimpioFinal)
+                            .putString("origen_boveda", "ESCANEO") // Candado estricto para Room
+                            .build();
+
+                    Constraints restricciones = new Constraints.Builder()
+                            .setRequiredNetworkType(NetworkType.CONNECTED)
+                            .build();
+
+                    OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(CifradoWorker.class)
+                            .setInputData(dataWorker)
+                            .setConstraints(restricciones)
+                            .build();
+
+                    WorkManager.getInstance(appCtx).enqueue(request);
+
+                    borrarFotosDeTodoElDispositivo(todasLasUris);
+
+                    new Handler(Looper.getMainLooper()).post(() -> {
                         sharedViewModel.clearList();
                         sharedViewModel.clearCameraOnlyList();
                         limpiarArchivosDeSesionAnterior();
+                        nav.navigate(R.id.cifradoEscaneo2);
+                    });
 
-                        Log.d(TAG, "Cifrado Mixto Completado con éxito");
-                    }, 800); // El delay ayuda a que la animación de carga se vea natural
-                },
-                errorMsg -> { // ERROR real
+                } else {
+
                     new Handler(Looper.getMainLooper()).post(() -> {
                         vm.resetear();
-                        if (isAdded()) {
-                            nav.popBackStack(); // Regresa al escaner para intentar de nuevo
-                            guardarPdf.setEnabled(true);
-                            Toast.makeText(appCtx, "Error: " + errorMsg, Toast.LENGTH_LONG).show();
-                        }
+                        Bundle args = new Bundle();
+                        args.putInt("destino_final", R.id.cifradoEscaneo2);
+                        nav.navigate(R.id.cargaProcesos, args);
                     });
+
+                    // Mandamos llamar al procesador síncrono enviando las uris de imágenes limpias
+                    EscanerProcesador.generarPdfYEnviar(
+                            appCtx,
+                            new ArrayList<>(todasLasUris),
+                            archivoService,
+                            archivoDAO,
+                            () -> {
+                                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                    vm.terminarProceso();
+                                    borrarFotosDeTodoElDispositivo(todasLasUris);
+                                    sharedViewModel.clearList();
+                                    sharedViewModel.clearCameraOnlyList();
+                                    limpiarArchivosDeSesionAnterior();
+                                    Log.d(TAG, "Cifrado Mixto Completado con éxito en primer plano");
+                                }, 800);
+                            },
+                            errorMsg -> {
+                                new Handler(Looper.getMainLooper()).post(() -> {
+                                    vm.resetear();
+                                    if (isAdded()) {
+                                        nav.popBackStack();
+                                        guardarPdf.setEnabled(true);
+                                        Toast.makeText(appCtx, "Error: " + errorMsg, Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+                    );
                 }
-        );
+            } catch (Exception e) {
+                Log.e(TAG, "Error en procesamiento estratégico mixto: " + e.getMessage());
+                new Handler(Looper.getMainLooper()).post(() -> guardarPdf.setEnabled(true));
+            }
+        });
     }
 
     private void startCamera() {
@@ -341,6 +410,15 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
         if (uri == null || getContext() == null) return null;
         String name = uri.getLastPathSegment();
         if (name == null) return null;
+        if (name.contains("/")) {
+            name = name.substring(name.lastIndexOf("/") + 1);
+        }
         return new File(requireContext().getCacheDir(), name);
+    }
+
+    private boolean tieneInternet() {
+        ConnectivityManager cm = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 }

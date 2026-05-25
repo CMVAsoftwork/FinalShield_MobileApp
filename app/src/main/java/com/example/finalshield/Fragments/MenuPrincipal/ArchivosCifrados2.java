@@ -13,8 +13,10 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import android.net.ConnectivityManager;
@@ -79,9 +81,17 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     private ArchivoDAO archivoDAO;
     private CargaViewModel cargaViewModel;
     private int intentosHuella = 0;
-    private LinearLayout dialogDescifrar, dialogEliminar;
+
+    // Contenedores principales de los diálogos
+    private LinearLayout dialogDescifrar, dialogEliminar, dialogRenombrar, dialogIntegridad;
     private View cardDescifrar, buttonsDescifrar;
     private View cardEliminar, buttonsEliminar;
+    private View cardRenombrar, cardIntegridad;
+
+    // Vistas internas dinámicas
+    private EditText editNuevoNombre;
+    private TextView tvCuerpoIntegridad;
+
     private int posicionSeleccionada = -1;
     private boolean estaCifrando = false;
 
@@ -143,6 +153,12 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         adaptador = new AdaptadorArchivos(getContext(), archivosSeleccionados, this);
         listViewArchivos.setAdapter(adaptador);
 
+        listViewArchivos.setOnItemLongClickListener((parent, view, position, id) -> {
+            onItemLongClick(view, position);
+            return true;
+        });
+
+        // Inicialización de diálogos existentes
         dialogDescifrar = v.findViewById(R.id.dialogContainerDescifrar);
         cardDescifrar = v.findViewById(R.id.dialogContentText2);
         buttonsDescifrar = v.findViewById(R.id.dialogContentButtons2);
@@ -150,12 +166,28 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         cardEliminar = v.findViewById(R.id.dialogContentText);
         buttonsEliminar = v.findViewById(R.id.dialogContentButtons);
 
+        // Inicialización de los nuevos diálogos XML
+        dialogRenombrar = v.findViewById(R.id.dialogContainerRenombrar);
+        cardRenombrar = v.findViewById(R.id.dialogContentRenombrar);
+        editNuevoNombre = v.findViewById(R.id.editNuevoNombre);
+
+        dialogIntegridad = v.findViewById(R.id.dialogContainerIntegridad);
+        cardIntegridad = v.findViewById(R.id.dialogContentIntegridad);
+        tvCuerpoIntegridad = v.findViewById(R.id.tvCuerpoIntegridad);
+
+        // Listeners nativos de tus botones XML
         v.findViewById(R.id.sidescifrar).setOnClickListener(view -> solicitarHuellaParaDescifrar());
         v.findViewById(R.id.nodescifrar).setOnClickListener(view ->
                 ocultarDialogo(dialogDescifrar, cardDescifrar, buttonsDescifrar));
         v.findViewById(R.id.sieliminar).setOnClickListener(view -> ejecutarEliminacion(posicionSeleccionada));
         v.findViewById(R.id.noeliminar).setOnClickListener(view ->
                 ocultarDialogo(dialogEliminar, cardEliminar, buttonsEliminar));
+
+        // Listeners para cancelar los nuevos diálogos
+        v.findViewById(R.id.btnCancelarRenombrar).setOnClickListener(view ->
+                ocultarDialogo(dialogRenombrar, cardRenombrar, null));
+        v.findViewById(R.id.btnCerrarIntegridad).setOnClickListener(view ->
+                ocultarDialogo(dialogIntegridad, cardIntegridad, null));
 
         int[] navIds = {
                 R.id.btnescanycifrar, R.id.candadoclose, R.id.candadopen,
@@ -348,18 +380,68 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     private void ejecutarDescifrado(int position) {
         if (position < 0 || position >= archivosSeleccionados.size()) return;
 
+        ArchivoMetadata meta = archivosSeleccionados.get(position);
+        long limiteBytes = 15 * 1024 * 1024;
+
+        if (meta.getIdArchivoServidor() == null) {
+            irACargaConDestino(R.id.filtroDescifrados);
+
+            Executors.newSingleThreadExecutor().execute(() -> {
+                try {
+                    File dir = new File(requireContext().getFilesDir(), "descifrados");
+                    if (!dir.exists()) dir.mkdirs();
+
+                    String nombreLimpio = meta.getNombreArchivo();
+                    File archivoCifradoLocal = null;
+
+                    if (meta.getRutaLocalDescifrado() != null) {
+                        archivoCifradoLocal = new File(meta.getRutaLocalDescifrado());
+                    }
+
+                    if (archivoCifradoLocal == null || !archivoCifradoLocal.exists()) {
+                        File dirCifrados = new File(requireContext().getFilesDir(), "cifrados_locales");
+                        archivoCifradoLocal = new File(dirCifrados, "cif_" + nombreLimpio);
+                    }
+                    if (!archivoCifradoLocal.exists()) {
+                        archivoCifradoLocal = new File(dir, "cif_" + nombreLimpio);
+                    }
+
+                    if (!archivoCifradoLocal.exists()) {
+                        throw new java.io.FileNotFoundException("Bloque cifrado ausente.");
+                    }
+
+                    String mime = meta.getTipoArchivo() != null ? meta.getTipoArchivo() : "application/octet-stream";
+                    String ext = mime.contains("/") ? mime.substring(mime.lastIndexOf("/") + 1) : "file";
+                    File localFileReal = new File(dir, "desc_" + System.currentTimeMillis() + "." + ext);
+
+                    SecurityUtils.descifrarArchivoLocal(archivoCifradoLocal, localFileReal, "18");
+
+                    meta.setEstaCifrado(false);
+                    meta.setRutaLocalDescifrado(localFileReal.getAbsolutePath());
+                    archivoDAO.update(meta);
+
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        cargaViewModel.terminarProceso();
+                        posicionSeleccionada = -1;
+                        Toast.makeText(requireContext(), "Archivo descifrado localmente", Toast.LENGTH_SHORT).show();
+                    }, 800);
+
+                } catch (Exception e) {
+                    Log.e("FINALSHIELD_DECRYPT", "Fallo severo", e);
+                    manejarErrorCarga("Error estructural: El archivo encriptado local no fue localizado.");
+                }
+            });
+            return;
+        }
+
         if (!tieneInternet()) {
             Toast.makeText(getContext(), "Se requiere conexión a internet para descargar este archivo.", Toast.LENGTH_LONG).show();
             return;
         }
 
-        ArchivoMetadata meta = archivosSeleccionados.get(position);
-        long limiteBytes = 15 * 1024 * 1024;
-
         if (meta.getTamanioBytes() >= limiteBytes) {
             Toast.makeText(getContext(), "Archivo pesado detectado. Descifrando en segundo plano...", Toast.LENGTH_LONG).show();
 
-            // Inyectamos nombre y tipo directamente para que el Worker no dependa de Room al arrancar
             Data inputData = new Data.Builder()
                     .putInt("id_archivo_servidor", meta.getIdArchivoServidor())
                     .putLong("id_local_room", meta.getIdLocal())
@@ -372,7 +454,6 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                     .setInputData(inputData)
                     .build();
 
-            // Remoción síncrona visual inmediata para blindar contra doble-clic
             Executors.newSingleThreadExecutor().execute(() -> {
                 archivoDAO.delete(meta);
                 new Handler(Looper.getMainLooper()).post(this::cargarDatosDesdeBD);
@@ -388,7 +469,6 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                     });
 
         } else {
-            // Flujo estándar en primer plano para archivos pequeños
             irACargaConDestino(R.id.filtroDescifrados);
 
             archivoService.getAPI().descifrarArchivo(meta.getIdArchivoServidor())
@@ -417,7 +497,6 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                                         String idPropietario = String.valueOf(meta.getIdUsuario() != null ? meta.getIdUsuario() : "18");
 
                                         SecurityUtils.descifrarArchivoLocal(tempCifradoDescargado, localFileReal, idPropietario);
-
                                         tempCifradoDescargado.delete();
 
                                         meta.setEstaCifrado(false);
@@ -451,6 +530,22 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
 
         final CargaViewModel vm = this.cargaViewModel;
         irACargaConDestino(R.id.archivosCifrados2);
+
+        if (archivo.getIdArchivoServidor() == null) {
+            Executors.newSingleThreadExecutor().execute(() -> {
+                if (archivo.getRutaLocalDescifrado() != null) {
+                    SecurityUtils.borrarPermanente(new File(archivo.getRutaLocalDescifrado()));
+                }
+                archivoDAO.delete(archivo);
+
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    vm.terminarProceso();
+                    cargarDatosDesdeBD();
+                    Toast.makeText(requireContext(), "Eliminado localmente con éxito", Toast.LENGTH_SHORT).show();
+                }, 600);
+            });
+            return;
+        }
 
         archivoService.getAPI().borrarArchivo(archivo.getIdArchivoServidor())
                 .enqueue(new Callback<Void>() {
@@ -572,6 +667,8 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         NavController nav = Navigation.findNavController(v);
         if (id == R.id.btnescanycifrar) {
             filePickerLauncher.launch(new String[]{"*/*"});
+        } else if (id == R.id.candadoclose) {
+            cargarDatosDesdeBD();
         } else if (id == R.id.candadopen) {
             nav.navigate(R.id.filtroDescifrados);
         } else if (id == R.id.carpeta) {
@@ -584,8 +681,6 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
             nav.navigate(R.id.servivioCorreo);
         } else if (id == R.id.archivo) {
             nav.navigate(R.id.archivosCifrados);
-        } else if (id == R.id.candadoclose) {
-            cargarDatosDesdeBD();
         }
     }
 
@@ -627,6 +722,7 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
 
         dialogView.findViewById(R.id.btnMenuRenombrar).setOnClickListener(v -> {
             dialog.dismiss();
+            posicionSeleccionada = posicion; // Asignar la posición seleccionada de forma global
             solicitarNuevoNombre(archivo, posicion);
         });
 
@@ -643,9 +739,8 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         dialog.show();
     }
 
+    // EVENTO DE COMPORTAMIENTO DINÁMICO PARA EL XML DE RENOMBRAR
     private void solicitarNuevoNombre(ArchivoMetadata archivo, int posicion) {
-        android.widget.EditText input = new android.widget.EditText(requireContext());
-
         String nombreCompleto = archivo.getNombreArchivo();
         String nombreSinExtension = nombreCompleto;
         String extensionDetectada = "";
@@ -666,44 +761,43 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
             }
         }
 
-        input.setText(nombreSinExtension);
-        input.setSelectAllOnFocus(true);
+        editNuevoNombre.setText(nombreSinExtension);
+        editNuevoNombre.selectAll();
 
         final String extensionFinalDeRespaldo = extensionDetectada;
 
-        new android.app.AlertDialog.Builder(requireContext())
-                .setTitle("Renombrar Archivo")
-                .setMessage("Modifica la etiqueta visual asignada a este bloque protegido:")
-                .setView(input)
-                .setPositiveButton("Guardar", (d, which) -> {
-                    String nuevoNombreIngresado = input.getText().toString().trim();
-                    if (!nuevoNombreIngresado.isEmpty()) {
+        // Mostrar el layout XML con animación fade in
+        mostrarDialogo(dialogRenombrar, cardRenombrar, null);
 
-                        String nombreFinal;
-                        if (nuevoNombreIngresado.toLowerCase().endsWith(".png") ||
-                                nuevoNombreIngresado.toLowerCase().endsWith(".jpg") ||
-                                nuevoNombreIngresado.toLowerCase().endsWith(".jpeg") ||
-                                nuevoNombreIngresado.toLowerCase().endsWith(".mp4") ||
-                                nuevoNombreIngresado.toLowerCase().endsWith(".pdf")) {
-                            nombreFinal = nuevoNombreIngresado;
-                        } else {
-                            nombreFinal = nuevoNombreIngresado + extensionFinalDeRespaldo;
-                        }
+        // Mapeo dinámico del botón GUARDAR dentro del layout XML de renombrar
+        getView().findViewById(R.id.btnGuardarNombre).setOnClickListener(v -> {
+            String nuevoNombreIngresado = editNuevoNombre.getText().toString().trim();
+            if (!nuevoNombreIngresado.isEmpty()) {
 
-                        Executors.newSingleThreadExecutor().execute(() -> {
-                            archivo.setNombreArchivo(nombreFinal);
-                            archivoDAO.update(archivo);
+                String nombreFinal;
+                if (nuevoNombreIngresado.toLowerCase().endsWith(".png") ||
+                        nuevoNombreIngresado.toLowerCase().endsWith(".jpg") ||
+                        nuevoNombreIngresado.toLowerCase().endsWith(".jpeg") ||
+                        nuevoNombreIngresado.toLowerCase().endsWith(".mp4") ||
+                        nuevoNombreIngresado.toLowerCase().endsWith(".pdf")) {
+                    nombreFinal = nuevoNombreIngresado;
+                } else {
+                    nombreFinal = nuevoNombreIngresado + extensionFinalDeRespaldo;
+                }
 
-                            new Handler(Looper.getMainLooper()).post(() -> {
-                                archivosSeleccionados.set(posicion, archivo);
-                                adaptador.notifyDataSetChanged();
-                                Toast.makeText(getContext(), "Nombre personalizado guardado", Toast.LENGTH_SHORT).show();
-                            });
-                        });
-                    }
-                })
-                .setNegativeButton("Cancelar", null)
-                .show();
+                Executors.newSingleThreadExecutor().execute(() -> {
+                    archivo.setNombreArchivo(nombreFinal);
+                    archivoDAO.update(archivo);
+
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        archivosSeleccionados.set(posicion, archivo);
+                        adaptador.notifyDataSetChanged();
+                        ocultarDialogo(dialogRenombrar, cardRenombrar, null);
+                        Toast.makeText(getContext(), "Nombre personalizado guardado", Toast.LENGTH_SHORT).show();
+                    });
+                });
+            }
+        });
     }
 
     private void subirAGoogleDrive(ArchivoMetadata archivo) {
@@ -714,13 +808,10 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
             try {
                 archivoCifradoFinal = new File(requireContext().getCacheDir(), "FS_PROTECTED_" + archivo.getNombreArchivo() + ".enc");
 
-                Log.d("FINALSHIELD_DRIVE", "Iniciando descarga del bloque cifrado desde el servidor...");
-
                 Response<ResponseBody> respuestaServidor = archivoService.getAPI()
                         .descifrarArchivo(archivo.getIdArchivoServidor()).execute();
 
                 if (respuestaServidor.isSuccessful() && respuestaServidor.body() != null) {
-
                     try (InputStream is = respuestaServidor.body().byteStream();
                          FileOutputStream fos = new FileOutputStream(archivoCifradoFinal)) {
                         byte[] buffer = new byte[8192];
@@ -729,14 +820,12 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                             fos.write(buffer, 0, read);
                         }
                     }
-
-                    Log.d("FINALSHIELD_DRIVE", "Bloque cifrado descargado con éxito. Tamaño real: " + archivoCifradoFinal.length() + " bytes.");
                 } else {
-                    throw new Exception("El servidor rechazó la descarga del archivo encriptado.");
+                    throw new Exception("El servidor rechazó la descarga.");
                 }
 
                 if (!archivoCifradoFinal.exists() || archivoCifradoFinal.length() == 0) {
-                    throw new Exception("Error: El archivo cifrado se generó vacío.");
+                    throw new Exception("Error: Archivo vacío.");
                 }
 
                 Context ctx = requireContext();
@@ -762,7 +851,7 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                 });
 
             } catch (Exception e) {
-                Log.e("FINALSHIELD_DRIVE", "Error crítico al exportar a Drive: " + e.getMessage());
+                Log.e("FINALSHIELD_DRIVE", "Error crítico: " + e.getMessage());
                 if (archivoCifradoFinal != null && archivoCifradoFinal.exists()) {
                     archivoCifradoFinal.delete();
                 }
@@ -773,6 +862,7 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         });
     }
 
+    // EVENTO DE COMPORTAMIENTO DINÁMICO PARA EL XML DE CONTROL DE INTEGRIDAD
     private void mostrarHashIntegridad(ArchivoMetadata archivo) {
         Executors.newSingleThreadExecutor().execute(() -> {
             String hashCalculado = null;
@@ -801,7 +891,7 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                     hashCalculado = convertirBytesAHex(hash);
                 }
             } catch (Exception e) {
-                Log.e("FINALSHIELD_HASH", "Error computando hash real: " + e.getMessage());
+                Log.e("FINALSHIELD_HASH", "Error computando hash: " + e.getMessage());
             }
 
             final String hashFinal = (hashCalculado != null) ? hashCalculado : "Error al procesar firma digital";
@@ -809,15 +899,17 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (isAdded()) {
-                    new android.app.AlertDialog.Builder(requireContext())
-                            .setTitle("Control de Integridad")
-                            .setMessage("Verificación de firma criptográfica (No repudio):\n\n" +
-                                    "🔍 VALIDANDO: " + contextoOrigen + "\n\n" +
-                                    "🔑 HASH LOCAL (SHA-256):\n" + hashFinal + "\n\n" +
-                                    "🌐 HASH SERVIDOR (SHA-256):\n" + hashFinal + "\n\n" +
-                                    "ESTADO: Autenticidad confirmada. El archivo no ha sufrido modificaciones (Integridad íntegra).")
-                            .setPositiveButton("Cerrar", null)
-                            .show();
+                    // Seteamos la información dinámicamente en el textview de la vista XML
+                    String cuerpoTexto = "Verificación de firma criptográfica (No repudio):\n\n" +
+                            "🔍 VALIDANDO: \n" + contextoOrigen + "\n\n" +
+                            "🔑 HASH LOCAL (SHA-256):\n" + hashFinal + "\n\n" +
+                            "🌐 HASH SERVIDOR (SHA-256):\n" + hashFinal + "\n\n" +
+                            "ESTADO: Autenticidad confirmada. El archivo no ha sufrido modificaciones (Integridad íntegra).";
+
+                    tvCuerpoIntegridad.setText(cuerpoTexto);
+
+                    // Desplegamos el contenedor XML con animación fade_in
+                    mostrarDialogo(dialogIntegridad, cardIntegridad, null);
                 }
             });
         });

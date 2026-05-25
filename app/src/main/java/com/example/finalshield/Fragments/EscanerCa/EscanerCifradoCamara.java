@@ -3,7 +3,10 @@ package com.example.finalshield.Fragments.EscanerCa;
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -34,6 +37,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -42,6 +50,7 @@ import com.example.finalshield.DBM.ArchivoDAO;
 import com.example.finalshield.Fragments.Escaner.EscanerProcesador;
 import com.example.finalshield.R;
 import com.example.finalshield.Service.ArchivoService;
+import com.example.finalshield.Service.CifradoWorker;
 import com.example.finalshield.ViewModel.CargaViewModel;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -50,6 +59,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 public class EscanerCifradoCamara extends Fragment implements View.OnClickListener {
 
@@ -194,49 +204,117 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
             return;
         }
 
+        // 1. Bloqueo inmediato del hilo de UI
         guardarPdf.setEnabled(false);
+        tomarfoto.setEnabled(false);
 
-        // Referencia final para asegurar el acceso en el callback
         final CargaViewModel vm = this.cargaViewModel;
         final Context appCtx = requireContext().getApplicationContext();
 
-        // 1. Navegar a CargaProcesos inmediatamente
+        long tamanoTotalBytes = 0;
+        for (File f : fotosTomadas) {
+            if (f.exists()) tamanoTotalBytes += f.length();
+        }
+
+        long limiteBytes = 15 * 1024 * 1024; // 15 MB
+        boolean conectado = tieneInternet();
+
+        final List<File> fotosAProcesar = new ArrayList<>(fotosTomadas);
+
+        List<Uri> urisParaCifrar = new ArrayList<>();
+        for (File f : fotosAProcesar) {
+            urisParaCifrar.add(FileProvider.getUriForFile(appCtx, appCtx.getPackageName() + ".fileprovider", f));
+        }
+
+        // 2. Transición visual a la pantalla de carga
         Bundle args = new Bundle();
         args.putInt("destino_final", R.id.cifradoEscaneo2);
         nav.navigate(R.id.cargaProcesos, args);
 
-        List<Uri> urisParaCifrar = new ArrayList<>();
-        for (File f : fotosTomadas) {
-            urisParaCifrar.add(FileProvider.getUriForFile(requireContext(),
-                    requireContext().getPackageName() + ".fileprovider", f));
-        }
+        if (tamanoTotalBytes >= limiteBytes || !conectado) {
+            String msj = !conectado
+                    ? "Sin red. Procesando escaneo en segundo plano..."
+                    : "Escaneo pesado. Procesando en segundo plano...";
+            Toast.makeText(appCtx, msj, Toast.LENGTH_LONG).show();
 
-        // 2. Ejecutar procesamiento en background usando ApplicationContext
-        EscanerProcesador.generarPdfYEnviar(
-                appCtx,
-                urisParaCifrar,
-                archivoService,
-                archivoDAO,
-                () -> { // Callback de Éxito
-                    borrarOriginalesExhaustivo(urisParaCifrar);
+            // 3. Hilo de fondo secuencial estricto
+            Executors.newSingleThreadExecutor().execute(() -> {
+                try {
+                    File outputPdfLocal = new File(appCtx.getCacheDir(), "SCAN_FS_" + System.currentTimeMillis() + ".pdf");
 
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        vm.terminarProceso(); // Notificar al ViewModel compartido
-                        limpiarArchivosDeSesionAnterior();
-                        Log.d("FINALSHIELD", "Cifrado exitoso, cerrando pantalla de carga");
-                    }, 800);
-                },
-                errorMsg -> { // Callback de Error
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        vm.resetear();
-                        if (isAdded()) {
-                            nav.popBackStack(); // Regresa al escáner si falla
-                            guardarPdf.setEnabled(true);
-                            Toast.makeText(requireContext(), "Error: " + errorMsg, Toast.LENGTH_LONG).show();
-                        }
-                    });
+                    // Compilación nativa del PDF local (Síncrona en este hilo)
+                    EscanerProcesador.compilarPdfLocalDesdeUris(appCtx, urisParaCifrar, outputPdfLocal);
+
+                    if (outputPdfLocal.exists() && outputPdfLocal.length() > 0) {
+
+                        String[] rutasInput = new String[]{outputPdfLocal.getAbsolutePath()};
+
+                        Data dataWorker = new Data.Builder()
+                                .putStringArray("uris_llave", rutasInput)
+                                .putString("id_usuario_llave", "18")
+                                .putString("nombre_visual_limpio", outputPdfLocal.getName())
+                                .putString("origen_boveda", "ESCANEO")
+                                .build();
+
+                        Constraints restricciones = new Constraints.Builder()
+                                .setRequiredNetworkType(NetworkType.CONNECTED)
+                                .build();
+
+                        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(CifradoWorker.class)
+                                .setInputData(dataWorker)
+                                .setConstraints(restricciones)
+                                .build();
+
+                        // Encolamos el Worker sabiendo que el archivo ya tiene sus megabytes completos
+                        WorkManager.getInstance(appCtx).enqueue(request);
+
+                        // Eliminamos los JPEGs sueltos ahora que el PDF está cerrado
+                        borrarOriginalesExhaustivo(urisParaCifrar);
+
+                        // 4. Liberación de la interfaz gráfica en el hilo principal
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            fotosTomadas.clear();
+                            limpiarUI();
+                            vm.terminarProceso(); // CargaProcesos nos redirige a CifradoEscaneo2
+                        });
+                    } else {
+                        Log.e("FINALSHIELD_ERROR", "El PDF local se generó vacío.");
+                        new Handler(Looper.getMainLooper()).post(vm::resetear);
+                    }
+                } catch (Exception e) {
+                    Log.e("FINALSHIELD_SCAN_ERROR", "Fallo armando PDF local de fondo: " + e.getMessage());
+                    new Handler(Looper.getMainLooper()).post(vm::resetear);
                 }
-        );
+            });
+
+        } else {
+            // Flujo normal síncrono por red estable
+            EscanerProcesador.generarPdfYEnviar(
+                    appCtx,
+                    urisParaCifrar,
+                    archivoService,
+                    archivoDAO,
+                    () -> {
+                        borrarOriginalesExhaustivo(urisParaCifrar);
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            fotosTomadas.clear();
+                            limpiarUI();
+                            vm.terminarProceso();
+                        }, 800);
+                    },
+                    errorMsg -> {
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            vm.resetear();
+                            if (isAdded()) {
+                                nav.popBackStack();
+                                guardarPdf.setEnabled(true);
+                                tomarfoto.setEnabled(true);
+                                Toast.makeText(appCtx, "Error: " + errorMsg, Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    }
+            );
+        }
     }
 
     private void startCamera() {
@@ -347,5 +425,11 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
             fotosTomadas.addAll(temp);
         }
         actualizarUIConDatosActuales();
+    }
+
+    private boolean tieneInternet() {
+        ConnectivityManager cm = (ConnectivityManager) requireContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 }

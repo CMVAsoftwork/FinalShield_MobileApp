@@ -7,6 +7,91 @@
     android:background="@color/degradado_azul_medio"
     tools:context=".Fragments.MenuPrincipal.ArchivosCifrados2">
     <LinearLayout
+        android:id="@+id/dialogContainerRenombrar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#A0000000"
+        android:gravity="center"
+        android:visibility="gone"
+        android:elevation="10dp"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/dialogContentRenombrar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:background="@drawable/cuadrado"
+            android:orientation="vertical"
+            android:padding="20dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Renombrar archivo"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+            <EditText
+                android:id="@+id/editNuevoNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColorHint="@color/white"
+                android:textColor="@color/white"
+                android:hint="Nuevo nombre" />
+            <Button
+                android:id="@+id/btnGuardarNombre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#1E90FF"
+                android:text="Guardar"/>
+            <Button
+                android:id="@+id/btnCancelarRenombrar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#1E90FF"
+                android:text="Cancelar"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/dialogContainerIntegridad"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#A0000000"
+        android:gravity="center"
+        android:visibility="gone"
+        android:elevation="10dp"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/dialogContentIntegridad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:background="@drawable/cuadrado"
+            android:orientation="vertical"
+            android:padding="20dp">
+            <TextView
+                android:id="@+id/tvTituloIntegridad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Control de Integridad"
+                android:textColor="@color/white"
+                android:textSize="18sp"/>
+            <TextView
+                android:id="@+id/tvCuerpoIntegridad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:layout_marginVertical="10dp"/>
+            <Button
+                android:id="@+id/btnCerrarIntegridad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#1E90FF"
+
+                android:text="Cerrar"/>
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
         android:id="@+id/dialogContainerDescifrar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

@@ -39,8 +39,8 @@ public class ArchivoService {
                     }
                     return chain.proceed(chain.request());
                 })
-                .connectTimeout(60, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(30, TimeUnit.MINUTES)
+                .readTimeout(30, TimeUnit.MINUTES)
                 .build();
         this.gson = new GsonBuilder()
                 .setLenient()
