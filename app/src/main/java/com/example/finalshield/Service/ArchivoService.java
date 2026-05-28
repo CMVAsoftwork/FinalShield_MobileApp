@@ -16,7 +16,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ArchivoService {
-    private static final String BASE_URL = "https:/aydan-nonrepresentational-womanishly.ngrok-free.dev/";
+    private static final String BASE_URL = "https://aydan-nonrepresentational-womanishly.ngrok-free.dev/";
     private final ArchivoAPI archivoAPI;
     private final AuthService authService;
     private final Gson gson;

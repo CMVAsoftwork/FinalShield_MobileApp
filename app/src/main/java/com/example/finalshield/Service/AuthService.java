@@ -25,7 +25,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class AuthService {
-    private static final String BASE_URL = "https:/aydan-nonrepresentational-womanishly.ngrok-free.dev/";
+    private static final String BASE_URL = "https://aydan-nonrepresentational-womanishly.ngrok-free.dev/";
     private static final String PREF_NAME = "finalshield_prefs";
     private static final String TOKEN_KEY = "jwt_token";
     private static final String CORREO_KEY = "correo_usuario";
