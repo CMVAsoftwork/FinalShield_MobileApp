@@ -14,7 +14,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CorreoService {
-    private static final String BASE_URL = "https://aydan-nonrepresentational-womanishly.ngrok-free.dev/";
+    private static final String BASE_URL = "https://cristo-des.mexicocentral.cloudapp.azure.com/";
     private final CorreoAPI correoAPI;
     private final AuthService authService;
     private final Gson gson;

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -181,10 +182,13 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
         final CargaViewModel vm = this.cargaViewModel;
         final Context appCtx = requireContext().getApplicationContext();
 
-        // Trasladamos todo el procesamiento de compilación a segundo plano inmediatamente
+        // Extraemos el ID del usuario logueado dinámicamente de SharedPreferences
+        SharedPreferences prefs = appCtx.getSharedPreferences("ShieldPrefs", Context.MODE_PRIVATE);
+        int idUsuarioLogueado = prefs.getInt("idUsuario", -1);
+        final String userIdStr = String.valueOf(idUsuarioLogueado);
+
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                // 1. Compilamos primero el PDF real en el caché para saber exactamente cuánto pesa inflado
                 String nombreLimpioFinal = "FS_SCAN_MIX_" + (System.currentTimeMillis() / 1000) + ".pdf";
                 File outputPdfLocal = new File(appCtx.getCacheDir(), nombreLimpioFinal);
 
@@ -194,14 +198,11 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
                     throw new java.io.FileNotFoundException("Error al estructurar contenedor binario del PDF Mixto.");
                 }
 
-                // 2. Medimos los bytes reales del archivo final construido
                 long tamanoRealPdfBytes = outputPdfLocal.length();
-                long limiteBytes = 15 * 1024 * 1024; // 15 MB reglamentarios
+                long limiteBytes = 15 * 1024 * 1024; // 15 MB
                 boolean conectado = tieneInternet();
 
-                // 3. Evaluamos la bifurcación con datos certeros del binario
                 if (tamanoRealPdfBytes >= limiteBytes || !conectado) {
-
                     new Handler(Looper.getMainLooper()).post(() -> {
                         String msj = !conectado
                                 ? "Sin red. Compilando contenedor mixto para procesar al recuperar señal."
@@ -209,14 +210,14 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
                         Toast.makeText(appCtx, msj, Toast.LENGTH_LONG).show();
                     });
 
-                    // Despachamos la ruta absoluta directa al disco privado
                     String[] inputUris = new String[]{outputPdfLocal.getAbsolutePath()};
 
+                    // REPARADO: Se inyecta la variable userIdStr en lugar del "18" estático
                     Data dataWorker = new Data.Builder()
                             .putStringArray("uris_llave", inputUris)
-                            .putString("id_usuario_llave", "18")
+                            .putString("id_usuario_llave", userIdStr)
                             .putString("nombre_visual_limpio", nombreLimpioFinal)
-                            .putString("origen_boveda", "ESCANEO") // Candado estricto para Room
+                            .putString("origen_boveda", "ESCANEO")
                             .build();
 
                     Constraints restricciones = new Constraints.Builder()
@@ -240,7 +241,6 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
                     });
 
                 } else {
-
                     new Handler(Looper.getMainLooper()).post(() -> {
                         vm.resetear();
                         Bundle args = new Bundle();
@@ -248,7 +248,6 @@ public class EscanerCifradoMixto extends Fragment implements View.OnClickListene
                         nav.navigate(R.id.cargaProcesos, args);
                     });
 
-                    // Mandamos llamar al procesador síncrono enviando las uris de imágenes limpias
                     EscanerProcesador.generarPdfYEnviar(
                             appCtx,
                             new ArrayList<>(todasLasUris),

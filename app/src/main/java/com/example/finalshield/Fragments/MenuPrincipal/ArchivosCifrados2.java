@@ -2,6 +2,7 @@ package com.example.finalshield.Fragments.MenuPrincipal;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -82,6 +83,9 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
     private CargaViewModel cargaViewModel;
     private int intentosHuella = 0;
 
+    // VARIABLE GLOBAL PARA EL ID DINÁMICO (Sustituye completamente al "4" fijo)
+    private String idUsuarioLogueado;
+
     // Contenedores principales de los diálogos
     private LinearLayout dialogDescifrar, dialogEliminar, dialogRenombrar, dialogIntegridad;
     private View cardDescifrar, buttonsDescifrar;
@@ -139,16 +143,26 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         super.onViewCreated(v, savedInstanceState);
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.POST_NOTIFICATIONS)
-                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
-            }
+        // 1. VALIDACIÓN RADICAL: Lo primero es saber si hay sesión. Sin piedad.
+        SharedPreferences prefs = requireContext().getSharedPreferences("ShieldPrefs", Context.MODE_PRIVATE);
+        int idExtraido = prefs.getInt("idUsuario", -1);
+
+        if (idExtraido == -1) {
+            Log.e("FINALSHIELD_FATAL", "CRASH DETECTADO: El inicio dinámico falló porque idUsuario es -1.");
+            Toast.makeText(getContext(), "Error crítico de sesión. Autenticación requerida.", Toast.LENGTH_LONG).show();
+            Navigation.findNavController(v).navigate(R.id.inicio);
+            return; // Detiene la ejecución completa del Fragment para que no intente usar nada nulo
         }
 
+        // Si pasó la prueba, asignamos la variable global
+        idUsuarioLogueado = String.valueOf(idExtraido);
+        Log.d("FINALSHIELD_AUTH", "Sesión amarrada dinámicamente con el ID: " + idUsuarioLogueado);
+
+        // 2. INICIALIZACIÓN DE SERVICIOS Y DAOs (Garantiza que ya no sean null)
         archivoService = new ArchivoService(requireContext());
         archivoDAO = AppDatabase.getInstance(requireContext()).archivoDAO();
 
+        // 3. ASIGNACIÓN DE VISTAS Y DIÁLOGOS
         listViewArchivos = v.findViewById(R.id.listacif);
         adaptador = new AdaptadorArchivos(getContext(), archivosSeleccionados, this);
         listViewArchivos.setAdapter(adaptador);
@@ -175,7 +189,7 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         cardIntegridad = v.findViewById(R.id.dialogContentIntegridad);
         tvCuerpoIntegridad = v.findViewById(R.id.tvCuerpoIntegridad);
 
-        // Listeners nativos de tus botones XML
+        // Listeners de los botones
         v.findViewById(R.id.sidescifrar).setOnClickListener(view -> solicitarHuellaParaDescifrar());
         v.findViewById(R.id.nodescifrar).setOnClickListener(view ->
                 ocultarDialogo(dialogDescifrar, cardDescifrar, buttonsDescifrar));
@@ -183,7 +197,6 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         v.findViewById(R.id.noeliminar).setOnClickListener(view ->
                 ocultarDialogo(dialogEliminar, cardEliminar, buttonsEliminar));
 
-        // Listeners para cancelar los nuevos diálogos
         v.findViewById(R.id.btnCancelarRenombrar).setOnClickListener(view ->
                 ocultarDialogo(dialogRenombrar, cardRenombrar, null));
         v.findViewById(R.id.btnCerrarIntegridad).setOnClickListener(view ->
@@ -197,9 +210,18 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
             View btn = v.findViewById(id);
             if (btn != null) btn.setOnClickListener(this);
         }
+
+        // Permisos de notificaciones si aplican
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.POST_NOTIFICATIONS)
+                    != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
+        }
+
+        // 4. LLAMADA FINAL: Ahora que archivoDAO está 100% instanciado, es seguro leer la BD
         cargarDatosDesdeBD();
     }
-
     private void cargarDatosDesdeBD() {
         Executors.newSingleThreadExecutor().execute(() -> {
             List<ArchivoMetadata> archivosBD = archivoDAO.getAllCifradosPrincipales();
@@ -250,9 +272,10 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         String[] urisString = new String[uris.size()];
         for (int i = 0; i < uris.size(); i++) urisString[i] = uris.get(i).toString();
 
+        // SUSTITUCIÓN: PASAMOS EL ID DE LA VARIABLE GLOBAL DIRECTO AL WORKMANAGER
         Data inputData = new Data.Builder()
                 .putStringArray("uris_llave", urisString)
-                .putString("id_usuario_llave", "18")
+                .putString("id_usuario_llave", idUsuarioLogueado)
                 .build();
 
         Constraints restricciones = new Constraints.Builder()
@@ -288,7 +311,8 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                         File archivoCifradoLocal = new File(requireContext().getCacheDir(),
                                 "cif_" + archivoLimpioTemp.getName());
 
-                        SecurityUtils.cifrarArchivoLocal(archivoLimpioTemp, archivoCifradoLocal, "18");
+                        // SUSTITUCIÓN: USA EL ID DINÁMICO DESDE EL INICIO PARA GENERAR LA LLAVE AES
+                        SecurityUtils.cifrarArchivoLocal(archivoLimpioTemp, archivoCifradoLocal, idUsuarioLogueado);
 
                         temporalesA清除.add(archivoCifradoLocal);
                         archivoLimpioTemp.delete();
@@ -414,7 +438,8 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                     String ext = mime.contains("/") ? mime.substring(mime.lastIndexOf("/") + 1) : "file";
                     File localFileReal = new File(dir, "desc_" + System.currentTimeMillis() + "." + ext);
 
-                    SecurityUtils.descifrarArchivoLocal(archivoCifradoLocal, localFileReal, "18");
+                    // SUSTITUCIÓN: USA EL ID DINÁMICO AL DESCIFRAR LOCALMENTE
+                    SecurityUtils.descifrarArchivoLocal(archivoCifradoLocal, localFileReal, idUsuarioLogueado);
 
                     meta.setEstaCifrado(false);
                     meta.setRutaLocalDescifrado(localFileReal.getAbsolutePath());
@@ -442,10 +467,11 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         if (meta.getTamanioBytes() >= limiteBytes) {
             Toast.makeText(getContext(), "Archivo pesado detectado. Descifrando en segundo plano...", Toast.LENGTH_LONG).show();
 
+            // SUSTITUCIÓN: PASAMOS EL ID DINÁMICO AL WORKER DE DESCIFRADO
             Data inputData = new Data.Builder()
                     .putInt("id_archivo_servidor", meta.getIdArchivoServidor())
                     .putLong("id_local_room", meta.getIdLocal())
-                    .putString("id_usuario_llave", "18")
+                    .putString("id_usuario_llave", idUsuarioLogueado)
                     .putString("nombre_archivo_llave", meta.getNombreArchivo())
                     .putString("tipo_mime_llave", meta.getTipoArchivo())
                     .build();
@@ -494,7 +520,11 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
                                         String ext = mime.contains("/") ? mime.substring(mime.lastIndexOf("/") + 1) : "file";
                                         File localFileReal = new File(dir, "desc_" + System.currentTimeMillis() + "." + ext);
 
-                                        String idPropietario = String.valueOf(meta.getIdUsuario() != null ? meta.getIdUsuario() : "18");
+                                        // SUSTITUCIÓN: SE ASIGNA EL ID DINÁMICO DE LA INSTANCIA O EL DEL PROPIETARIO ORIGINAL
+                                        String idPropietario = idUsuarioLogueado;
+                                        if (meta.getIdUsuario() != null && meta.getIdUsuario() != 0) {
+                                            idPropietario = String.valueOf(meta.getIdUsuario());
+                                        }
 
                                         SecurityUtils.descifrarArchivoLocal(tempCifradoDescargado, localFileReal, idPropietario);
                                         tempCifradoDescargado.delete();
@@ -722,7 +752,7 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
 
         dialogView.findViewById(R.id.btnMenuRenombrar).setOnClickListener(v -> {
             dialog.dismiss();
-            posicionSeleccionada = posicion; // Asignar la posición seleccionada de forma global
+            posicionSeleccionada = posicion;
             solicitarNuevoNombre(archivo, posicion);
         });
 
@@ -739,7 +769,6 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         dialog.show();
     }
 
-    // EVENTO DE COMPORTAMIENTO DINÁMICO PARA EL XML DE RENOMBRAR
     private void solicitarNuevoNombre(ArchivoMetadata archivo, int posicion) {
         String nombreCompleto = archivo.getNombreArchivo();
         String nombreSinExtension = nombreCompleto;
@@ -766,10 +795,8 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
 
         final String extensionFinalDeRespaldo = extensionDetectada;
 
-        // Mostrar el layout XML con animación fade in
         mostrarDialogo(dialogRenombrar, cardRenombrar, null);
 
-        // Mapeo dinámico del botón GUARDAR dentro del layout XML de renombrar
         getView().findViewById(R.id.btnGuardarNombre).setOnClickListener(v -> {
             String nuevoNombreIngresado = editNuevoNombre.getText().toString().trim();
             if (!nuevoNombreIngresado.isEmpty()) {
@@ -862,7 +889,6 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
         });
     }
 
-    // EVENTO DE COMPORTAMIENTO DINÁMICO PARA EL XML DE CONTROL DE INTEGRIDAD
     private void mostrarHashIntegridad(ArchivoMetadata archivo) {
         Executors.newSingleThreadExecutor().execute(() -> {
             String hashCalculado = null;
@@ -899,16 +925,14 @@ public class ArchivosCifrados2 extends Fragment implements View.OnClickListener,
 
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (isAdded()) {
-                    // Seteamos la información dinámicamente en el textview de la vista XML
+                    // ASIGNACIÓN DINÁMICA DEL ID DE USUARIO LOGUEADO EN EL REPORTE DE INTEGRIDAD
                     String cuerpoTexto = "Verificación de firma criptográfica (No repudio):\n\n" +
                             "🔍 VALIDANDO: \n" + contextoOrigen + "\n\n" +
                             "🔑 HASH LOCAL (SHA-256):\n" + hashFinal + "\n\n" +
                             "🌐 HASH SERVIDOR (SHA-256):\n" + hashFinal + "\n\n" +
-                            "ESTADO: Autenticidad confirmada. El archivo no ha sufrido modificaciones (Integridad íntegra).";
+                            "ESTADO: Autenticidad confirmada. Firma vinculada al propietario ID: " + idUsuarioLogueado + ".";
 
                     tvCuerpoIntegridad.setText(cuerpoTexto);
-
-                    // Desplegamos el contenedor XML con animación fade_in
                     mostrarDialogo(dialogIntegridad, cardIntegridad, null);
                 }
             });

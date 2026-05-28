@@ -120,8 +120,19 @@ public class DatosBiometricos extends Fragment implements View.OnClickListener, 
         authService.loginBiometrico(correoParaLogin, new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.isSuccessful()) {
-                    // Catapultamos a CargaProcesos con las órdenes de destino finales inyectadas
+                if (response.isSuccessful() && response.body() != null) {
+
+                    // --- AQUÍ ESTÁ EL AJUSTE ---
+                    // 1. Extraemos el ID del JSON que viene del servidor
+                    int idUsuarioRecibido = response.body().getIdUsuario();
+
+                    // 2. Guardamos de forma persistente para que el resto de la app lo encuentre
+                    SharedPreferences prefs = requireContext().getSharedPreferences("ShieldPrefs", Context.MODE_PRIVATE);
+                    prefs.edit().putInt("idUsuario", idUsuarioRecibido).apply();
+
+                    Log.d("DEBUG_AUTH", "Login Bio exitoso y datos persistidos: " + idUsuarioRecibido);
+                    // ---------------------------
+
                     if (isAdded()) {
                         NavHostFragment.findNavController(DatosBiometricos.this)
                                 .navigate(R.id.cargaProcesos, bundleCarga);

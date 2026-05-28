@@ -6,6 +6,46 @@
     android:orientation="vertical"
     android:background="@color/degradado_azul_medio"
     tools:context=".Fragments.MenuPrincipal.ArchivosDSeguros">
+
+    <LinearLayout
+        android:id="@+id/dialogContainerIntegridad"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#A0000000"
+        android:gravity="center"
+        android:visibility="gone"
+        android:elevation="10dp"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/dialogContentIntegridad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:background="@drawable/cuadrado"
+            android:orientation="vertical"
+            android:padding="20dp">
+            <TextView
+                android:id="@+id/tvTituloIntegridad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Control de Integridad"
+                android:textColor="@color/white"
+                android:textSize="18sp"/>
+            <TextView
+                android:id="@+id/tvCuerpoIntegridad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:layout_marginVertical="10dp"/>
+            <Button
+                android:id="@+id/btnCerrarIntegridad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#1E90FF"
+                android:text="Cerrar"/>
+        </LinearLayout>
+    </LinearLayout>
+
     <LinearLayout
         android:id="@+id/dialogContainer"
         android:layout_width="match_parent"
@@ -58,6 +98,7 @@
                 android:layout_marginStart="16dp"/>
         </LinearLayout>
     </LinearLayout>
+
     <LinearLayout
         android:id="@+id/dialogContainer2"
         android:layout_width="match_parent"
@@ -78,7 +119,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                android:text="¿Estás seguro de que\nquieres eliminar el arvhivo?"
+                android:text="¿Estás seguro de que\nquieres eliminar el archivo?"
                 android:textSize="18sp"
                 android:textAlignment="center"
                 android:textColor="@color/white"
@@ -110,6 +151,7 @@
                 android:layout_marginStart="16dp"/>
         </LinearLayout>
     </LinearLayout>
+
     <ImageButton
         android:id="@+id/btnperfil"
         android:layout_width="30dp"
@@ -118,6 +160,7 @@
         android:background="@android:color/transparent"
         android:layout_marginStart="330dp"
         android:layout_marginTop="55dp"/>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -138,15 +181,33 @@
             android:layout_marginTop="20dp"
             android:src="@drawable/flower" />
     </LinearLayout>
-    <TextView
-        android:layout_width="wrap_content"
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Archivos Descifrados"
-        android:textColor="@color/white"
-        android:textSize="20dp"
-        android:textStyle="bold"
-        android:layout_marginStart="90dp"
-        android:layout_marginTop="30dp"/>
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="30dp"
+        android:paddingHorizontal="30dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Archivos Descifrados"
+            android:textColor="@color/white"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btnImportarDrive"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:src="@drawable/drive"
+            android:scaleType="fitCenter"
+            android:background="@android:color/transparent"
+            android:contentDescription="Importar desde Google Drive" />
+    </LinearLayout>
 
     <ListView
         android:id="@+id/listadesc"
@@ -155,7 +216,8 @@
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
         android:divider="@null"
-        android:layout_marginTop="30dp" />
+        android:layout_marginTop="15dp" />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -177,7 +239,6 @@
             android:scaleType="fitCenter"
             android:layout_marginStart="20dp"
             android:background="@android:color/transparent"/>
-
         <ImageButton
             android:id="@+id/candadoclose"
             android:layout_width="40dp"

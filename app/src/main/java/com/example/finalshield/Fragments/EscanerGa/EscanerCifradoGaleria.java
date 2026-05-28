@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -228,9 +229,13 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
         final CargaViewModel vm = this.cargaViewModel;
         final Context appCtx = requireContext().getApplicationContext();
 
+        // Extraemos el ID del usuario logueado dinámicamente de SharedPreferences
+        SharedPreferences prefs = appCtx.getSharedPreferences("ShieldPrefs", Context.MODE_PRIVATE);
+        int idUsuarioLogueado = prefs.getInt("idUsuario", -1);
+        final String userIdStr = String.valueOf(idUsuarioLogueado);
+
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                // 1. Armamos primero el PDF en disco dentro del caché de la app
                 String nombreLimpioFinal = "cif_SCAN_GAL_" + (System.currentTimeMillis() / 1000) + ".pdf";
                 File outputPdfLocal = new File(appCtx.getCacheDir(), nombreLimpioFinal);
 
@@ -240,12 +245,10 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
                     throw new java.io.FileNotFoundException("Fallo al compilar el contenedor binario del PDF.");
                 }
 
-                // 2. Ahora que el PDF ya está inflado con su estructura real, calculamos su peso exacto
                 long tamanoRealPdfBytes = outputPdfLocal.length();
                 long limiteBytes = 15 * 1024 * 1024; // 15 MB
                 boolean conectado = tieneInternet();
 
-                // 3. Evaluamos la condición con el peso real del archivo final
                 if (tamanoRealPdfBytes >= limiteBytes || !conectado) {
                     new Handler(Looper.getMainLooper()).post(() -> {
                         String msg = !conectado
@@ -254,14 +257,14 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
                         Toast.makeText(appCtx, msg, Toast.LENGTH_LONG).show();
                     });
 
-                    // Despachamos la ruta absoluta directa del archivo
                     String[] inputUris = new String[]{outputPdfLocal.getAbsolutePath()};
 
+                    // REPARADO: Reemplazamos el "18" estático por la referencia dinámica userIdStr
                     Data dataWorker = new Data.Builder()
                             .putStringArray("uris_llave", inputUris)
-                            .putString("id_usuario_llave", "18")
+                            .putString("id_usuario_llave", userIdStr)
                             .putString("nombre_visual_limpio", nombreLimpioFinal)
-                            .putString("origen_boveda", "ESCANEO") // Filtro de enrutamiento asignado
+                            .putString("origen_boveda", "ESCANEO")
                             .build();
 
                     Constraints restricciones = new Constraints.Builder()
@@ -275,7 +278,6 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
 
                     WorkManager.getInstance(appCtx).enqueue(request);
 
-                    // Limpieza limpia de las fotos de la galería original en dispositivos antiguos
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
                         for (Uri u : listaOrigenesGaleria) {
                             try { appCtx.getContentResolver().delete(u, null, null); } catch(Exception ignored){}
@@ -290,7 +292,6 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
                     });
 
                 } else {
-
                     new Handler(Looper.getMainLooper()).post(() -> {
                         vm.resetear();
                         Bundle args = new Bundle();
@@ -298,7 +299,6 @@ public class EscanerCifradoGaleria extends Fragment implements View.OnClickListe
                         nav.navigate(R.id.cargaProcesos, args);
                     });
 
-                    // Como el PDF ya está generado en disco y mide menos de 15MB, se lo pasamos directo al cargador síncrono
                     EscanerProcesador.generarPdfYEnviar(
                             appCtx,
                             new ArrayList<>(listaSeleccionadaParaGuardar),

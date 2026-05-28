@@ -13,7 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class EscanerService {
     private static final String BASE_URL =
-            "https://aydan-nonrepresentational-womanishly.ngrok-free.dev/";
+            "https://cristo-des.mexicocentral.cloudapp.azure.com/";
 
     private final EscanerAPI escanerAPI;
 

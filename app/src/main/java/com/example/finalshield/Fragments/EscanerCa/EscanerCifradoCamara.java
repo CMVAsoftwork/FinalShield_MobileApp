@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -204,12 +205,16 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
             return;
         }
 
-        // 1. Bloqueo inmediato del hilo de UI
         guardarPdf.setEnabled(false);
         tomarfoto.setEnabled(false);
 
         final CargaViewModel vm = this.cargaViewModel;
         final Context appCtx = requireContext().getApplicationContext();
+
+        // Extraemos el ID del usuario logueado dinámicamente de SharedPreferences
+        SharedPreferences prefs = appCtx.getSharedPreferences("ShieldPrefs", Context.MODE_PRIVATE);
+        int idUsuarioLogueado = prefs.getInt("idUsuario", -1);
+        final String userIdStr = String.valueOf(idUsuarioLogueado);
 
         long tamanoTotalBytes = 0;
         for (File f : fotosTomadas) {
@@ -220,13 +225,11 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
         boolean conectado = tieneInternet();
 
         final List<File> fotosAProcesar = new ArrayList<>(fotosTomadas);
-
         List<Uri> urisParaCifrar = new ArrayList<>();
         for (File f : fotosAProcesar) {
             urisParaCifrar.add(FileProvider.getUriForFile(appCtx, appCtx.getPackageName() + ".fileprovider", f));
         }
 
-        // 2. Transición visual a la pantalla de carga
         Bundle args = new Bundle();
         args.putInt("destino_final", R.id.cifradoEscaneo2);
         nav.navigate(R.id.cargaProcesos, args);
@@ -237,21 +240,19 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
                     : "Escaneo pesado. Procesando en segundo plano...";
             Toast.makeText(appCtx, msj, Toast.LENGTH_LONG).show();
 
-            // 3. Hilo de fondo secuencial estricto
             Executors.newSingleThreadExecutor().execute(() -> {
                 try {
                     File outputPdfLocal = new File(appCtx.getCacheDir(), "SCAN_FS_" + System.currentTimeMillis() + ".pdf");
 
-                    // Compilación nativa del PDF local (Síncrona en este hilo)
                     EscanerProcesador.compilarPdfLocalDesdeUris(appCtx, urisParaCifrar, outputPdfLocal);
 
                     if (outputPdfLocal.exists() && outputPdfLocal.length() > 0) {
-
                         String[] rutasInput = new String[]{outputPdfLocal.getAbsolutePath()};
 
+                        // REPARADO: Cambiamos "18" por la lectura dinámica userIdStr
                         Data dataWorker = new Data.Builder()
                                 .putStringArray("uris_llave", rutasInput)
-                                .putString("id_usuario_llave", "18")
+                                .putString("id_usuario_llave", userIdStr)
                                 .putString("nombre_visual_limpio", outputPdfLocal.getName())
                                 .putString("origen_boveda", "ESCANEO")
                                 .build();
@@ -265,17 +266,14 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
                                 .setConstraints(restricciones)
                                 .build();
 
-                        // Encolamos el Worker sabiendo que el archivo ya tiene sus megabytes completos
                         WorkManager.getInstance(appCtx).enqueue(request);
 
-                        // Eliminamos los JPEGs sueltos ahora que el PDF está cerrado
                         borrarOriginalesExhaustivo(urisParaCifrar);
 
-                        // 4. Liberación de la interfaz gráfica en el hilo principal
                         new Handler(Looper.getMainLooper()).post(() -> {
                             fotosTomadas.clear();
                             limpiarUI();
-                            vm.terminarProceso(); // CargaProcesos nos redirige a CifradoEscaneo2
+                            vm.terminarProceso();
                         });
                     } else {
                         Log.e("FINALSHIELD_ERROR", "El PDF local se generó vacío.");
@@ -288,7 +286,6 @@ public class EscanerCifradoCamara extends Fragment implements View.OnClickListen
             });
 
         } else {
-            // Flujo normal síncrono por red estable
             EscanerProcesador.generarPdfYEnviar(
                     appCtx,
                     urisParaCifrar,

@@ -259,7 +259,7 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
 
                 File archivoClaroDestino = new File(dirDescifrados, "desc_" + System.currentTimeMillis() + "_" + nombreLimpio);
 
-                SecurityUtils.descifrarArchivoLocal(tempCifrado, archivoClaroDestino, "18");
+                SecurityUtils.descifrarArchivoLocal(tempCifrado, archivoClaroDestino, "4");
                 tempCifrado.delete();
 
                 ArchivoMetadata meta = new ArchivoMetadata();
@@ -267,7 +267,7 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
                 meta.setTamanioBytes(finalTamano);
                 meta.setEstaCifrado(false);
                 meta.setRutaLocalDescifrado(archivoClaroDestino.getAbsolutePath());
-                meta.setIdUsuario(18);
+                meta.setIdUsuario(4);
                 meta.setFechaSeleccion(new Date());
 
                 if (finalNombre.startsWith("FS_SCAN_")) {
@@ -338,7 +338,7 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
 
             Data inputData = new Data.Builder()
                     .putStringArray("uris_llave", urisString)
-                    .putString("id_usuario_llave", "18")
+                    .putString("id_usuario_llave", "4")
                     .putString("nombre_visual_limpio", nombreEnvioFinal)
                     .putString("origen_boveda", origenFinalConstante)
                     .build();
@@ -385,7 +385,7 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
 
                         File archivoCifradoDestino = new File(dirCifrados, "cif_" + archivo.getNombreArchivo());
 
-                        SecurityUtils.cifrarArchivoLocal(archivoFisicoClaro, archivoCifradoDestino, "18");
+                        SecurityUtils.cifrarArchivoLocal(archivoFisicoClaro, archivoCifradoDestino, "4");
                         SecurityUtils.borrarPermanente(archivoFisicoClaro);
 
                         archivo.setEstaCifrado(true);
@@ -701,7 +701,7 @@ public class ArchivosDesifrados extends Fragment implements View.OnClickListener
                             "🔍 ALGORITMO: SHA-256 \n\n" +
                             "🔑 HASH GENERADO:\n" + hashFinal + "\n\n" +
                             "🌐 HASH ESPERADO:\n" + hashFinal + "\n\n" +
-                            "ESTADO: Bloque binario íntegro. El archivo es auténtico, le pertenece al usuario 18 y no ha sido alterado localmente.";
+                            "ESTADO: Bloque binario íntegro. El archivo es auténtico, le pertenece al usuario 4 y no ha sido alterado localmente.";
 
                     // Inyectamos el texto directo en la vista mapeada del XML
                     tvCuerpoIntegridad.setText(textoReporte);
