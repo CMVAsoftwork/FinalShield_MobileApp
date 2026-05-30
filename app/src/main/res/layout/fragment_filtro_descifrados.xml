@@ -1,73 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/degradado_azul_medio"
+    android:paddingTop="32dp"
     tools:context=".Fragments.FiltroDescifrados">
-
-    <TextView
-        android:id="@+id/tvBrand"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="32dp"
-        android:text="Daily\nSecurity Shield"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/flowerIcon"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginEnd="16dp"
-        android:src="@drawable/flower"
-        app:layout_constraintBottom_toBottomOf="@+id/tvBrand"
-        app:layout_constraintEnd_toStartOf="@+id/btnperfil"
-        app:layout_constraintTop_toTopOf="@+id/tvBrand" />
 
     <ImageButton
         android:id="@+id/btnperfil"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="24dp"
-        android:background="@android:color/transparent"
-        android:scaleType="fitCenter"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:src="@drawable/user"
-        app:layout_constraintBottom_toBottomOf="@+id/tvBrand"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/tvBrand" />
+        android:background="@android:color/transparent"
+        android:layout_marginStart="290dp"
+        android:layout_marginTop="50dp"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="-25dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Daily\n Security Shield"
+            android:textColor="@color/white"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:layout_marginStart="50dp" />
+        <ImageView
+            android:layout_width="68dp"
+            android:layout_height="63dp"
+            android:layout_marginStart="50dp"
+            android:src="@drawable/flower" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tvInstruction"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="20dp"
         android:gravity="center"
-        android:text="Introduzca su PIN de seguridad para acceder a sus documentos cifrados"
+        android:text="Introduzca su PIN de seguridad para acceder a sus documentos descifrados"
         android:textColor="@color/white"
-        android:textSize="22sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvBrand" />
+        android:textSize="22sp" />
 
+    <!-- PIN -->
     <LinearLayout
         android:id="@+id/pinContainer"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="40dp"
         android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvInstruction">
+        android:orientation="horizontal">
 
         <EditText
             android:id="@+id/digito1"
@@ -161,69 +149,62 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/navBar"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:layout_marginBottom="16dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="300dp"
+        android:layout_marginLeft="-15dp">
         <ImageButton
             android:id="@+id/house"
-            android:layout_width="0dp"
+            android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:layout_marginStart="29dp"
+            android:src="@drawable/housecolor"
             android:scaleType="fitCenter"
-            android:src="@drawable/housecolor" />
-
+            android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/archivo"
-            android:layout_width="0dp"
+            android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:src="@drawable/iconazulinfo"
             android:scaleType="fitCenter"
-            android:src="@drawable/iconazulinfo" />
-
+            android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/candadoclose"
-            android:layout_width="0dp"
+            android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:src="@drawable/candadoclose"
             android:scaleType="fitCenter"
-            android:src="@drawable/candadoclose" />
-
+            android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/carpeta"
-            android:layout_width="0dp"
+            android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:src="@drawable/carpeta"
             android:scaleType="fitCenter"
-            android:src="@drawable/carpeta" />
-
+            android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/mail"
-            android:layout_width="0dp"
+            android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:src="@drawable/mail"
             android:scaleType="fitCenter"
-            android:src="@drawable/mail" />
-
+            android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"/>
         <ImageButton
             android:id="@+id/candadopen"
-            android:layout_width="0dp"
+            android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
+            android:src="@drawable/candadoopen"
             android:scaleType="fitCenter"
-            android:src="@drawable/candadoopen" />
+            android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"/>
     </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
