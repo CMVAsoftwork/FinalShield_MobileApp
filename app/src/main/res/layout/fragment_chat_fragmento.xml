@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/chat_background"
+    tools:context=".Fragments.Chatbot.ChatFragmento">
+
+    <ImageView
+        android:id="@+id/menu"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/menu"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/userCircle"/>
+
+    <ImageView
+        android:id="@+id/userCircle"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/user"
+        android:clickable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/menu"
+        app:layout_constraintBottom_toBottomOf="@id/menu"/>
+    <ImageView
+        android:id="@+id/chatbotHead"
+        android:layout_width="150dp"
+        android:layout_height="75dp"
+        android:src="@drawable/chatbot_head"
+
+        app:layout_constraintTop_toBottomOf="@id/userCircle"
+        app:layout_constraintStart_toStartOf="parent"
+
+        android:layout_marginTop="20dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvChat"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="17dp"
+        app:layout_constraintTop_toBottomOf="@id/chatbotHead"
+        app:layout_constraintBottom_toTopOf="@id/inputContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <LinearLayout
+        android:id="@+id/inputContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="20dp"
+        android:background="@drawable/chatbot_message_capsule"
+        android:gravity="center_vertical"
+        android:paddingStart="24dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <EditText
+            android:id="@+id/etMessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="Comienza a preguntar"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#8E92B2"
+            android:inputType="textMultiLine"            android:textSize="16sp"
+            android:importantForAutofill="no" />
+
+        <ImageView
+            android:id="@+id/btnSend"
+            android:layout_width="65dp"
+            android:layout_gravity="center_vertical"
+            android:layout_height="65dp"
+            android:clickable="true"
+            android:contentDescription="Enviar"
+            android:src="@drawable/send_button" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,9 +5,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.finalshield.Fragments.Chatbot.ChatFragmento;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +31,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         procesarVinculo(getIntent());
+
+        ImageView btnChat=findViewById(R.id.fabChat);
+
+        btnChat.setOnClickListener(v -> {
+            ChatFragmento chat= new ChatFragmento();
+
+            chat.show(getSupportFragmentManager(), "CHAT");
+
+        });
     }
 
     @Override

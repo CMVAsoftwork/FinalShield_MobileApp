@@ -16,43 +16,19 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ArchivoService {
-    private static final String BASE_URL = "https://cristo-des.mexicocentral.cloudapp.azure.com/";
+
     private final ArchivoAPI archivoAPI;
-    private final AuthService authService;
     private final Gson gson;
 
     public ArchivoService(Context context) {
-        this.authService = new AuthService(context);
 
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .addInterceptor(chain -> {
-                    String token = authService.obtenerToken();
-                    if (token != null && !token.isEmpty()) {
-                        Request newRequest = chain.request().newBuilder()
-                                .header("Authorization", "Bearer " + token)  // ← Exacto así, "Bearer " + token
-                                .build();
-                        return chain.proceed(newRequest);
-                    }
-                    return chain.proceed(chain.request());
-                })
-                .connectTimeout(30, TimeUnit.MINUTES)
-                .readTimeout(30, TimeUnit.MINUTES)
-                .build();
         this.gson = new GsonBuilder()
                 .setLenient()
                 .create();
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create(this.gson))
-                .build();
-
-        archivoAPI = retrofit.create(ArchivoAPI.class);
+        archivoAPI = RetrofitClient
+                .getInstance(context)
+                .create(ArchivoAPI.class);
     }
 
     public ArchivoAPI getAPI() {
