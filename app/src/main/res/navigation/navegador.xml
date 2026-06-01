@@ -597,6 +597,9 @@
         android:name="com.example.finalshield.Fragments.Perfil"
         android:label="Perfil" >
         <action
+            android:id="@+id/action_perfil2_to_analisis_Datos"
+            app:destination="@id/analisis_Datos" />
+        <action
             android:id="@+id/action_perfil2_to_cambiarContrasena"
             app:destination="@id/cambiarContrasena" />
         <action
@@ -753,4 +756,8 @@
         android:name="com.example.finalshield.DeepLinkHandlerFragment"
         android:label="fragment_deep_link_handler"
         tools:layout="@layout/fragment_deep_link_handler" />
+
+    <fragment
+        android:id="@+id/analisis_Datos"
+        android:name="com.example.finalshield.Fragments.Analisis_Datos"/>
 </navigation>

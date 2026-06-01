@@ -2,65 +2,181 @@ package com.example.finalshield.Fragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.finalshield.DTO.EstadisticasResumenDTO;
 import com.example.finalshield.R;
+import com.example.finalshield.Service.EstadisticasService;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link Analisis_Datos#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class Analisis_Datos extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private TextView txtValor1;
+    private TextView txtValor2;
+    private TextView txtValor3;
+    private TextView txtValor4;
+    private LineChart chartRendimiento;
 
     public Analisis_Datos() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment Analisis_Datos.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static Analisis_Datos newInstance(String param1, String param2) {
-        Analisis_Datos fragment = new Analisis_Datos();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+        // Constructor vacío requerido
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            ViewGroup container,
+            Bundle savedInstanceState
+    ) {
+        View view = inflater.inflate(
+                R.layout.fragment_analisis__datos,
+                container,
+                false
+        );
+
+        inicializarVistas(view);
+        cargarEstadisticas();
+
+        return view;
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_analisis__datos, container, false);
+    private void inicializarVistas(View view) {
+
+        txtValor1 = view.findViewById(R.id.txtValor1);
+        txtValor2 = view.findViewById(R.id.txtValor2);
+        txtValor3 = view.findViewById(R.id.txtValor3);
+        txtValor4 = view.findViewById(R.id.txtValor4);
+        chartRendimiento = view.findViewById(R.id.chartRendimiento);
+
+    }
+
+    private void cargarGrafica(
+            long cifrados,
+            long correos,
+            long descifrados
+    ) {
+
+        List<Entry> entries = new ArrayList<>();
+
+        entries.add(new Entry(0f, (float) cifrados));
+        entries.add(new Entry(1f, (float) correos));
+        entries.add(new Entry(2f, (float) descifrados));
+
+        LineDataSet dataSet =
+                new LineDataSet(entries, "Actividad FinalShield");
+
+        dataSet.setLineWidth(3f);
+        dataSet.setCircleRadius(5f);
+
+        LineData lineData = new LineData(dataSet);
+
+        chartRendimiento.setData(lineData);
+
+        chartRendimiento.invalidate();
+    }
+
+    private void cargarEstadisticas() {
+
+        EstadisticasService estadisticasService =
+                new EstadisticasService(requireContext());
+
+        estadisticasService
+                .getAPI()
+                .obtenerResumen()
+                .enqueue(new Callback<EstadisticasResumenDTO>() {
+
+                    @Override
+                    public void onResponse(
+                            @NonNull Call<EstadisticasResumenDTO> call,
+                            @NonNull Response<EstadisticasResumenDTO> response
+                    ) {
+
+                        if (response.isSuccessful()
+                                && response.body() != null) {
+
+                            EstadisticasResumenDTO stats =
+                                    response.body();
+
+                            txtValor1.setText(
+                                    String.valueOf(
+                                            stats.getArchivosCifrados()
+                                    )
+                            );
+
+                            txtValor2.setText(
+                                    String.valueOf(
+                                            stats.getCorreosEnviados()
+                                    )
+                            );
+
+                            txtValor3.setText(
+                                    String.valueOf(
+                                            stats.getArchivosDescifrados()
+                                    )
+                            );
+
+                            // Puedes cambiar esto cuando agregues más métricas
+                            txtValor4.setText("0");
+
+                            cargarGrafica(
+                                    stats.getArchivosCifrados(),
+                                    stats.getCorreosEnviados(),
+                                    stats.getArchivosDescifrados()
+                            );
+
+                        } else {
+
+                            Log.e(
+                                    "ESTADISTICAS",
+                                    "Código HTTP: " + response.code()
+                            );
+
+                            Toast.makeText(
+                                    requireContext(),
+                                    "No se pudieron obtener las estadísticas",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(
+                            @NonNull Call<EstadisticasResumenDTO> call,
+                            @NonNull Throwable t
+                    ) {
+
+                        Log.e(
+                                "ESTADISTICAS",
+                                "Error",
+                                t
+                        );
+
+                        Toast.makeText(
+                                requireContext(),
+                                "Error de conexión",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                });
     }
 }

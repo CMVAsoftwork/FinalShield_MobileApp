@@ -35,7 +35,7 @@ import retrofit2.Response;
 public class Perfil extends Fragment implements View.OnClickListener {
 
     private TextView correo, nombre;
-    private Button btnCambiarContraseña, btnCerrarSesion, btnRegresar;
+    private Button btnCambiarContraseña, btnCerrarSesion, btnRegresar, btnMiActividad;
     private SwitchCompat switchHuella;
 
     private AuthService authService;
@@ -66,10 +66,12 @@ public class Perfil extends Fragment implements View.OnClickListener {
         btnCerrarSesion = v.findViewById(R.id.cerrarsecion);
         btnRegresar = v.findViewById(R.id.regresar5);
         switchHuella = v.findViewById(R.id.switchHuellaInicio);
+        btnMiActividad = v.findViewById(R.id.miactividad);
 
         btnCerrarSesion.setOnClickListener(this);
         btnCambiarContraseña.setOnClickListener(this);
         btnRegresar.setOnClickListener(this);
+        btnMiActividad.setOnClickListener(this);
 
         if (authService.isLoggedIn()) {
             nombre.setText(authService.obtenerNombre());
@@ -126,6 +128,8 @@ public class Perfil extends Fragment implements View.OnClickListener {
             nav.navigate(R.id.action_perfil2_to_cambiarContrasena);
         } else if (id == R.id.regresar5) {
             nav.popBackStack();
+        } else if (id == R.id.miactividad) {
+            nav.navigate(R.id.action_perfil2_to_analisis_Datos);
         }
     }
 

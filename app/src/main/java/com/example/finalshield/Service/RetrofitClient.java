@@ -14,7 +14,7 @@ public class RetrofitClient {
     private static Retrofit retrofit;
 
     private static final String BASE_URL =
-            "https://alberto-des.northcentralus.cloudapp.azure.com/";
+            "https://aydan-nonrepresentational-womanishly.ngrok-free.dev/";
 
     public static Retrofit getInstance(Context context) {
 
