@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.activity.EdgeToEdge;
@@ -17,14 +19,13 @@ public class MainActivity extends AppCompatActivity {
 
     // Variable global para almacenar el desvío de pantalla pendiente
     private String destinoPendiente = null;
-
+    private boolean chatAbierto=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // 1. Verificamos si se inyectó una orden de desvío desde las notificaciones
         if (getIntent() != null && getIntent().hasExtra("pantalla_destino")) {
             destinoPendiente = getIntent().getStringExtra("pantalla_destino");
             Log.d("FINALSHIELD_LINK", "Destino capturado en onCreate: " + destinoPendiente);
@@ -33,12 +34,46 @@ public class MainActivity extends AppCompatActivity {
         procesarVinculo(getIntent());
 
         ImageView btnChat=findViewById(R.id.fabChat);
+        FrameLayout contenedorChat=findViewById(R.id.chatContainer);
 
         btnChat.setOnClickListener(v -> {
-            ChatFragmento chat= new ChatFragmento();
+            if (!chatAbierto) {
 
-            chat.show(getSupportFragmentManager(), "CHAT");
+                contenedorChat.setVisibility(View.VISIBLE);
 
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.chatContainer, new ChatFragmento())
+                        .commit();
+
+                btnChat.setVisibility(View.GONE);
+
+                chatAbierto = true;
+
+            } else {
+
+                contenedorChat.setVisibility(View.GONE);
+                btnChat.setVisibility(View.VISIBLE);
+                chatAbierto = false;
+            }
+
+        });
+
+        contenedorChat.setOnClickListener(v -> {
+
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .remove(
+                            getSupportFragmentManager()
+                                    .findFragmentById(R.id.chatContainer)
+                    )
+                    .commit();
+
+            contenedorChat.setVisibility(View.GONE);
+
+            btnChat.setVisibility(View.VISIBLE);
+
+            Log.d("CHAT_TEST", "CLICK DETECTADO");
         });
     }
 

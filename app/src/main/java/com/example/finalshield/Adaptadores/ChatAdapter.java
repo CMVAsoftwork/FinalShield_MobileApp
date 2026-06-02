@@ -44,7 +44,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (viewType == TYPE_USER) {
 
             View view = inflater.inflate(
-                    R.layout.bubble_user,
+                    R.layout.item_message_user,
                     parent,
                     false
             );
@@ -54,7 +54,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         } else {
 
             View view = inflater.inflate(
-                    R.layout.bubble_bot,
+                    R.layout.item_message_bot,
                     parent,
                     false
             );

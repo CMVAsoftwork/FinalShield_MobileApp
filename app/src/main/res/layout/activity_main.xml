@@ -21,18 +21,31 @@
         android:id="@+id/contenedorp">
     </androidx.fragment.app.FragmentContainerView>
 
+    <FrameLayout
+        android:id="@+id/chatContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#66000000"
+        android:visibility="gone"
+        android:clickable="true"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <ImageView
         android:id="@+id/fabChat"
-        android:layout_width="200px"
-        android:layout_height="200px"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
         android:layout_margin="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="76dp"
         android:clickable="true"
         android:contentDescription="Chat"
         android:scaleType="fitXY"
         android:src="@drawable/chatbot_icon"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.90" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

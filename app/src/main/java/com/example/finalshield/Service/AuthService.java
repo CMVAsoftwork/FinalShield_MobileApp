@@ -60,6 +60,8 @@ public class AuthService {
 
                         guardarPinReal(response.body().getPinReal());
                         guardarPinSeguro(response.body().getPinSeguro());
+
+                        Log.d("JWT", TOKEN_KEY);
                     }
                     callback.onResponse(call, response);
                 }
