@@ -86,6 +86,28 @@ public class CargaProcesos extends Fragment {
         });
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        requireActivity()
+                .findViewById(R.id.fabChat)
+                .setVisibility(View.GONE);
+
+        requireActivity()
+                .findViewById(R.id.chatContainer)
+                .setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        requireActivity()
+                .findViewById(R.id.fabChat)
+                .setVisibility(View.VISIBLE);
+    }
+
     private void iniciarRespiracion() {
         if (ivLogo == null) return;
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(ivLogo, View.SCALE_X, 0.90f, 1.10f);

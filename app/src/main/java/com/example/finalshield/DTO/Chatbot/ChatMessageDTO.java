@@ -16,4 +16,8 @@ public class ChatMessageDTO {
     public boolean isUser() {
         return isUser;
     }
+
+    public void setMensaje(String mensaje) {
+        this.mensaje = mensaje;
+    }
 }

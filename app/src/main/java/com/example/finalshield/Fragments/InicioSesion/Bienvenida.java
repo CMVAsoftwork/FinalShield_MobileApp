@@ -55,6 +55,28 @@ public class Bienvenida extends Fragment {
         });
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        requireActivity()
+                .findViewById(R.id.fabChat)
+                .setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        requireActivity()
+                .findViewById(R.id.fabChat)
+                .setVisibility(View.GONE);
+
+        requireActivity()
+                .findViewById(R.id.chatContainer)
+                .setVisibility(View.GONE);
+    }
+
     private void validarYDecidirDestino() {
         SharedPreferences linkPrefs = requireActivity().getSharedPreferences("deep_link", Context.MODE_PRIVATE);
         String pendingToken = linkPrefs.getString("pending_token", null);

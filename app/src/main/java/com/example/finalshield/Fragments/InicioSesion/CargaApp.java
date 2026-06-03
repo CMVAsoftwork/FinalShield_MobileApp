@@ -23,6 +23,33 @@ public class CargaApp extends Fragment {
     private static  final int tiempoEsp = 2300;
     ImageView ivalphaa;
     LinearLayout laybienv;
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        requireActivity()
+                .findViewById(R.id.fabChat)
+                .setVisibility(View.GONE);
+
+        requireActivity()
+                .findViewById(R.id.chatContainer)
+                .setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        requireActivity()
+                .findViewById(R.id.fabChat)
+                .setVisibility(View.GONE);
+
+        requireActivity()
+                .findViewById(R.id.chatContainer)
+                .setVisibility(View.GONE);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
